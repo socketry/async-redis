@@ -18,62 +18,73 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'protocol/resp'
-require_relative 'pool'
-
-require 'async/io/endpoint'
-
 module Async
 	module Redis
-		def self.local_endpoint
-			Async::IO::Endpoint.tcp('localhost', 6379)
-		end
-		
-		class Client
-			def initialize(endpoint, protocol = Protocol::RESP, **options)
-				@endpoint = endpoint
-				@protocol = protocol
+		class Pool
+			def initialize(limit = nil, &block)
+				@available = []
+				@waiting = []
 				
-				@connections = connect(**options)
+				@limit = limit
+				
+				@constructor = block
 			end
 			
-			attr :endpoint
-			attr :protocol
-			
-			def self.open(*args, &block)
-				client = self.new(*args)
+			def acquire
+				resource = wait_for_next_available
 				
-				return client unless block_given?
+				return resource unless block_given?
 				
 				begin
-					yield client
+					yield resource
 				ensure
-					client.close
+					release(resource)
+				end
+			end
+			
+			# Make the resource available and let waiting tasks know that there is something available.
+			def release(resource)
+				@available << resource
+					
+				if task = @waiting.pop
+					task.resume
 				end
 			end
 			
 			def close
-				@connections.close
-			end
-			
-			def call(*arguments)
-				@connections.acquire do |connection|
-					connection.write_command(arguments)
-					return connection.read_object
-				end
+				@available.each(&:close)
+				@available.clear
 			end
 			
 			protected
 			
-			def connect(connection_limit: nil)
-				Pool.new(connection_limit) do
-					peer = @endpoint.connect
-						
-					peer.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
-					
-					stream = IO::Stream.new(peer)
-					
-					@protocol.client(stream)
+			def wait_for_next_available
+				until resource = next_available
+					@waiting << Fiber.current
+					Task.yield
+				end
+				
+				return resource
+			end
+			
+			def create_resource
+				begin
+					# This might fail, which is okay :)
+					resource = @constructor.call
+				rescue StandardError
+					Async.logger.error "#{$!}: #{$!.backtrace}"
+					return nil
+				end
+				
+				return resource
+			end
+			
+			def next_available
+				if @available.any?
+					@available.pop
+				elsif !@limit or @available.count < @limit
+					Async.logger.debug(self) {"No available resources, allocating new one..."}
+					create_resource
 				end
 			end
 		end

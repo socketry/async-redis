@@ -27,6 +27,10 @@ module Async
 			class RESP < Async::IO::Protocol::Line
 				CRLF = "\r\n".freeze
 				
+				class << self
+					alias client new
+				end
+				
 				def initialize(stream)
 					super(stream, CRLF)
 				end
