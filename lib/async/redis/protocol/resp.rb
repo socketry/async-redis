@@ -29,6 +29,12 @@ module Async
 			class RESP < Async::IO::Protocol::Line
 				CRLF = "\r\n".freeze
 				
+				SIMPLE_STRING = "+".freeze
+				ERROR = "-".freeze
+				INTEGER = ":".freeze
+				BULK_STRING = "$".freeze
+				ARRAY = "*".freeze
+				
 				class << self
 					alias client new
 				end
@@ -80,31 +86,77 @@ module Async
 					# puts "token: #{token}"
 					
 					case token
-					when '$'
-						length = read_line.to_i
+					when SIMPLE_STRING
+						string = read_line
 						
+						return string
+					when ERROR
+						raise NotImplementedError("Implementation for token #{token} missing")
+					when INTEGER
+						integer = read_line.to_i
+						
+						return integer
+					when BULK_STRING
+						buffer = read_line
+						length = buffer.to_i
 						if length == -1
 							return nil
 						else
 							buffer = @stream.read(length)
-							read_line # Eat trailing whitespace?
+							read_line # Eat trailing whitespace because length does not include the CRLF
 						
 							return buffer
 						end
-					when '*'
-						count = read_line.to_i
-						array = Array.new(count) {read_object}
+					when ARRAY
+						array = [] # the actual main array
+						array_stack = [array] # a stack of references to the sub arrays
+						length_stack = [read_line.to_i] # a stack of lengths
+						
+						return nil if length_stack.last == -1
+						
+						while length_stack.length > 0
+							if length_stack.last == 0
+								length_stack.pop()
+								array_stack.pop()
+							end
+							
+							length_stack.last -= 1
+							
+							sub_token = @stream.read(1)
+							
+							case sub_token
+							when SIMPLE_STRING
+								array_stack.last << read_line
+							when ERROR
+								raise NotImplementedError("Implementation for token #{sub_token} missing")
+							when INTEGER
+								array_stack.last << read_line.to_i
+							when BULK_STRING
+								buffer = read_line
+								length = buffer.to_i
+								if length == -1
+									array_stack.last << nil
+								else
+									buffer = @stream.read(length)
+									read_line # Eat trailing whitespace because length does not include the CRLF
+								
+									array_stack.last << buffer
+								end
+							when ARRAY
+								new_length = read_line
+								if new_length == -1
+									array_stack.last << nil
+								else
+									length_stack << new_length
+									array_stack.last << []
+									array_stack << array_stack.last.last
+								end
+							else
+								raise NotImplementedError("Implementation for token #{sub_token} missing")
+							end
+						end
 						
 						return array
-					when ':'
-						return read_line.to_i
-					
-					when '-'
-						raise Error.new(read_line)
-					
-					when '+'
-						return read_line
-					
 					else
 						raise NotImplementedError, "Implementation for token #{token} missing"
 					end
