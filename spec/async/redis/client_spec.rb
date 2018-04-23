@@ -59,4 +59,17 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		
 		client.close
 	end
+	
+	it "can propagate errors back from the server" do
+		# ERR
+		expect{client.call("NOSUCHTHING", 0, 85)}.to raise_error(Async::Redis::ServerError)
+		
+		# WRONGTYPE
+		expect{client.call("GET", list_key)}.to raise_error(Async::Redis::ServerError)
+		
+		client.close
+	end
+	
+	let (:subcription_key) {"async-redis:test:subscription"}
+	
 end

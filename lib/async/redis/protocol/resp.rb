@@ -22,7 +22,7 @@ require 'async/io/protocol/line'
 
 module Async
 	module Redis
-		class Error < StandardError
+		class ServerError < StandardError
 		end
 		
 		module Protocol
@@ -100,7 +100,7 @@ module Async
 						return read_line.to_i
 					
 					when '-'
-						raise Error.new(read_line)
+						raise ServerError.new(read_line)
 					
 					when '+'
 						return read_line
