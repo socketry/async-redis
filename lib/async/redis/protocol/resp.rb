@@ -91,7 +91,8 @@ module Async
 						
 						return string
 					when ERROR
-						raise NotImplementedError("Implementation for token #{token} missing")
+						error = read_line
+						return error
 					when INTEGER
 						integer = read_line.to_i
 						
@@ -114,13 +115,16 @@ module Async
 						
 						return nil if length_stack.last == -1
 						
-						while length_stack.length > 0
+						while !length_stack.empty?
+							puts "#{length_stack}"
 							if length_stack.last == 0
 								length_stack.pop()
 								array_stack.pop()
+								
+								break if length_stack.empty?
 							end
 							
-							length_stack.last -= 1
+							length_stack << (length_stack.pop - 1)
 							
 							sub_token = @stream.read(1)
 							
