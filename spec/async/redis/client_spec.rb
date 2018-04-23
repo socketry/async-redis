@@ -34,6 +34,18 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		client.close
 	end
 	
+	let(:string_key) {"async-redis:test:string"}
+	let(:test_string) {"beep-boop"}
+	
+	it "can set simple string and retrieve it" do
+		client.call("SET", string_key, test_string)
+		
+		response = client.call("GET", string_key)
+		expect(response).to be == test_string
+		
+		client.close
+	end
+	
 	let(:list_key) {"async-redis:test:list"}
 	
 	it "can add items to list and retrieve them" do
