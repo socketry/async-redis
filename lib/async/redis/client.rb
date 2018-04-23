@@ -58,8 +58,8 @@ module Async
 			
 			def call(*arguments)
 				@connections.acquire do |connection|
-					connection.write_command(arguments)
-					return connection.read_object
+					connection.write_request(arguments)
+					return connection.read_response
 				end
 			end
 			

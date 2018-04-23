@@ -20,6 +20,9 @@
 
 module Async
 	module Redis
+		# It might make sense to add support for pipelining https://redis.io/topics/pipelining
+		# We should be able to wrap the protocol so that write_request and read_response happen in lockstep.
+		# The only problem would be blocking operations. It might also be confusing if order of operations affects commands.
 		class Pool
 			def initialize(limit = nil, &block)
 				@available = []

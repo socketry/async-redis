@@ -33,4 +33,18 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		
 		client.close
 	end
+	
+	let(:list_key) {"async-redis:test:list"}
+	
+	it "can add items to list and retrieve them" do
+		client.call("LTRIM", list_key, 0, 0)
+		
+		response = client.call("LPUSH", list_key, "World", "Hello")
+		expect(response).to be > 0
+		
+		response = client.call("LRANGE", list_key, 0, 1)
+		expect(response).to be == ["Hello", "World"]
+		
+		client.close
+	end
 end
