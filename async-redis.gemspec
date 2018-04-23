@@ -4,8 +4,8 @@ require_relative 'lib/async/redis/version'
 Gem::Specification.new do |spec|
 	spec.name          = "async-redis"
 	spec.version       = Async::Redis::VERSION
-	spec.authors       = ["Samuel Williams"]
-	spec.email         = ["samuel.williams@oriontransfer.co.nz"]
+	spec.authors       = ["Samuel Williams", "Huba Nagy"]
+	spec.email         = ["samuel.williams@oriontransfer.co.nz", "12huba@gmail.com"]
 
 	spec.summary       = "A Redis client library."
 	spec.homepage      = "https://github.com/socketry/async-redis"

@@ -39,7 +39,8 @@ Or install it yourself as:
 
 Released under the MIT license.
 
-Copyright, 2015, by [Samuel G. D. Williams](https://www.codeotaku.com/samuel-williams).
+Copyright, 2018, by [Samuel G. D. Williams](https://www.codeotaku.com/samuel-williams) and
+Huba Z. Nagy
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
