@@ -20,6 +20,7 @@
 
 require_relative 'protocol/resp'
 require_relative 'pool'
+require_relative 'context/multi'
 
 require 'async/io/endpoint'
 
@@ -54,6 +55,20 @@ module Async
 			
 			def close
 				@connections.close
+			end
+			
+			def multi(&block)
+				return unless block_given?
+				
+				response = nil
+				
+				@connections.acquire do |connection|
+					response = Context::Multi.enter(connection) do |multi_context|
+						yield multi_context
+					end
+				end
+				
+				return response
 			end
 			
 			def call(*arguments)

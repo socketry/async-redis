@@ -52,6 +52,7 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		client.call("LTRIM", list_key, 0, 0)
 		
 		response = client.call("LPUSH", list_key, "World", "Hello")
+		puts response
 		expect(response).to be > 0
 		
 		response = client.call("LRANGE", list_key, 0, 1)
@@ -70,6 +71,23 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		client.close
 	end
 	
-	let (:subcription_key) {"async-redis:test:subscription"}
+	let (:multi_key_base) {"async-redis:test:multi"}
 	
+	it "can atomically execute commands in a multi" do
+		response = client.multi do |context|
+			(0..5).each do |id|
+				queued = context.set "#{multi_key_base}:#{id}", "multi-test 6"
+				expect(queued).to be == "QUEUED"
+			end
+		end
+		
+		# all 5 SET commands should return OK
+		expect(response).to be == ["OK"] * 6
+		
+		(0..5).each do |id|
+			expect(client.call("GET", "#{multi_key_base}:#{id}")).to be == "multi-test 6"
+		end
+		
+		client.close
+	end
 end
