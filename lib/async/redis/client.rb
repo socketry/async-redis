@@ -31,7 +31,7 @@ module Async
 		end
 		
 		class Client
-			def initialize(endpoint, protocol = Protocol::RESP, **options)
+			def initialize(endpoint = Redis.local_endpoint, protocol = Protocol::RESP, **options)
 				@endpoint = endpoint
 				@protocol = protocol
 				
