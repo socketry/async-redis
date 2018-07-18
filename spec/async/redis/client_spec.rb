@@ -52,7 +52,6 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		client.call("LTRIM", list_key, 0, 0)
 		
 		response = client.call("LPUSH", list_key, "World", "Hello")
-		puts response
 		expect(response).to be > 0
 		
 		response = client.call("LRANGE", list_key, 0, 1)
@@ -81,7 +80,7 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 			end
 		end
 		
-		# all 5 SET commands should return OK
+		# all 5 SET + 1 EXEC commands should return OK
 		expect(response).to be == ["OK"] * 6
 		
 		(0..5).each do |id|

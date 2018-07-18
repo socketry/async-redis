@@ -19,37 +19,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'nested'
-
 module Async
 	module Redis
 		module Context
-			class Multi < Nested
+			class Nested
+				def self.enter(connection, &block)
+					context = self.new(connection)
+					
+					return context unless block_given?
+					
+					begin
+						yield context
+					rescue ServerError
+						puts "caught server error"
+						return context.cleanup
+					ensure
+						return context.success
+					end
+				end
+				
 				def initialize(connection)
-					super(connection)
-					@connection.write_request(['MULTI'])
-					@connection.read_response
+					@connection = connection
 				end
 				
-				def set(key, value)
-					return send_command('SET', key, value)
+				def send_command(command, *args)
+					@connection.write_request([command] + args)
+					return @connection.read_response
 				end
-				
-				def get(key)
-					return send_command 'GET', key
-				end
-				
-				def execute
-					return send_command 'EXEC'
-				end
-				
-				def discard
-					return send_command 'DISCARD'
-				end
-				
-				alias cleanup discard
-				alias success execute
 			end
 		end
-	end 
+	end
 end

@@ -22,7 +22,7 @@ require_relative 'protocol/resp'
 require_relative 'pool'
 require_relative 'context/multi'
 
-require 'async/io/endpoint'
+require 'async/io'
 
 module Async
 	module Redis
