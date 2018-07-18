@@ -23,8 +23,8 @@ module Async
 	module Redis
 		module Context
 			class Nested
-				def self.enter(connection, &block)
-					context = self.new(connection)
+				def self.enter(connection, connection_pool, &block)
+					context = self.new(connection, connection_pool)
 					
 					return context unless block_given?
 					
@@ -38,8 +38,9 @@ module Async
 					end
 				end
 				
-				def initialize(connection)
+				def initialize(connection, connection_pool)
 					@connection = connection
+					@connection_pool = connection_pool
 				end
 				
 				def send_command(command, *args)

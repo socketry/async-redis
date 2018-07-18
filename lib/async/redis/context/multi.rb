@@ -25,14 +25,14 @@ module Async
 	module Redis
 		module Context
 			class Multi < Nested
-				def initialize(connection)
-					super(connection)
+				def initialize(connection, connection_pool)
+					super(connection, connection_pool)
 					@connection.write_request(['MULTI'])
 					@connection.read_response
 				end
 				
 				def set(key, value)
-					return send_command('SET', key, value)
+					return send_command 'SET', key, value
 				end
 				
 				def get(key)
@@ -40,11 +40,15 @@ module Async
 				end
 				
 				def execute
-					return send_command 'EXEC'
+					response = send_command 'EXEC'
+					@connection_pool.release(@connection)
+					return response
 				end
 				
 				def discard
-					return send_command 'DISCARD'
+					response = send_command 'DISCARD'
+					@connection_pool.release(@connection)
+					return response
 				end
 				
 				alias cleanup discard

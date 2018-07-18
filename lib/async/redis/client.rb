@@ -58,7 +58,11 @@ module Async
 			end
 			
 			def multi(&block)
-				return unless block_given?
+				unless block_given?
+					connection = @connections.acquire
+					multi_context = Context::Multi.enter(connection, @connections)
+					return multi_context
+				end
 				
 				response = nil
 				
