@@ -21,6 +21,7 @@
 require_relative 'protocol/resp'
 require_relative 'pool'
 require_relative 'context/multi'
+require_relative 'context/subscribe'
 
 require 'async/io'
 
@@ -55,6 +56,24 @@ module Async
 			
 			def close
 				@connections.close
+			end
+			
+			def publish(channel, message)
+				call('PUBLISH', channel, message)
+			end
+			
+			def subscribe(*channels, &block)
+				return unless block_given?
+				
+				response = nil
+				
+				@connections.acquire do |connection|
+					response = Context::Subscribe.enter(connection, *channels) do |subscribe_context|
+						yield subscribe_context
+					end
+				end
+				
+				return response
 			end
 			
 			def multi(&block)

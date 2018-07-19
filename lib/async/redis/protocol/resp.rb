@@ -77,7 +77,7 @@ module Async
 				
 				def read_object
 					token = @stream.read(1)
-					# puts "token: #{token}"
+					puts "token: #{token.ord} #{token}"
 					
 					case token
 					when '$'
@@ -106,7 +106,10 @@ module Async
 						return read_line
 					
 					else
-						raise NotImplementedError, "Implementation for token #{token} missing"
+						puts @stream
+						puts @stream.read(1000)
+						@stream.flush
+						# raise NotImplementedError, "Implementation for token #{token} missing"
 					end
 				end
 				

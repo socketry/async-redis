@@ -19,33 +19,57 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require_relative 'nested'
+
+require 'set'
+
 module Async
 	module Redis
 		module Context
-			class Nested
-				def self.enter(connection, *args, &block)
-					context = self.new(connection, *args)
+			class Subscribe < Nested
+				def initialize(connection, *channels)
+					super(connection)
+					@channels = Set[]
+					subscribe(*channels)
+				end
+				
+				def listen
+					return nil if @channels.empty?
 					
-					return context unless block_given?
-					
-					begin
-						yield context
-					rescue ServerError
-						puts "caught server error"
-						return context.cleanup
-					ensure
-						return context.success
+					return @connection.read_response
+				end
+				
+				def subscribe(*channels)
+					@channels = @channels | channels
+		
+					puts @channels
+					@connection.write_request ['SUBSCRIBE', *channels]
+					response = '☭'
+					channels.length.times do |i|
+						response = @connection.read_response
+						puts "#{response}"
+					end
+					return response
+				end
+				
+				def unsubscribe(*channels)
+					if channels.empty? # unsubscribe from everything if no specific channels are given
+						@connection.write_request ['UNSUBSCRIBE']
+						response = '☭'
+						puts @channels.length
+						@channels.length.times do |i|
+							response = @connection.read_response
+							puts "#{response}"
+						end
+						return response
+					else
+						@channels.subtract(channels)
+						return send_command 'UNSUBSCRIBE', *channels
 					end
 				end
 				
-				def initialize(connection, *args)
-					@connection = connection
-				end
-				
-				def send_command(command, *args)
-					@connection.write_request([command, *args])
-					return @connection.read_response
-				end
+				alias success unsubscribe
+				alias cleanup unsubscribe
 			end
 		end
 	end
