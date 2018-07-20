@@ -62,32 +62,30 @@ module Async
 				call('PUBLISH', channel, message)
 			end
 			
-			def subscribe(*channels, &block)
-				return unless block_given?
+			def subscribe(*channels)
+				connection = @pool.acquire
+				context = Context::Subscribe.new(connection, channels)
 				
-				response = nil
+				return context unless block_given?
 				
-				@pool.acquire do |connection|
-					response = Context::Subscribe.enter(connection, *channels) do |subscribe_context|
-						yield subscribe_context
-					end
+				begin
+					yield context
+				ensure
+					context.close
 				end
-				
-				return response
 			end
 			
 			def multi(&block)
-				return unless block_given?
+				connection = @pool.acquire
+				context = Context::Multi.new(connection)
 				
-				response = nil
+				return context unless block_given?
 				
-				@pool.acquire do |connection|
-					response = Context::Multi.enter(connection) do |multi_context|
-						yield multi_context
-					end
+				begin
+					yield context
+				ensure
+					context.close
 				end
-				
-				return response
 			end
 			
 			def call(*arguments)

@@ -27,21 +27,21 @@ module Async
 	module Redis
 		module Context
 			class Subscribe < Nested
-				def initialize(connection, *channels)
+				def initialize(connection, channels)
 					super(connection)
-					@channels = Set[]
-					subscribe(*channels)
+					
+					@channels = channels
+					
+					subscribe(channels)
 				end
 				
 				def listen
-					return nil if @channels.empty?
-					
 					return @connection.read_response
 				end
 				
-				def subscribe(*channels)
-					@channels = @channels | channels
-					
+				private
+				
+				def subscribe(channels)
 					@connection.write_request ['SUBSCRIBE', *channels]
 					
 					response = nil
@@ -69,9 +69,6 @@ module Async
 						return send_command 'UNSUBSCRIBE', *channels
 					end
 				end
-				
-				alias success unsubscribe
-				alias cleanup unsubscribe
 			end
 		end
 	end

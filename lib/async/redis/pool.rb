@@ -58,6 +58,8 @@ module Async
 			end
 			
 			def close
+				Async.logger.debug("Closing pool with #{@available.count} available connections.")
+				
 				@available.each(&:close)
 				@available.clear
 			end

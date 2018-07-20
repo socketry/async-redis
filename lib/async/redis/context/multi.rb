@@ -27,6 +27,7 @@ module Async
 			class Multi < Nested
 				def initialize(connection, *args)
 					super(connection)
+					
 					@connection.write_request(['MULTI'])
 					@connection.read_response
 				end
@@ -46,9 +47,6 @@ module Async
 				def discard
 					return send_command 'DISCARD'
 				end
-				
-				alias cleanup discard
-				alias success execute
 			end
 		end
 	end 

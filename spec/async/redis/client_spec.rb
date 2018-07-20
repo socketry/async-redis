@@ -73,11 +73,15 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 	let (:multi_key_base) {"async-redis:test:multi"}
 	
 	it "can atomically execute commands in a multi" do
-		response = client.multi do |context|
+		response = nil
+		
+		client.multi do |context|
 			(0..5).each do |id|
 				queued = context.set "#{multi_key_base}:#{id}", "multi-test 6"
 				expect(queued).to be == "QUEUED"
 			end
+			
+			response = context.execute
 		end
 		
 		# all 5 SET + 1 EXEC commands should return OK

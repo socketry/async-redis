@@ -23,23 +23,13 @@ module Async
 	module Redis
 		module Context
 			class Nested
-				def self.enter(connection, *args, &block)
-					context = self.new(connection, *args)
-					
-					return context unless block_given?
-					
-					begin
-						yield context
-					rescue ServerError
-						puts "caught server error"
-						return context.cleanup
-					ensure
-						return context.success
-					end
-				end
-				
 				def initialize(connection, *args)
 					@connection = connection
+				end
+				
+				def close
+					@connection.close
+					@connection = nil
 				end
 				
 				def send_command(command, *args)
