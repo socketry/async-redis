@@ -77,8 +77,6 @@ module Async
 				
 				def read_object
 					token = @stream.read(1)
-					puts "fileno: #{@stream.io.io.fileno}"
-					# puts "token: #{token.ord} #{token}"
 					
 					case token
 					when '$'

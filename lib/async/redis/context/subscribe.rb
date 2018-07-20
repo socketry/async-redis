@@ -41,26 +41,28 @@ module Async
 				
 				def subscribe(*channels)
 					@channels = @channels | channels
-		
-					puts @channels
+					
 					@connection.write_request ['SUBSCRIBE', *channels]
-					response = '☭'
+					
+					response = nil
+					
 					channels.length.times do |i|
 						response = @connection.read_response
-						puts "#{response}"
 					end
+					
 					return response
 				end
 				
 				def unsubscribe(*channels)
 					if channels.empty? # unsubscribe from everything if no specific channels are given
 						@connection.write_request ['UNSUBSCRIBE']
-						response = '☭'
-						puts @channels.length
+						
+						response = nil
+						
 						@channels.length.times do |i|
 							response = @connection.read_response
-							puts "#{response}"
 						end
+						
 						return response
 					else
 						@channels.subtract(channels)

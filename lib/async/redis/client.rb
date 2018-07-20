@@ -59,8 +59,7 @@ module Async
 			end
 			
 			def publish(channel, message)
-				puts message
-				puts call('PUBLISH', channel, message)
+				call('PUBLISH', channel, message)
 			end
 			
 			def subscribe(*channels, &block)
