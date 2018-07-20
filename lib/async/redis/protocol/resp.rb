@@ -105,7 +105,7 @@ module Async
 						return read_line
 					
 					else
-						# puts @stream
+						puts @stream.inspect
 						puts @stream.read(1000)
 						@stream.flush
 						# raise NotImplementedError, "Implementation for token #{token} missing"
