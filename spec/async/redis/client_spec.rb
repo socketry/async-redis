@@ -108,6 +108,8 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 			end
 		end
 		
+		reactor.sleep 0.1
+		
 		publisher = reactor.async do
 			Async.logger.debug("Publishing message...")
 			client.publish 'news.breaking', 'AAA'
