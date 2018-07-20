@@ -37,6 +37,10 @@ module Async
 					super(stream, CRLF)
 				end
 				
+				def closed?
+					@stream.closed?
+				end
+				
 				# The redis server doesn't want actual objects (e.g. integers) but only bulk strings. So, we inline it for performance.
 				def write_request(arguments)
 					write_lines("*#{arguments.count}")

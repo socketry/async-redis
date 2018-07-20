@@ -23,13 +23,16 @@ module Async
 	module Redis
 		module Context
 			class Nested
-				def initialize(connection, *args)
-					@connection = connection
+				def initialize(pool, *args)
+					@pool = pool
+					@connection = pool.acquire
 				end
 				
 				def close
-					@connection.close
-					@connection = nil
+					if @connection
+						@pool.release(@connection) unless @connection.closed?
+						@connection = nil
+					end
 				end
 				
 				def send_command(command, *args)

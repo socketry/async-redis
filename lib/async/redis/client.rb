@@ -63,8 +63,7 @@ module Async
 			end
 			
 			def subscribe(*channels)
-				connection = @pool.acquire
-				context = Context::Subscribe.new(connection, channels)
+				context = Context::Subscribe.new(@pool, channels)
 				
 				return context unless block_given?
 				
@@ -76,8 +75,7 @@ module Async
 			end
 			
 			def multi(&block)
-				connection = @pool.acquire
-				context = Context::Multi.new(connection)
+				context = Context::Multi.new(@pool)
 				
 				return context unless block_given?
 				

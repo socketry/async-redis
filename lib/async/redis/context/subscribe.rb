@@ -27,8 +27,8 @@ module Async
 	module Redis
 		module Context
 			class Subscribe < Nested
-				def initialize(connection, channels)
-					super(connection)
+				def initialize(pool, channels)
+					super(pool)
 					
 					@channels = channels
 					

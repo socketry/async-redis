@@ -25,8 +25,8 @@ module Async
 	module Redis
 		module Context
 			class Multi < Nested
-				def initialize(connection, *args)
-					super(connection)
+				def initialize(pool, *args)
+					super(pool)
 					
 					@connection.write_request(['MULTI'])
 					@connection.read_response
