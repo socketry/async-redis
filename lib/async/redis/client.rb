@@ -36,7 +36,7 @@ module Async
 				@endpoint = endpoint
 				@protocol = protocol
 				
-				@connections = connect(**options)
+				@pool = connect(**options)
 			end
 			
 			attr :endpoint
@@ -55,7 +55,7 @@ module Async
 			end
 			
 			def close
-				@connections.close
+				@pool.close
 			end
 			
 			def publish(channel, message)
@@ -67,7 +67,7 @@ module Async
 				
 				response = nil
 				
-				@connections.acquire do |connection|
+				@pool.acquire do |connection|
 					response = Context::Subscribe.enter(connection, *channels) do |subscribe_context|
 						yield subscribe_context
 					end
@@ -81,7 +81,7 @@ module Async
 				
 				response = nil
 				
-				@connections.acquire do |connection|
+				@pool.acquire do |connection|
 					response = Context::Multi.enter(connection) do |multi_context|
 						yield multi_context
 					end
@@ -91,7 +91,7 @@ module Async
 			end
 			
 			def call(*arguments)
-				@connections.acquire do |connection|
+				@pool.acquire do |connection|
 					connection.write_request(arguments)
 					return connection.read_response
 				end

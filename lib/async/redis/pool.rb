@@ -35,6 +35,7 @@ module Async
 			
 			def acquire
 				resource = wait_for_next_available
+				Async.logger.debug("Creating resource #{resource}")
 				
 				return resource unless block_given?
 				
@@ -47,6 +48,8 @@ module Async
 			
 			# Make the resource available and let waiting tasks know that there is something available.
 			def release(resource)
+				Async.logger.debug("Releasing resource #{resource}")
+				
 				@available << resource
 					
 				if task = @waiting.pop
@@ -70,24 +73,12 @@ module Async
 				return resource
 			end
 			
-			def create_resource
-				begin
-					# This might fail, which is okay :)
-					resource = @constructor.call
-				rescue StandardError
-					Async.logger.error "#{$!}: #{$!.backtrace}"
-					return nil
-				end
-				
-				return resource
-			end
-			
 			def next_available
 				if @available.any?
 					@available.pop
 				elsif !@limit or @available.count < @limit
 					Async.logger.debug(self) {"No available resources, allocating new one..."}
-					create_resource
+					@constructor.call
 				end
 			end
 		end
