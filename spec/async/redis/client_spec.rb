@@ -95,10 +95,20 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 	end
 	
 	it "should subscribe to channels and report incoming messages" do
+		condition = Async::Condition.new
+		
+		publisher = reactor.async do
+			condition.wait
+			Async.logger.debug("Publishing message...")
+			client.publish 'news.breaking', 'AAA'
+		end
+		
 		listener = reactor.async do
 			Async.logger.debug("Subscribing...")
 			client.subscribe 'news.breaking', 'news.weather', 'news.sport' do |context|
 				Async.logger.debug("Waiting for message...")
+				condition.signal
+				
 				type, name, message = context.listen
 				
 				Async.logger.debug("Got: #{type} #{name} #{message}")
@@ -108,12 +118,7 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 			end
 		end
 		
-		reactor.sleep 0.1
 		
-		publisher = reactor.async do
-			Async.logger.debug("Publishing message...")
-			client.publish 'news.breaking', 'AAA'
-		end
 		
 		publisher.wait
 		listener.wait
