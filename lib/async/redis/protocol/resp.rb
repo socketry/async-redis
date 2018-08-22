@@ -90,7 +90,8 @@ module Async
 							return nil
 						else
 							buffer = @stream.read(length)
-							read_line # Eat trailing whitespace?
+							# Eat trailing whitespace because length does not include the CRLF:
+							read_line
 						
 							return buffer
 						end
@@ -109,8 +110,6 @@ module Async
 						return read_line
 					
 					else
-						puts @stream.inspect
-						puts @stream.read(1000).inspect
 						@stream.flush
 						
 						raise NotImplementedError, "Implementation for token #{token} missing"

@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'async/notification'
+
 module Async
 	module Redis
 		# It might make sense to add support for pipelining https://redis.io/topics/pipelining
@@ -25,17 +27,24 @@ module Async
 		# The only problem would be blocking operations. It might also be confusing if order of operations affects commands.
 		class Pool
 			def initialize(limit = nil, &block)
-				@available = []
-				@waiting = []
+				@resources = []
+				@available = Async::Notification.new
 				
 				@limit = limit
+				@active = 0
 				
 				@constructor = block
 			end
 			
+			
+			attr :resources
+			
+			def empty?
+				@resources.empty?
+			end
+			
 			def acquire
-				resource = wait_for_next_available
-				Async.logger.debug("Creating resource #{resource}")
+				resource = wait_for_resource
 				
 				return resource unless block_given?
 				
@@ -46,42 +55,77 @@ module Async
 				end
 			end
 			
-			# Make the resource available and let waiting tasks know that there is something available.
+			# Make the resource resources and let waiting tasks know that there is something resources.
 			def release(resource)
-				Async.logger.debug("Releasing resource #{resource}")
-				
-				@available << resource
-					
-				if task = @waiting.pop
-					task.resume
+				# A resource that is not good should also not be reusable.
+				unless resource.closed?
+					reuse(resource)
+				else
+					retire(resource)
 				end
 			end
 			
 			def close
-				Async.logger.debug("Closing pool with #{@available.count} available connections.")
+				@resources.each(&:close)
+				@resources.clear
 				
-				@available.each(&:close)
-				@available.clear
+				@active = 0
+			end
+			
+			def to_s
+				"\#<#{self.class} resources=#{resources.count} limit=#{@limit}>"
 			end
 			
 			protected
 			
-			def wait_for_next_available
-				until resource = next_available
-					@waiting << Fiber.current
-					Task.yield
+			def reuse(resource)
+				Async.logger.debug(self) {"Reuse #{resource}"}
+				
+				@resources << resource
+				
+				@available.signal
+			end
+			
+			def retire(resource)
+				Async.logger.debug(self) {"Retire #{resource}"}
+				
+				@active -= 1
+				
+				resource.close
+				
+				@available.signal
+			end
+			
+			def wait_for_resource
+				# If we fail to create a resource (below), we will end up waiting for one to become resources.
+				until resource = available_resource
+					@available.wait
 				end
+				
+				Async.logger.debug(self) {"Wait for resource #{resource}"}
 				
 				return resource
 			end
 			
-			def next_available
-				if @available.any?
-					@available.pop
-				elsif !@limit or @available.count < @limit
-					Async.logger.debug(self) {"No available resources, allocating new one..."}
-					@constructor.call
+			def create
+				# This might return nil, which means creating the resource failed.
+				return @constructor.call
+			end
+			
+			def available_resource
+				if @resources.any?
+					return @resources.pop
 				end
+				
+				if !@limit or @active < @limit
+					Async.logger.debug(self) {"No resources resources, allocating new one..."}
+					
+					@active += 1
+					
+					return create
+				end
+				
+				return nil
 			end
 		end
 	end

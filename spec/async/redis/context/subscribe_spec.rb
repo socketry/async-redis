@@ -20,52 +20,38 @@
 
 require 'async/redis/client'
 
-RSpec.describe Async::Redis::Client, timeout: 5 do
+RSpec.describe Async::Redis::Context::Subscribe, timeout: 5 do
 	include_context Async::RSpec::Reactor
 	
 	let(:endpoint) {Async::Redis.local_endpoint}
 	let(:client) {Async::Redis::Client.new(endpoint)}
 	
-	it "should connect to redis server" do
-		result = client.call("INFO")
+	it "should subscribe to channels and report incoming messages" do
+		condition = Async::Condition.new
 		
-		expect(result).to include('redis_version')
+		publisher = reactor.async do
+			condition.wait
+			Async.logger.debug("Publishing message...")
+			client.publish 'news.breaking', 'AAA'
+		end
 		
-		client.close
-	end
-	
-	let(:string_key) {"async-redis:test:string"}
-	let(:test_string) {"beep-boop"}
-	
-	it "can set simple string and retrieve it" do
-		client.call("SET", string_key, test_string)
+		listener = reactor.async do
+			Async.logger.debug("Subscribing...")
+			client.subscribe 'news.breaking', 'news.weather', 'news.sport' do |context|
+				Async.logger.debug("Waiting for message...")
+				condition.signal
+				
+				type, name, message = context.listen
+				
+				Async.logger.debug("Got: #{type} #{name} #{message}")
+				expect(type).to be == 'message'
+				expect(name).to be == 'news.breaking'
+				expect(message).to be == 'AAA'
+			end
+		end
 		
-		response = client.call("GET", string_key)
-		expect(response).to be == test_string
-		
-		client.close
-	end
-	
-	let(:list_key) {"async-redis:test:list"}
-	
-	it "can add items to list and retrieve them" do
-		client.call("LTRIM", list_key, 0, 0)
-		
-		response = client.call("LPUSH", list_key, "World", "Hello")
-		expect(response).to be > 0
-		
-		response = client.call("LRANGE", list_key, 0, 1)
-		expect(response).to be == ["Hello", "World"]
-		
-		client.close
-	end
-	
-	it "can propagate errors back from the server" do
-		# ERR
-		expect{client.call("NOSUCHTHING", 0, 85)}.to raise_error(Async::Redis::ServerError)
-		
-		# WRONGTYPE
-		expect{client.call("GET", list_key)}.to raise_error(Async::Redis::ServerError)
+		publisher.wait
+		listener.wait
 		
 		client.close
 	end

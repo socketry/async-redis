@@ -30,7 +30,7 @@ module Async
 				
 				def close
 					if @connection
-						@pool.release(@connection) unless @connection.closed?
+						@pool.release(@connection)
 						@connection = nil
 					end
 				end
