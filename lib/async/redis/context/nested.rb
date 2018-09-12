@@ -35,7 +35,7 @@ module Async
 					end
 				end
 				
-				def send_command(command, *args)
+				def call(command, *args)
 					@connection.write_request([command, *args])
 					return @connection.read_response
 				end

@@ -66,7 +66,7 @@ module Async
 						return response
 					else
 						@channels.subtract(channels)
-						return send_command 'UNSUBSCRIBE', *channels
+						return call 'UNSUBSCRIBE', *channels
 					end
 				end
 			end

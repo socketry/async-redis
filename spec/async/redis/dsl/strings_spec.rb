@@ -19,30 +19,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'nested'
-require_relative '../dsl/strings'
+require 'async/redis/client'
 
-module Async
-	module Redis
-		module Context
-			class Multi < Nested
-				include DSL::Strings
+RSpec.describe Async::Redis::DSL::Strings, timeout: 5 do
+	include_context Async::RSpec::Reactor
 
-				def initialize(pool, *args)
-					super(pool)
-					
-					@connection.write_request(['MULTI'])
-					@connection.read_response
-				end
-				
-				def execute
-					return call 'EXEC'
-				end
-				
-				def discard
-					return call 'DISCARD'
-				end
-			end
-		end
-	end 
+	let(:endpoint) {Async::Redis.local_endpoint}
+	let(:client) {Async::Redis::Client.new(endpoint)}
+
+	it "can perform bitwise manipulation" do
+		raise "TODO"
+	end
+
+	it "can perform string manipulation" do
+		raise "TODO"
+	end
 end
