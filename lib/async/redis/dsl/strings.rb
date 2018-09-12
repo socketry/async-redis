@@ -48,7 +48,7 @@ module Async
 				end
 
 				def decrby(key, decrement)
-					return call('DECR_BY', key, decrement)
+					return call('DECRBY', key, decrement)
 				end
 
 				def get(key)
@@ -60,7 +60,7 @@ module Async
 				end
 
 				def getrange(key, start_index, end_index)
-					return call('GETRANGE', key, start_index, get_index)
+					return call('GETRANGE', key, start_index, end_index)
 				end
 
 				def getset(key, value)
@@ -83,12 +83,14 @@ module Async
 					return call('MGET', key, *keys)
 				end
 
-				def mset
-
+				def mset(pairs)
+					flattened_pairs = pairs.keys.zip(pairs.values).flatten
+					return call('MSET', *flattened_pairs)
 				end
 
-				def msetnx
-
+				def msetnx(pairs)
+					flattened_pairs = pairs.keys.zip(pairs.values).flatten
+					return call('MSETNX', *flattened_pairs)
 				end
 
 				def psetex(key, milliseconds, value)
