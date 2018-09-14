@@ -20,9 +20,11 @@
 # THE SOFTWARE.
 
 require 'async/redis/client'
+require_relative '../database_cleanup'
 
 RSpec.describe Async::Redis::DSL::Strings, timeout: 5 do
 	include_context Async::RSpec::Reactor
+	include_context "database cleanup"
 
 	let(:endpoint) {Async::Redis.local_endpoint}
 	let(:client) {Async::Redis::Client.new(endpoint)}
@@ -30,12 +32,9 @@ RSpec.describe Async::Redis::DSL::Strings, timeout: 5 do
 	let(:string_key) {"async-redis:test:string"}
 	let(:other_string_key) {"async-redis:test:other_string"}
 	let(:test_string) {"beep-boop"}
+	let(:other_string) {"doot"}
 
 	it "can perform string manipulation" do
-		# This is a bit of a hack, there's no way to put this into
-		# a before(:all) context, it is needed for testing SETNX
-		client.call 'FLUSHDB'
-
 		expect(client.set(string_key, test_string)).to be == "OK"
 		expect(client.get(string_key)).to be == test_string
 		expect(client.strlen(string_key)).to be == test_string.length
@@ -46,14 +45,50 @@ RSpec.describe Async::Redis::DSL::Strings, timeout: 5 do
 		expect(client.append(string_key, "-boop")).to be == "beep-beep-boop".length
 		expect(client.get(string_key)).to be == "beep-beep-boop"
 
-		expect(client.setnx(string_key, test_string)).to be == 0
-		expect(client.get(string_key)).to be == "beep-beep-boop"
-
 		expect(client.getset(string_key, test_string)).to be == "beep-beep-boop"
 		expect(client.get(string_key)).to be == test_string
 
-		expect(client.setnx(other_string_key, test_string)).to be == 1
+		client.close
+	end
+
+	it "can conditionally set values based on whether they exist or not" do
+		expect(client.set(string_key, test_string)).to be == "OK"
+
+		# only set if it doesn't exist, which it does already
+		expect(client.setnx(string_key, other_string)).to be_nil
+		expect(client.get(string_key)).to be == test_string
+
+		# only set if it exists, which it doesn't yet
+		expect(client.set other_string_key, other_string, condition: :xx).to be_nil
+		expect(client.get other_string_key).to be_nil
+
+		# only set if it doesn't exist, which it doesn't
+		expect(client.setnx(other_string_key, test_string)).to be == "OK"
 		expect(client.get(other_string_key)).to be == test_string
+
+		# only set if it exists, which it does
+		expect(client.set other_string_key, other_string, condition: :xx).to be == "OK"
+		expect(client.get other_string_key).to be == other_string
+
+		client.close
+	end
+
+	let(:seconds) {3}
+	let(:milliseconds) {3500}
+
+	it "can set values with a time-to-live" do
+		expect(client.set(string_key, test_string)).to be == "OK"
+		expect(client.call("TTL", string_key)).to be == -1
+
+		expect(client.setex(string_key, seconds, test_string)).to be == "OK"
+		expect(client.call("TTL", string_key)).to be >= 0
+
+		expect(client.psetex(other_string_key, milliseconds, other_string)).to be == "OK"
+		expect(client.call("TTL", other_string_key)).to be >= 0
+
+		expect{
+			client.set string_key, test_string, seconds: seconds, milliseconds: milliseconds
+		}.to raise_error(Async::Redis::ServerError)
 
 		client.close
 	end

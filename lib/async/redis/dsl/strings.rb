@@ -94,11 +94,27 @@ module Async
 				end
 
 				def psetex(key, milliseconds, value)
-					return call('PSETEX', key, milliseconds, value)
+					return set key, value, milliseconds: milliseconds
 				end
 
-				def set(key, value)
-					return call('SET', key, value)
+				def set(key, value, options={})
+					arguments = []
+
+					if options.has_key? :seconds
+						arguments.append 'EX', options[:seconds]
+					end
+
+					if options.has_key? :milliseconds
+						arguments.append 'PX', options[:milliseconds]
+					end
+
+					if options[:condition] == :nx
+						arguments.append 'NX'
+					elsif options[:condition] == :xx
+						arguments.append 'XX'
+					end
+
+					return call('SET', key, value, *arguments)
 				end
 
 				def setbit(key, offset, value)
@@ -106,11 +122,11 @@ module Async
 				end
 
 				def setex(key, seconds, value)
-					return call('SETEX', key, seconds, value)
+					return set key, value, seconds: seconds
 				end
 
 				def setnx(key, value)
-					return call('SETNX', key, value)
+					return set key, value, condition: :nx
 				end
 
 				def setrange(key, offset, value)
