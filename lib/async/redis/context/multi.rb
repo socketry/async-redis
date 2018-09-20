@@ -20,13 +20,16 @@
 # THE SOFTWARE.
 
 require_relative 'nested'
+
 require_relative '../dsl/strings'
+require_relative '../dsl/keys'
 
 module Async
 	module Redis
 		module Context
 			class Multi < Nested
 				include DSL::Strings
+				include DSL::Keys
 
 				def initialize(pool, *args)
 					super(pool)

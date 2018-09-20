@@ -24,6 +24,7 @@ require_relative 'context/multi'
 require_relative 'context/subscribe'
 
 require_relative 'dsl/strings'
+require_relative 'dsl/keys'
 
 require 'async/io'
 
@@ -35,6 +36,7 @@ module Async
 		
 		class Client
 			include DSL::Strings
+			include DSL::Keys
 
 			def initialize(endpoint = Redis.local_endpoint, protocol = Protocol::RESP, **options)
 				@endpoint = endpoint
