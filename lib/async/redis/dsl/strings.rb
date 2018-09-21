@@ -101,17 +101,19 @@ module Async
 					arguments = []
 
 					if options.has_key? :seconds
-						arguments.append 'EX', options[:seconds]
+						arguments << 'EX'
+						arguments << options[:seconds]
 					end
 
 					if options.has_key? :milliseconds
-						arguments.append 'PX', options[:milliseconds]
+						arguments << 'PX'
+						arguments << options[:milliseconds]
 					end
 
 					if options[:condition] == :nx
-						arguments.append 'NX'
+						arguments << 'NX'
 					elsif options[:condition] == :xx
-						arguments.append 'XX'
+						arguments << 'XX'
 					end
 
 					return call('SET', key, value, *arguments)
