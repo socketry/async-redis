@@ -19,6 +19,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'date'
+
 module Async
 	module Redis
 		module DSL
@@ -40,7 +42,14 @@ module Async
 				end
 
 				def expireat(key, time)
+					case time
+					when DateTime, Time, Date 
+						timestamp =  time.strftime('%s').to_i
+					else
+						timestamp = time
+					end
 
+					return call('EXPIREAT', key, timestamp)
 				end
 
 				def keys(pattern)
@@ -59,16 +68,23 @@ module Async
 
 				end
 
-				def presist(key)
-					return call('PRESIST', key)
+				def persist(key)
+					return call('PERSIST', key)
 				end
 
 				def pexpire(key, milliseconds)
 					return call('PEXPIRE', milliseconds)
 				end
 
-				def pexpireat(key, milliseconds_time)
-
+				def pexpireat(key, time)
+					case time.class
+					when DateTime, Time, Date 
+						timestamp =  time.strftime('%Q').to_i
+					else
+						timestamp = time
+					end
+					
+					return call('PEXPIREAT', key, timestamp)
 				end
 
 				def pttl(key)
