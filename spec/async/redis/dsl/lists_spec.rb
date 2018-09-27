@@ -19,35 +19,48 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'nested'
+require 'async/redis/client'
+require_relative '../database_cleanup'
 
-require_relative '../dsl/strings'
-require_relative '../dsl/keys'
-require_relative '../dsl/lists'
+RSpec.describe Async::Redis::DSL::Lists, timeout: 5 do
+	include_context Async::RSpec::Reactor
+	include_context "database cleanup"
 
-module Async
-	module Redis
-		module Context
-			class Multi < Nested
-				include DSL::Strings
-				include DSL::Keys
-				include DSL::Lists
+	let(:endpoint) {Async::Redis.local_endpoint}
+	let(:client) {Async::Redis::Client.new(endpoint)}
 
-				def initialize(pool, *args)
-					super(pool)
-					
-					@connection.write_request(['MULTI'])
-					@connection.read_response
-				end
-				
-				def execute
-					return call 'EXEC'
-				end
-				
-				def discard
-					return call 'DISCARD'
-				end
-			end
+	let(:list_a) {'async-redis:test:list_a'}
+	let(:list_b) {'async-redis:test:list_b'}
+	let(:test_list) {(0..4).to_a}
+
+	it "can do non blocking push/pop operations" do
+		expect(client.lpush list_a, test_list).to be == test_list.length
+		expect(client.rpush list_b, test_list).to be == test_list.length
+
+		expect(client.llen list_a).to be == client.llen(list_b)
+
+		test_list.each do |i|
+			item_a = client.lpop list_a
+			item_b = client.rpop list_b
+			expect(item_a).to be == item_b
 		end
-	end 
+
+		client.close
+	end
+
+	it "can conditionally push and pop items from lists" do
+
+	end
+
+	it "can get, set and remove values at specific list indexes" do
+
+	end
+
+	it "can get a list slice and trim lists" do
+
+	end
+
+	it "can trim lists" do
+
+	end
 end
