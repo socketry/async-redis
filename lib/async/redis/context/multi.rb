@@ -1,5 +1,5 @@
 # Copyright, 2018, by Samuel G. D. Williams. <http://www.codeotaku.com>
-# and Huba Nagy
+# Copyright, 2018, by Huba Nagy.
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,17 +21,17 @@
 
 require_relative 'nested'
 
-require_relative '../dsl/strings'
-require_relative '../dsl/keys'
-require_relative '../dsl/lists'
+require_relative '../methods/strings'
+require_relative '../methods/keys'
+require_relative '../methods/lists'
 
 module Async
 	module Redis
 		module Context
 			class Multi < Nested
-				include DSL::Strings
-				include DSL::Keys
-				include DSL::Lists
+				include Methods::Strings
+				include Methods::Keys
+				include Methods::Lists
 
 				def initialize(pool, *args)
 					super(pool)

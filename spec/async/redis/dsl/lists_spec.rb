@@ -1,5 +1,5 @@
 # Copyright, 2018, by Samuel G. D. Williams. <http://www.codeotaku.com>
-# and Huba Nagy
+# Copyright, 2018, by Huba Nagy.
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 require 'async/redis/client'
 require_relative '../database_cleanup'
 
-RSpec.describe Async::Redis::DSL::Lists, timeout: 5 do
+RSpec.describe Async::Redis::Methods::Lists, timeout: 5 do
 	include_context Async::RSpec::Reactor
 	include_context "database cleanup"
 

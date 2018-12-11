@@ -1,5 +1,5 @@
 # Copyright, 2018, by Samuel G. D. Williams. <http://www.codeotaku.com>
-# and Huba Nagy
+# Copyright, 2018, by Huba Nagy.
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
 
 module Async
 	module Redis
-		module DSL
+		module Methods
 			module Lists
 				def blpop(ttl=0, *keys)
 					return call('BLPOP', *keys, ttl)

@@ -19,55 +19,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'nested'
-
-require 'set'
-
 module Async
 	module Redis
-		module Context
-			class Subscribe < Nested
-				def initialize(pool, channels)
-					super(pool)
+		module Methods
+			module Server
+				# Get info from server.
+				# @return [Hash] the server metadata.
+				def info
+					metadata = {}
 					
-					@channels = channels
-					
-					subscribe(channels)
-				end
-				
-				def listen
-					return @connection.read_response
-				end
-				
-				private
-				
-				def subscribe(channels)
-					@connection.write_request ['SUBSCRIBE', *channels]
-					
-					response = nil
-					
-					channels.length.times do |i|
-						response = @connection.read_response
-					end
-					
-					return response
-				end
-				
-				def unsubscribe(*channels)
-					if channels.empty? # unsubscribe from everything if no specific channels are given
-						@connection.write_request ['UNSUBSCRIBE']
+					call('INFO').each_line(Protocol::CRLF) do |line|
+						key, value = line.split(':')
 						
-						response = nil
-						
-						@channels.length.times do |i|
-							response = @connection.read_response
+						if value
+							metadata[key.to_sym] = value.chomp!
 						end
-						
-						return response
-					else
-						@channels.subtract(channels)
-						return call 'UNSUBSCRIBE', *channels
 					end
+					
+					return metadata
 				end
 			end
 		end

@@ -23,9 +23,10 @@ require_relative 'pool'
 require_relative 'context/multi'
 require_relative 'context/subscribe'
 
-require_relative 'dsl/strings'
-require_relative 'dsl/keys'
-require_relative 'dsl/lists'
+require_relative 'methods/strings'
+require_relative 'methods/keys'
+require_relative 'methods/lists'
+require_relative 'methods/server'
 
 require 'async/io'
 
@@ -36,10 +37,11 @@ module Async
 		end
 		
 		class Client
-			include DSL::Strings
-			include DSL::Keys
-			include DSL::Lists
-
+			include Methods::Strings
+			include Methods::Keys
+			include Methods::Lists
+			include Methods::Server
+			
 			def initialize(endpoint = Redis.local_endpoint, protocol = Protocol::RESP, **options)
 				@endpoint = endpoint
 				@protocol = protocol
@@ -64,22 +66,6 @@ module Async
 			
 			def close
 				@pool.close
-			end
-			
-			# Get info from server.
-			# @return [Hash] the server metadata.
-			def info
-				metadata = {}
-				
-				call('INFO').each_line(Protocol::CRLF) do |line|
-					key, value = line.split(':')
-					
-					if value
-						metadata[key.to_sym] = value.chomp!
-					end
-				end
-				
-				return metadata
 			end
 			
 			def publish(channel, message)
