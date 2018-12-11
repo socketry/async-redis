@@ -27,6 +27,62 @@ Or install it yourself as:
 
 ## Usage
 
+### Basic Local Connection
+
+```ruby
+require 'async/redis'
+
+endpoint = Async::Redis.local_endpoint
+client = Async::Redis::Client.new(endpoint)
+
+Async.run do
+	pp client.info
+ensure
+	client.close
+end
+```
+
+### Variables
+
+```ruby
+require 'async/redis'
+
+endpoint = Async::Redis.local_endpoint
+client = Async::Redis::Client.new(endpoint)
+
+Async.run do
+	pp client.info
+ensure
+	client.close
+end
+```
+
+### Subscriptions
+
+```ruby
+require 'async/redis'
+require 'json'
+
+endpoint = Async::Redis.local_endpoint
+client = Async::Redis::Client.new(endpoint)
+
+Async.run do |task|
+	subscriber = task.async do
+		client.subscribe 'status.frontend' do |context|
+			type, name, message = context.listen
+			
+			pp type, name, message
+		end
+	end
+	
+	publisher = task.async do
+		client.publish 'status.frontend', 'good'
+	end
+ensure
+	client.close
+end
+```
+
 ## Contributing
 
 1. Fork it
