@@ -58,6 +58,22 @@ module Async
 				@pool.close
 			end
 			
+			# Get info from server.
+			# @return [Hash] the server metadata.
+			def info
+				metadata = {}
+				
+				call('INFO').each_line(Protocol::CRLF) do |line|
+					key, value = line.split(':')
+					
+					if value
+						metadata[key.to_sym] = value.chomp!
+					end
+				end
+				
+				return metadata
+			end
+			
 			def publish(channel, message)
 				call('PUBLISH', channel, message)
 			end

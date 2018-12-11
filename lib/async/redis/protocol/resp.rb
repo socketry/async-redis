@@ -26,9 +26,9 @@ module Async
 		end
 		
 		module Protocol
+			CRLF = "\r\n".freeze
+			
 			class RESP < Async::IO::Protocol::Line
-				CRLF = "\r\n".freeze
-				
 				class << self
 					alias client new
 				end
