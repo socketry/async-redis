@@ -51,7 +51,8 @@ endpoint = Async::Redis.local_endpoint
 client = Async::Redis::Client.new(endpoint)
 
 Async.run do
-	pp client.info
+	client.set('X', 10)
+	pp client.get('X')
 ensure
 	client.close
 end
