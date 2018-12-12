@@ -102,9 +102,10 @@ module Async
 
 			group_commands.each do |command, command_spec|
 				puts "\t#{command} - #{command_spec["summary"][0..50]}"
+				command_method = command.downcase.split(' ').join('_')
 
 				file.write <<-METHOD
-					def #{command.downcase} *arguments
+					def #{command_method}(*arguments)
 						return call('#{command}', arguments)
 					end
 
