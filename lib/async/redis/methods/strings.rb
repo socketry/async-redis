@@ -27,20 +27,8 @@ module Async
 					return call('APPEND', key, value)
 				end
 
-				def bitcount(key, value)
-
-				end
-
-				def bitfield
-
-				end
-
-				def bitop
-
-				end
-
-				def bitpos
-
+				def bitcount(key, *range)
+					return call('BITCOUNT', key, *range)
 				end
 
 				def decr(key)
