@@ -60,6 +60,16 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		client.close
 	end
 	
+	it "can timeout" do
+		duration = Async::Clock.measure do
+			result = client.call("BLPOP", "SLEEP", 1)
+		end
+		
+		expect(duration).to be_within(20).percent_of(1)
+		
+		client.close
+	end
+	
 	it "can propagate errors back from the server" do
 		# ERR
 		expect{client.call("NOSUCHTHING", 0, 85)}.to raise_error(Async::Redis::ServerError)

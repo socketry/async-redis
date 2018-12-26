@@ -17,6 +17,7 @@ if ENV['COVERAGE'] || ENV['TRAVIS']
 end
 
 require 'bundler/setup'
+require 'async/clock'
 require 'async/redis'
 require 'async/rspec/reactor'
 

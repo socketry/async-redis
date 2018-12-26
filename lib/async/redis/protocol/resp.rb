@@ -97,6 +97,10 @@ module Async
 						end
 					when '*'
 						count = read_line.to_i
+						
+						# Null array (https://redis.io/topics/protocol#resp-arrays):
+						return nil if count == -1
+						
 						array = Array.new(count) {read_object}
 						
 						return array
