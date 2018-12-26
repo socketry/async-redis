@@ -1,4 +1,5 @@
 language: ruby
+dist: xenial
 cache: bundler
 
 services:
@@ -19,4 +20,5 @@ matrix:
     - rvm: truffleruby
     - rvm: ruby-head
     - rvm: jruby-head
+    - rvm: truffleruby
     - rvm: rbx-3
