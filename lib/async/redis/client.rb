@@ -97,10 +97,12 @@ module Async
 			end
 			
 			def call(*arguments)
-				@pool.acquire do |connection|
-					connection.write_request(arguments)
-					return connection.read_response
-				end
+				Async.run do
+					@pool.acquire do |connection|
+						connection.write_request(arguments)
+						connection.read_response
+					end
+				end.wait
 			end
 			
 			protected

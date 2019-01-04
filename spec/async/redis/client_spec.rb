@@ -75,6 +75,7 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		expect{client.call("NOSUCHTHING", 0, 85)}.to raise_error(Async::Redis::ServerError)
 		
 		# WRONGTYPE
+		client.call("LPUSH", list_key, "World", "Hello")
 		expect{client.call("GET", list_key)}.to raise_error(Async::Redis::ServerError)
 		
 		client.close
