@@ -56,8 +56,15 @@ RSpec.describe Async::Redis::Methods::Lists, timeout: 5 do
 
 	end
 
-	it "can get a list slice and trim lists" do
+	it "can get a list slice" do
+		client.rpush(list_a, test_list)
 
+		slice_size = list_a.size/2
+
+		expect(client.lrange(list_a, 0, slice_size - 1))
+			.to match_array test_list.take(slice_size).map(&:to_s)
+
+		client.close
 	end
 
 	it "can trim lists" do
