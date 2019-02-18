@@ -73,7 +73,7 @@ module Async
 				end
 
 				def lrange(key, start, stop)
-					return call('LRANGE', key. start, stop)
+					return call('LRANGE', key, start, stop)
 				end
 
 				def lrem(key, count, value)
