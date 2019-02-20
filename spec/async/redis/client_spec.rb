@@ -79,4 +79,16 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		
 		client.close
 	end
+
+	it "retrieves large responses from redis" do
+		num_elems = 5000
+		client.call("DEL", list_key)
+	  num_elems.times { |i| client.call("RPUSH", list_key, i) }
+
+		response = client.call("LRANGE", list_key, 0, num_elems - 1)
+
+		expect(response).to eq (0...num_elems).map(&:to_s)
+
+		client.close
+	end
 end
