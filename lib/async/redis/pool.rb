@@ -36,7 +36,6 @@ module Async
 				@constructor = block
 			end
 			
-			
 			attr :resources
 			
 			def empty?

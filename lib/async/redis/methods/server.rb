@@ -38,6 +38,10 @@ module Async
 					
 					return metadata
 				end
+				
+				def flushdb!
+					call 'FLUSHDB'
+				end
 			end
 		end
 	end

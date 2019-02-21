@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'async/clock'
 require 'async/redis/client'
 
 RSpec.describe Async::Redis::Client, timeout: 5 do

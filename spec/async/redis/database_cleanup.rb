@@ -19,10 +19,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'async/redis'
+require 'async/redis/client'
+
 RSpec.shared_context "database cleanup", shared_context: :metadata do
 	before :example do
 		Async::Redis::Client.open do |client|
-			client.call 'FLUSHDB'
+			client.flushdb!
 		end
 	end
 end
