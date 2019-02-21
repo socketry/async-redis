@@ -52,16 +52,20 @@ module Async
 			attr :endpoint
 			attr :protocol
 			
+			# @return [client] if no block provided.
+			# @yield [client, task] yield the client in an async task.
 			def self.open(*args, &block)
 				client = self.new(*args)
 				
 				return client unless block_given?
 				
-				begin
-					yield client
-				ensure
-					client.close
-				end
+				Async do |task|
+					begin
+						yield client, task
+					ensure
+						client.close
+					end
+				end.wait
 			end
 			
 			def close
@@ -99,6 +103,7 @@ module Async
 			def call(*arguments)
 				@pool.acquire do |connection|
 					connection.write_request(arguments)
+					
 					return connection.read_response
 				end
 			end
