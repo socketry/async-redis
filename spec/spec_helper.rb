@@ -1,29 +1,13 @@
 
-if ENV['COVERAGE'] || ENV['TRAVIS']
-	begin
-		require 'simplecov'
-		
-		SimpleCov.start do
-			add_filter "/spec/"
-		end
-		
-		if ENV['TRAVIS']
-			require 'coveralls'
-			Coveralls.wear!
-		end
-	rescue LoadError
-		warn "Could not load simplecov: #{$!}"
-	end
-end
+require 'covered/rspec'
 
-require 'bundler/setup'
-require 'async/clock'
-require 'async/redis'
-require 'async/rspec/reactor'
+require 'async/rspec'
 
 # Async.logger.level = Logger::DEBUG
 
 RSpec.configure do |config|
+	config.disable_monkey_patching
+	
 	# Enable flags like --only-failures and --next-failure
 	config.example_status_persistence_file_path = ".rspec_status"
 
