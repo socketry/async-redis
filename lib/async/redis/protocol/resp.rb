@@ -121,6 +121,26 @@ module Async
 				end
 				
 				alias read_response read_object
+
+				private
+
+				# Override Async::IO::Protocol::Line#write_line
+				# The original method performs a flush. This one does not and moves the
+				# responsibility of flushing to the caller of the method.
+				# In the case of Redis, we do not want to perform a flush in every line,
+				# because each Redis command contains several lines. Flushing once per
+				# command is more efficient because it avoids unnecessary writes to the
+				# socket.
+				def write_lines(*args)
+					if args.empty?
+						@stream.write(@eol)
+					else
+						args.each do |arg|
+							@stream.write(arg)
+							@stream.write(@eol)
+						end
+					end
+				end
 			end
 		end
 	end
