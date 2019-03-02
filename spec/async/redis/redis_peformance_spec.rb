@@ -23,7 +23,7 @@ require 'async/redis'
 require 'redis'
 require 'benchmark/ips'
 
-Rspec.describe "Client Performance" do
+RSpec.describe "Client Performance" do
 	it "should be fast to set keys" do
 		Benchmark.ips do |x|
 			x.report("async-redis") do |times|
