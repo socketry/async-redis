@@ -1,7 +1,7 @@
 require "rspec"
 require 'async/redis'
 require 'redis'
-require 'benchmark/ips'
+require 'benchmark-ips'
 
 
  Rspec.describe Async::Redis do

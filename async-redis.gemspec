@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
 
 	spec.add_development_dependency "async-rspec", "~> 1.1"
 	spec.add_development_dependency "redis"
-	spec.add_development_dependency "benchmark/ips"
+	spec.add_development_dependency "benchmark-ips"
 
 	spec.add_development_dependency "covered"
 	spec.add_development_dependency "bundler"
