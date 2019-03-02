@@ -47,8 +47,8 @@ RSpec.describe "Client Performance" do
 					redis.set(["X","Y","Z"].sample, rand(1..10))
 				end
 			end
-		end
+			x.compare!
 
-		x.compare!
+		end
 	end
 end
