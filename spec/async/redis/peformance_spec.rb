@@ -27,28 +27,28 @@ RSpec.describe "Client Performance" do
 		Benchmark.ips do |x|
 			x.report("async-redis") do |times|
 				endpoint = Async::Redis.local_endpoint
-
+				
 				Async do
 					client = Async::Redis::Client.new(endpoint)
-
+					
 					while (times -= 1) >= 0
 						client.set(["X","Y","Z"].sample, rand(1..10))
 					end
-
+					
 				# ensure
 					client.close
 				end
 			end
-
+			
 			x.report("redis-rb") do |times|
 				redis = Redis.new
-
+				
 				while (times -= 1) >= 0
 					redis.set(["X","Y","Z"].sample, rand(1..10))
 				end
 			end
+			
 			x.compare!
-
 		end
 	end
 end
