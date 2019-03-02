@@ -67,18 +67,6 @@ module Async
 					end
 				end
 				
-				# def write_lines(*args)
-				# 	puts "write_lines(#{args.inspect})"
-				# 	super
-				# end
-				# 
-				# def read_line
-				# 	result = super
-				# 	puts "read_line #{result}"
-				# 
-				# 	return result
-				# end
-				
 				def read_object
 					token = @stream.read(1)
 					
