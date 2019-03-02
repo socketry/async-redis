@@ -19,10 +19,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require_relative '../methods/strings'
+require_relative '../methods/keys'
+require_relative '../methods/lists'
+
 module Async
 	module Redis
 		module Context
 			class Nested
+				include Methods::Strings
+				include Methods::Keys
+				include Methods::Lists
+				
 				def initialize(pool, *args)
 					@pool = pool
 					@connection = pool.acquire

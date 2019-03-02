@@ -21,18 +21,10 @@
 
 require_relative 'nested'
 
-require_relative '../methods/strings'
-require_relative '../methods/keys'
-require_relative '../methods/lists'
-
 module Async
 	module Redis
 		module Context
 			class Multi < Nested
-				include Methods::Strings
-				include Methods::Keys
-				include Methods::Lists
-
 				def initialize(pool, *args)
 					super(pool)
 					

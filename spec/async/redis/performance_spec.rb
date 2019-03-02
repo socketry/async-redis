@@ -25,7 +25,7 @@ require 'benchmark/ips'
 RSpec.describe "Client Performance" do
 	it "should be fast to set keys" do
 		Benchmark.ips do |x|
-			x.report("async-redis") do |times|
+			x.report("async-redis (pool)") do |times|
 				endpoint = Async::Redis.local_endpoint
 				
 				Async do
@@ -40,12 +40,31 @@ RSpec.describe "Client Performance" do
 				end
 			end
 			
+			x.report("async-redis (nested)") do |times|
+				endpoint = Async::Redis.local_endpoint
+				
+				Async do
+					client = Async::Redis::Client.new(endpoint)
+					
+					client.nested do |nested|
+						while (times -= 1) >= 0
+							nested.set(["X","Y","Z"].sample, rand(1..10))
+						end
+					end
+					
+				# ensure
+					client.close
+				end
+			end
+			
 			x.report("redis-rb") do |times|
 				redis = Redis.new
 				
 				while (times -= 1) >= 0
 					redis.set(["X","Y","Z"].sample, rand(1..10))
 				end
+				
+				redis.close
 			end
 			
 			x.compare!

@@ -100,6 +100,18 @@ module Async
 				end
 			end
 			
+			def nested(&block)
+				context = Context::Nested.new(@pool)
+				
+				return context unless block_given?
+				
+				begin
+					yield context
+				ensure
+					context.close
+				end
+			end
+			
 			def call(*arguments)
 				@pool.acquire do |connection|
 					connection.write_request(arguments)
