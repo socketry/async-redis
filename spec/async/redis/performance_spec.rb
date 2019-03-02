@@ -32,7 +32,11 @@ RSpec.describe "Client Performance" do
 					client = Async::Redis::Client.new(endpoint)
 					
 					while (times -= 1) >= 0
-						client.set(["X","Y","Z"].sample, rand(1..10))
+						key = ["X","Y","Z"].sample
+						value = rand(10).to_s
+						
+						client.set(key, value)
+						expect(client.get(key)).to be == value
 					end
 					
 				# ensure
@@ -48,7 +52,11 @@ RSpec.describe "Client Performance" do
 					
 					client.nested do |nested|
 						while (times -= 1) >= 0
-							nested.set(["X","Y","Z"].sample, rand(1..10))
+							key = ["X","Y","Z"].sample
+							value = rand(10).to_s
+							
+							nested.set(key, value)
+							expect(nested.get(key)).to be == value
 						end
 					end
 					
@@ -58,13 +66,17 @@ RSpec.describe "Client Performance" do
 			end
 			
 			x.report("redis-rb") do |times|
-				redis = Redis.new
-				
+				client = Redis.new
+			
 				while (times -= 1) >= 0
-					redis.set(["X","Y","Z"].sample, rand(1..10))
+					key = ["X","Y","Z"].sample
+					value = rand(10).to_s
+					
+					client.set(key, value)
+					expect(client.get(key)).to be == value
 				end
-				
-				redis.close
+			
+				client.close
 			end
 			
 			x.compare!
