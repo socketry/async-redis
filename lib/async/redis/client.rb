@@ -125,7 +125,7 @@ module Async
 			def connect(connection_limit: nil)
 				Pool.new(connection_limit) do
 					peer = @endpoint.connect
-						
+					
 					peer.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
 					
 					stream = IO::Stream.new(peer)
