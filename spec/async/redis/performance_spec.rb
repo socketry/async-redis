@@ -35,21 +35,21 @@ RSpec.describe "Client Performance", timeout: nil do
 	it "should be fast to set keys" do
 		Benchmark.ips do |benchmark|
 			benchmark.report("async-redis (pool)") do |times|
-				while (times -= 1) >= 0
-					key = keys.sample
-					value = times.to_s
-					
+				key = keys.sample
+				value = times.to_s
+				
+				i = 0; while i < times; i += 1
 					async_client.set(key, value)
 					expect(async_client.get(key)).to be == value
 				end
 			end
 			
 			benchmark.report("async-redis (nested)") do |times|
+				key = keys.sample
+				value = times.to_s
+				
 				async_client.nested do |nested|
-					while (times -= 1) >= 0
-						key = keys.sample
-						value = times.to_s
-						
+					i = 0; while i < times; i += 1
 						nested.set(key, value)
 						expect(nested.get(key)).to be == value
 					end
@@ -57,10 +57,10 @@ RSpec.describe "Client Performance", timeout: nil do
 			end
 			
 			benchmark.report("redis-rb") do |times|
-				while (times -= 1) >= 0
-					key = keys.sample
-					value = times.to_s
-					
+				key = keys.sample
+				value = times.to_s
+				
+				i = 0; while i < times; i += 1
 					redis_client.set(key, value)
 					expect(redis_client.get(key)).to be == value
 				end
