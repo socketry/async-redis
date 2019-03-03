@@ -23,12 +23,12 @@ module Async
 	module Redis
 		module Methods
 			module Lists
-				def blpop(ttl=0, *keys)
-					return call('BLPOP', *keys, ttl)
+				def blpop(*keys, timeout: 0)
+					return call('BLPOP', *keys, timeout)
 				end
 
-				def brpop(ttl=0, *keys)
-					return call('BRPOP', *keys, ttl)
+				def brpop(*keys, timeout: 0)
+					return call('BRPOP', *keys, timeout)
 				end
 
 				def brpoplpush(sorce, destination, timeout)
