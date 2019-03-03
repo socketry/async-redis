@@ -67,6 +67,15 @@ module Async
 					end
 				end
 				
+				def read_data(length)
+					buffer = @stream.read(length) or @stream.eof!
+					
+					# Eat trailing whitespace because length does not include the CRLF:
+					@stream.read(2) or @stream.eof!
+					
+					return buffer
+				end
+				
 				def read_object
 					line = read_line
 					token = line.slice!(0, 1)
@@ -78,12 +87,7 @@ module Async
 						if length == -1
 							return nil
 						else
-							buffer = @stream.read(length)
-							
-							# Eat trailing whitespace because length does not include the CRLF:
-							@stream.read(2)
-							
-							return buffer
+							return read_data(length)
 						end
 					when '*'
 						count = line.to_i
@@ -108,6 +112,8 @@ module Async
 						
 						raise NotImplementedError, "Implementation for token #{token} missing"
 					end
+					
+					# TODO: If an exception (e.g. Async::TimeoutError) propagates out of this function, perhaps @stream should be closed? Otherwise it might be in a weird state.
 				end
 				
 				alias read_response read_object
