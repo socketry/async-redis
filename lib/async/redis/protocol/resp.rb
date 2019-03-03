@@ -68,23 +68,25 @@ module Async
 				end
 				
 				def read_object
-					token = @stream.read(1)
+					line = read_line
+					token = line.slice!(0, 1)
 					
 					case token
 					when '$'
-						length = read_line.to_i
+						length = line.to_i
 						
 						if length == -1
 							return nil
 						else
 							buffer = @stream.read(length)
+							
 							# Eat trailing whitespace because length does not include the CRLF:
-							read_line
-						
+							@stream.read(2)
+							
 							return buffer
 						end
 					when '*'
-						count = read_line.to_i
+						count = line.to_i
 						
 						# Null array (https://redis.io/topics/protocol#resp-arrays):
 						return nil if count == -1
@@ -93,13 +95,13 @@ module Async
 						
 						return array
 					when ':'
-						return read_line.to_i
+						return line.to_i
 					
 					when '-'
-						raise ServerError.new(read_line)
+						raise ServerError.new(line)
 					
 					when '+'
-						return read_line
+						return line
 					
 					else
 						@stream.flush
