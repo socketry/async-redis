@@ -20,68 +20,56 @@
 
 require 'async/redis'
 require 'redis'
+
+require 'benchmark'
 require 'benchmark/ips'
 
-RSpec.describe "Client Performance" do
+RSpec.describe "Client Performance", timeout: nil do
+	include_context Async::RSpec::Reactor
+	
+	let(:keys) {["X","Y","Z"].freeze}
+	let(:endpoint) {Async::Redis.local_endpoint}
+	let(:async_client) {Async::Redis::Client.new(endpoint)}
+	let(:redis_client) {Redis.new}
+	
 	it "should be fast to set keys" do
-		keys = ["X","Y","Z"].freeze
-		
-		Benchmark.ips do |x|
-			x.report("async-redis (pool)") do |times|
-				endpoint = Async::Redis.local_endpoint
-				
-				Async do
-					client = Async::Redis::Client.new(endpoint)
-					
-					while (times -= 1) >= 0
-						key = keys.sample
-						value = times.to_s
-						
-						client.set(key, value)
-						expect(client.get(key)).to be == value
-					end
-					
-				# ensure
-					client.close
-				end
-			end
-			
-			x.report("async-redis (nested)") do |times|
-				endpoint = Async::Redis.local_endpoint
-				
-				Async do
-					client = Async::Redis::Client.new(endpoint)
-					
-					client.nested do |nested|
-						while (times -= 1) >= 0
-							key = keys.sample
-							value = times.to_s
-							
-							nested.set(key, value)
-							expect(nested.get(key)).to be == value
-						end
-					end
-					
-				# ensure
-					client.close
-				end
-			end
-			
-			x.report("redis-rb") do |times|
-				client = Redis.new
-			
+		Benchmark.ips do |benchmark|
+			benchmark.report("async-redis (pool)") do |times|
 				while (times -= 1) >= 0
 					key = keys.sample
 					value = times.to_s
 					
-					client.set(key, value)
-					expect(client.get(key)).to be == value
+					async_client.set(key, value)
+					expect(async_client.get(key)).to be == value
 				end
-			
-				client.close
 			end
 			
-			x.compare!
+			benchmark.report("async-redis (nested)") do |times|
+				async_client.nested do |nested|
+					while (times -= 1) >= 0
+						key = keys.sample
+						value = times.to_s
+						
+						nested.set(key, value)
+						expect(nested.get(key)).to be == value
+					end
+				end
+			end
+			
+			benchmark.report("redis-rb") do |times|
+				while (times -= 1) >= 0
+					key = keys.sample
+					value = times.to_s
+					
+					redis_client.set(key, value)
+					expect(redis_client.get(key)).to be == value
+				end
+			end
+			
+			benchmark.compare!
 		end
+		
+		async_client.close
+		redis_client.close
 	end
 end
