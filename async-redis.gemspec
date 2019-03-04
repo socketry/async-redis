@@ -28,4 +28,9 @@ Gem::Specification.new do |spec|
 	spec.add_development_dependency "bundler"
 	spec.add_development_dependency "rspec", "~> 3.6"
 	spec.add_development_dependency "rake"
+
+	# Dependencies with C extensions
+	if defined?(RUBY_ENGINE) && RUBY_ENGINE == "ruby"
+		spec.add_development_dependency "hiredis"
+	end
 end
