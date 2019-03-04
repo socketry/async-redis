@@ -31,6 +31,7 @@ RSpec.describe "Client Performance", timeout: nil do
 	let(:endpoint) {Async::Redis.local_endpoint}
 	let(:async_client) {Async::Redis::Client.new(endpoint)}
 	let(:redis_client) {Redis.new}
+	let(:redis_client_hiredis) {Redis.new(driver: :hiredis)}
 	
 	it "should be fast to set keys" do
 		Benchmark.ips do |benchmark|
@@ -65,6 +66,20 @@ RSpec.describe "Client Performance", timeout: nil do
 					expect(redis_client.get(key)).to be == value
 				end
 			end
+
+			# Hiredis is C and not supported in JRuby and TruffleRuby.
+			if defined?(RUBY_ENGINE) && RUBY_ENGINE == "ruby"
+				benchmark.report("redis-rb (hiredis)") do |times|
+					key = keys.sample
+					value = times.to_s
+
+					i = 0; while i < times; i += 1
+						redis_client_hiredis.set(key, value)
+						expect(redis_client_hiredis.get(key)).to be == value
+					end
+				end
+			end
+
 			
 			benchmark.compare!
 		end
