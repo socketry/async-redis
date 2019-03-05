@@ -11,7 +11,6 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 				stream = Async::IO::Stream.new(connection)
 				stream.read(8)
 				stream.close
-				connection.close
 			end
 		end
 
