@@ -31,7 +31,7 @@ module Async
 					return call('BRPOP', *keys, timeout)
 				end
 
-				def brpoplpush(sorce, destination, timeout)
+				def brpoplpush(source, destination, timeout)
 					return call('BRPOPLPUSH', source, destination, timeout)
 				end
 
