@@ -26,6 +26,7 @@ require_relative 'context/subscribe'
 require_relative 'methods/strings'
 require_relative 'methods/keys'
 require_relative 'methods/lists'
+require_relative 'methods/hashes'
 require_relative 'methods/server'
 
 require 'async/io'
@@ -40,6 +41,7 @@ module Async
 			include Methods::Strings
 			include Methods::Keys
 			include Methods::Lists
+			include Methods::Hashes
 			include Methods::Server
 			
 			def initialize(endpoint = Redis.local_endpoint, protocol = Protocol::RESP, **options)
