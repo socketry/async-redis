@@ -1,4 +1,4 @@
-# Copyright, 2018, by Mikael Henriksson. <http://www.mhenrixon.com>
+# Copyright, 2019, by Mikael Henriksson. <http://www.mhenrixon.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
