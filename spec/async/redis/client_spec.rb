@@ -93,4 +93,18 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		
 		client.close
 	end
+
+	it "can use pipelining" do
+		client.set 'async_redis_test_key_1', 'a'
+		client.set 'async_redis_test_key_2', 'b'
+
+	  res = client.pipelined do |context|
+	    context.get 'async_redis_test_key_1'
+			context.get 'async_redis_test_key_2'
+		end
+
+		expect(res).to eq ['a', 'b']
+
+		client.close
+	end
 end
