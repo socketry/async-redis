@@ -22,6 +22,7 @@ require_relative 'protocol/resp'
 require_relative 'pool'
 require_relative 'context/multi'
 require_relative 'context/subscribe'
+require_relative 'context/pipeline'
 
 require_relative 'methods/strings'
 require_relative 'methods/keys'
@@ -113,7 +114,20 @@ module Async
 					context.close
 				end
 			end
-			
+
+			def pipelined(&block)
+				context = Context::Pipeline.new(@pool)
+
+				return context unless block_given?
+
+				begin
+					yield context
+					context.run
+				ensure
+					context.close
+				end
+			end
+
 			def call(*arguments)
 				@pool.acquire do |connection|
 					connection.write_request(arguments)
