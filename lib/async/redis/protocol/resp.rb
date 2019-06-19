@@ -43,17 +43,10 @@ module Async
 				
 				# The redis server doesn't want actual objects (e.g. integers) but only bulk strings. So, we inline it for performance.
 				def write_request(arguments)
-					write_lines("*#{arguments.count}")
-					
-					arguments.each do |argument|
-						string = argument.to_s
-						
-						write_lines("$#{string.bytesize}", string)
-					end
-					
+					write_request_without_flush(arguments)
 					@stream.flush
 				end
-				
+
 				def write_object(object)
 					case object
 					when String
@@ -118,6 +111,16 @@ module Async
 				
 				alias read_response read_object
 
+				def write_pipeline(commands)
+					commands.each do |command|
+						write_request_without_flush(command)
+					end
+
+					@stream.flush
+
+					commands.size.times.map { read_response }
+				end
+
 				private
 
 				# Override Async::IO::Protocol::Line#write_line
@@ -135,6 +138,19 @@ module Async
 							@stream.write(arg)
 							@stream.write(@eol)
 						end
+					end
+				end
+
+				# This method is useful for pipelining because instead of flushing once
+				# per command, we want to flush just once for the whole pipeline for
+				# performance reasons.
+				def write_request_without_flush(arguments)
+					write_lines("*#{arguments.count}")
+
+					arguments.each do |argument|
+						string = argument.to_s
+
+						write_lines("$#{string.bytesize}", string)
 					end
 				end
 			end
