@@ -42,18 +42,18 @@ module Async
 				end
 				
 				# The redis server doesn't want actual objects (e.g. integers) but only bulk strings. So, we inline it for performance.
-				def write_request(arguments)
+				def write_request(arguments, flush: true)
 					write_lines("*#{arguments.count}")
-					
+
 					arguments.each do |argument|
 						string = argument.to_s
-						
+
 						write_lines("$#{string.bytesize}", string)
 					end
-					
-					@stream.flush
+
+					@stream.flush if flush
 				end
-				
+
 				def write_object(object)
 					case object
 					when String
@@ -117,6 +117,14 @@ module Async
 				end
 				
 				alias read_response read_object
+
+				def write_pipeline(commands)
+					commands.each do |command|
+						write_request(command, flush: false)
+					end
+
+					@stream.flush
+				end
 
 				private
 
