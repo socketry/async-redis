@@ -4,35 +4,37 @@ module Async
 
 			# This class accumulates commands and sends several of them in a single
 			# request, instead of sending them one by one.
-			class Pipeline
+			class Pipeline < Nested
 				include Methods::Strings
 				include Methods::Keys
 				include Methods::Lists
-
-				def initialize(connection_pool)
-					@pool = connection_pool
-					@connection = connection_pool.acquire
-
-					# Each command is an array where the first element is the name of the
-					# command ('SET', 'GET', etc.) and the rest of elements are the
-					# parameters for that command.
-					# Ex: ['SET', 'some_key', 42].
-					@commands = []
+				
+				def initialize(pool)
+					super(pool)
+					@command_counter = 0
 				end
 
-				# This method just accumulates the commands and their params.
-				def call(*args)
-					@commands << args
+				def call(command, *args)
+					@connection.write_request([command, *args], flush=false)
+					@command_counter += 1
 				end
 
 				# Send to redis all the accumulated commands.
 				# Returns an array with the result for each command in the same order
 				# that they were added with .call().
 				def run
-					@connection.write_pipeline(@commands)
+					@connection.flush
+
+					responses = @command_counter.times.map { @connection.read_object }
+					@command_counter = 0
+					return responses
 				end
 
+				alias :dispatch :run
+
 				def close
+					run
+
 					if @connection
 						@pool.release(@connection)
 						@connection = nil
