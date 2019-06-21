@@ -15,7 +15,7 @@ module Async
 				end
 
 				def call(command, *args)
-					@connection.write_request([command, *args], flush=false)
+					@connection.write_request([command, *args], accumulate=true)
 					@command_counter += 1
 				end
 

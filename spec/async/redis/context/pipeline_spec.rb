@@ -9,40 +9,62 @@ RSpec.describe Async::Redis::Context::Pipeline, timeout: 5 do
 	let(:pool) {client.instance_variable_get(:@pool)}
 	let(:pipeline) {Async::Redis::Context::Pipeline.new(pool)}
 
-	let(:example_key_vals) do
-	  { pipeline_key_1: '123', pipeline_key_2: '456' }
+	let(:small_key_count) { 50 }
+	let(:large_key_count) { 1500 }
+	let(:key_prefix) { 'pipeline_key_' }
+	let(:keys) { large_key_count.times.map { |i| "#{key_prefix}#{i}" } }
+
+	it 'accumulates commands without running them prematurely' do
+		small_key_count.times do |i|
+			pipeline.set(keys[i], i)
+			expect(client.keys("#{key_prefix}*").length).to eq 0
+		end
+
+		pipeline.run
+		expect(client.keys("#{key_prefix}*").length).to eq small_key_count
+
+		pipeline.close
+		client.close
 	end
 
-	describe '.call' do
-	  it 'accumulates commands without running them' do
-			example_key_vals.each do |k, v|
-				pipeline.call('SET', k, v)
-			end
+	it 'can read back the responses to each request' do
+		small_key_count.times do |i|
+			pipeline.set(keys[i], i)
+		end
 
-			pipeline.close
+		pipeline.close
 
-			example_key_vals.keys do |k|
-				expect(client.get k).to be nil
-			end
-
-			client.close
-	  end
+		client.close
 	end
 
-	describe '.run' do
-	  it 'runs the accumulated commands' do
-			example_key_vals.each do |k, v|
-				pipeline.call('SET', k, v)
-			end
+	it 'does not send any commands more than once' do
+		small_key_count.times do |i|
+			pipeline.set("#{key_prefix}#{i}", i)
+		end
 
-			pipeline.run
-			pipeline.close
+		pipeline.run
+		
+		# increment each key once
+		small_key_count.times do |i|
+			pipeline.incr(keys[i])
+		end
 
-			example_key_vals.keys do |k, v|
-				expect(client.get k).to eq v
-			end
+		pipeline.close
 
-			client.close
-	  end
+		small_key_count.times do |i|
+			expect(client.get(keys[i]).to_i).to eq i+1
+		end
+
+		client.close
+	end
+
+	it 'behaves well even when the buffer gets full' do
+		large_key_count.times do |i|
+			pipeline.set(keys[i], i)
+		end
+
+		pipeline.close
+
+		client.close
 	end
 end
