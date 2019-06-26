@@ -35,7 +35,7 @@ require 'async/redis'
 endpoint = Async::Redis.local_endpoint
 client = Async::Redis::Client.new(endpoint)
 
-Async.run do
+Async do
 	pp client.info
 ensure
 	client.close
@@ -45,12 +45,13 @@ end
 ### Variables
 
 ```ruby
+require 'async'
 require 'async/redis'
 
 endpoint = Async::Redis.local_endpoint
 client = Async::Redis::Client.new(endpoint)
 
-Async.run do
+Async do
 	client.set('X', 10)
 	pp client.get('X')
 ensure
@@ -61,23 +62,29 @@ end
 ### Subscriptions
 
 ```ruby
+require 'async'
 require 'async/redis'
-require 'json'
 
 endpoint = Async::Redis.local_endpoint
 client = Async::Redis::Client.new(endpoint)
 
-Async.run do |task|
+Async do |task|
+	condition = Async::Condition.new
+	
+	publisher = task.async do
+		condition.wait
+		
+		client.publish 'status.frontend', 'good'
+	end
+	
 	subscriber = task.async do
 		client.subscribe 'status.frontend' do |context|
+			condition.signal # We are waiting for messages.
+			
 			type, name, message = context.listen
 			
 			pp type, name, message
 		end
-	end
-	
-	publisher = task.async do
-		client.publish 'status.frontend', 'good'
 	end
 ensure
 	client.close
