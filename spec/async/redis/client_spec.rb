@@ -89,7 +89,7 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		
 		response = client.call("LRANGE", list_key, 0, count - 1)
 		
-		expect(response).to eq (0...count).map(&:to_s)
+		expect(response).to eq (0...size).map(&:to_s)
 		
 		client.close
 	end

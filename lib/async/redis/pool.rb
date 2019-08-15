@@ -72,7 +72,7 @@ module Async
 			end
 			
 			def to_s
-				"\#<#{self.class} resources=#{resources.count} limit=#{@limit}>"
+				"\#<#{self.class} resources=#{resources.size} limit=#{@limit}>"
 			end
 			
 			protected
