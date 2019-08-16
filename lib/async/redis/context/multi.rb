@@ -29,15 +29,16 @@ module Async
 					super(pool)
 					
 					@connection.write_request(['MULTI'])
+					@connection.flush
 					@connection.read_response
 				end
 				
 				def execute
-					return call 'EXEC'
+					call 'EXEC'
 				end
 				
 				def discard
-					return call 'DISCARD'
+					call 'DISCARD'
 				end
 			end
 		end

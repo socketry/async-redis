@@ -33,8 +33,8 @@ RSpec.describe Async::Redis::Context::Multi, timeout: 5 do
 		
 		client.multi do |context|
 			(0..5).each do |id|
-				queued = context.set "#{multi_key_base}:#{id}", "multi-test 6"
-				expect(queued).to be == "QUEUED"
+				response = context.set "#{multi_key_base}:#{id}", "multi-test 6"
+				expect(response).to be == "QUEUED"
 			end
 			
 			response = context.execute

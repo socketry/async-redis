@@ -21,8 +21,6 @@
 
 require_relative 'nested'
 
-require 'set'
-
 module Async
 	module Redis
 		module Context
@@ -43,6 +41,7 @@ module Async
 				
 				def subscribe(channels)
 					@connection.write_request ['SUBSCRIBE', *channels]
+					@connection.flush
 					
 					response = nil
 					

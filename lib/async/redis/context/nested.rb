@@ -19,34 +19,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative '../methods/strings'
-require_relative '../methods/keys'
-require_relative '../methods/lists'
+require_relative 'generic'
 
 module Async
 	module Redis
 		module Context
-			class Nested
-				include Methods::Strings
-				include Methods::Keys
-				include Methods::Lists
-				
-				def initialize(pool, *args)
-					@pool = pool
-					@connection = pool.acquire
-				end
-				
-				def close
-					if @connection
-						@pool.release(@connection)
-						@connection = nil
-					end
-				end
-				
-				def call(command, *args)
-					@connection.write_request([command, *args])
-					return @connection.read_response
-				end
+			class Nested < Generic
+				include ::Protocol::Redis::Methods
 			end
 		end
 	end

@@ -1,4 +1,5 @@
-# Copyright, 2019, by Mikael Henriksson. <http://www.mhenrixon.com>
+# Copyright, 2018, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2018, by Huba Nagy.
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,60 +19,38 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'protocol/redis/methods'
+
 module Async
 	module Redis
-		module Methods
-			module Hashes
-				def hlen(key)
-					return call('HLEN', key)
+		module Context
+			class Generic
+				def initialize(pool, *args)
+					@pool = pool
+					@connection = pool.acquire
 				end
 				
-				def hset(key, field, value)
-					return call('HSET', key, field, value)
+				def close
+					if @connection
+						@pool.release(@connection)
+						@connection = nil
+					end
 				end
 				
-				def hsetnx(key, field, value)
-					return call('HSETNX', key, field, value)
+				def write_request(command, *args)
+					@connection.write_request([command, *args])
 				end
 				
-				def hmset(key, *attrs)
-					return call('HMSET', key, *attrs)
+				def read_response
+					@connection.flush
+					
+					return @connection.read_response
 				end
 				
-				def hget(key, field)
-					return call('HGET', key, field)
-				end
-				
-				def hmget(key, *fields, &blk)
-					return call('HMGET', key, *fields, &blk)
-				end
-				
-				def hdel(key, *fields)
-					return call('HDEL', key, *fields)
-				end
-				
-				def hexists(key, field)
-					return call('HEXISTS', key, field)
-				end
-				
-				def hincrby(key, field, increment)
-					return call('HINCRBY', key, field, increment)
-				end
-				
-				def hincrbyfloat(key, field, increment)
-					return call('HINCRBYFLOAT', key, field, increment)
-				end
-				
-				def hkeys(key)
-					return call('HKEYS', key)
-				end
-				
-				def hvals(key)
-					return call('HVALS', key)
-				end
-				
-				def hgetall(key)
-					return call('HGETALL', key)
+				def call(command, *args)
+					write_request(command, *args)
+					
+					return read_response
 				end
 			end
 		end

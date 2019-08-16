@@ -20,6 +20,8 @@ Gem::Specification.new do |spec|
 	spec.add_dependency("async", "~> 1.8")
 	spec.add_dependency("async-io", "~> 1.10")
 	
+	spec.add_dependency("protocol-redis", "~> 0.2.0")
+	
 	spec.add_development_dependency "async-rspec", "~> 1.1"
 	spec.add_development_dependency "redis"
 	spec.add_development_dependency "benchmark-ips"

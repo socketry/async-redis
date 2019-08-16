@@ -21,7 +21,7 @@
 require 'async/redis/client'
 require_relative '../database_cleanup'
 
-RSpec.describe Async::Redis::Methods::Hashes, timeout: 5 do
+RSpec.describe Protocol::Redis::Methods::Hashes, timeout: 5 do
 	include_context Async::RSpec::Reactor
 	include_context "database cleanup"
 
@@ -46,14 +46,14 @@ RSpec.describe Async::Redis::Methods::Hashes, timeout: 5 do
 	end
 	
 	it "can set multiple field values" do
-	  client.hmset(hash_key, hash_field_two, hash_value, hash_field_one, hash_value)
-	  
-	  expect(client.hmget hash_key, hash_field_one, hash_field_two).to be == [hash_value, hash_value]
-	  expect(client.hexists hash_key, hash_field_one).to be == 1
+		client.hmset(hash_key, hash_field_two, hash_value, hash_field_one, hash_value)
+		
+		expect(client.hmget hash_key, hash_field_one, hash_field_two).to be == [hash_value, hash_value]
+		expect(client.hexists hash_key, hash_field_one).to be == 1
 		expect(client.hexists hash_key, hash_field_two).to be == 1
 		expect(client.hlen hash_key).to be == 2
 		
-	  client.close()
+		client.close()
 	end
 	
 	it "can get keys" do

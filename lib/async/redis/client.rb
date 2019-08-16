@@ -18,34 +18,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'protocol/resp'
 require_relative 'pool'
 require_relative 'context/multi'
 require_relative 'context/subscribe'
 require_relative 'context/pipeline'
 
-require_relative 'methods/strings'
-require_relative 'methods/keys'
-require_relative 'methods/lists'
-require_relative 'methods/hashes'
-require_relative 'methods/server'
+require_relative 'protocol/resp2'
 
 require 'async/io'
+require 'async/io/stream'
+
+require 'protocol/redis/methods'
 
 module Async
 	module Redis
+		# Legacy.
+		ServerError = ::Protocol::Redis::ServerError
+		
 		def self.local_endpoint
 			Async::IO::Endpoint.tcp('localhost', 6379)
 		end
 		
 		class Client
-			include Methods::Strings
-			include Methods::Keys
-			include Methods::Lists
-			include Methods::Hashes
-			include Methods::Server
+			include ::Protocol::Redis::Methods
 			
-			def initialize(endpoint = Redis.local_endpoint, protocol = Protocol::RESP, **options)
+			def initialize(endpoint = Redis.local_endpoint, protocol = Protocol::RESP2, **options)
 				@endpoint = endpoint
 				@protocol = protocol
 				
@@ -115,14 +112,13 @@ module Async
 				end
 			end
 
-			def pipelined(&block)
+			def pipeline(&block)
 				context = Context::Pipeline.new(@pool)
 
 				return context unless block_given?
 
 				begin
 					yield context
-					context.run
 				ensure
 					context.close
 				end
@@ -131,6 +127,8 @@ module Async
 			def call(*arguments)
 				@pool.acquire do |connection|
 					connection.write_request(arguments)
+					
+					connection.flush
 					
 					return connection.read_response
 				end

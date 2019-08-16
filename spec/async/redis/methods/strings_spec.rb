@@ -22,7 +22,7 @@
 require 'async/redis/client'
 require_relative '../database_cleanup'
 
-RSpec.describe Async::Redis::Methods::Strings, timeout: 5 do
+RSpec.describe Protocol::Redis::Methods::Strings, timeout: 5 do
 	include_context Async::RSpec::Reactor
 	include_context "database cleanup"
 

@@ -76,18 +76,19 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		expect{client.call("NOSUCHTHING", 0, 85)}.to raise_error(Async::Redis::ServerError)
 		
 		# WRONGTYPE
+		client.call("LPUSH", list_key, "World", "Hello")
 		expect{client.call("GET", list_key)}.to raise_error(Async::Redis::ServerError)
 		
 		client.close
 	end
 
 	it "retrieves large responses from redis", timeout: 30 do
-		count = 5000
+		size = 5000
 		
 		client.call("DEL", list_key)
-		count.times {|i| client.call("RPUSH", list_key, i) }
+		size.times {|i| client.call("RPUSH", list_key, i) }
 		
-		response = client.call("LRANGE", list_key, 0, count - 1)
+		response = client.call("LRANGE", list_key, 0, size - 1)
 		
 		expect(response).to eq (0...size).map(&:to_s)
 		
@@ -95,16 +96,18 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 	end
 
 	it "can use pipelining" do
-		client.set 'async_redis_test_key_1', 'a'
-		client.set 'async_redis_test_key_2', 'b'
-
-	  res = client.pipelined do |context|
-	    context.get 'async_redis_test_key_1'
-			context.get 'async_redis_test_key_2'
+		client.pipeline do |context|
+			client.set 'async_redis_test_key_1', 'a'
+			client.set 'async_redis_test_key_2', 'b'
+			
+			results = context.collect do
+				context.get 'async_redis_test_key_1'
+				context.get 'async_redis_test_key_2'
+			end
+			
+			expect(results).to be == ['a', 'b']
 		end
-
-		expect(res).to eq ['a', 'b']
-
+		
 		client.close
 	end
 end

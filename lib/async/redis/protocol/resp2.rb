@@ -1,5 +1,4 @@
 # Copyright, 2018, by Samuel G. D. Williams. <http://www.codeotaku.com>
-# Copyright, 2018, by Huba Nagy.
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,28 +18,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'protocol/redis'
+
 module Async
 	module Redis
-		module Methods
-			module Server
-				# Get info from server.
-				# @return [Hash] the server metadata.
-				def info
-					metadata = {}
-					
-					call('INFO').each_line(Protocol::CRLF) do |line|
-						key, value = line.split(':')
-						
-						if value
-							metadata[key.to_sym] = value.chomp!
-						end
-					end
-					
-					return metadata
-				end
-				
-				def flushdb!
-					call 'FLUSHDB'
+		module Protocol
+			module RESP2
+				def self.client(stream)
+					::Protocol::Redis::Connection.new(stream)
 				end
 			end
 		end
