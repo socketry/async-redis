@@ -23,56 +23,56 @@ module Async
 		module Methods
 			module Hashes
 				def hlen(key)
-	        return call('HLEN', key)
-	      end
-
-	      def hset(key, field, value)
-	        return call('HSET', key, field, value)
-	      end
-
-	      def hsetnx(key, field, value)
-	        return call('HSETNX', key, field, value)
-	      end
-
-	      def hmset(key, *attrs)
-	        return call('HMSET', key, *attrs)
-	      end
-
-	      def hget(key, field)
-	        return call('HGET', key, field)
-	      end
-
-	      def hmget(key, *fields, &blk)
-	        return call('HMGET', key, *fields, &blk)
-	      end
-
-	      def hdel(key, *fields)
-	        return call('HDEL', key, *fields)
-	      end
-
-	      def hexists(key, field)
-	        return call('HEXISTS', key, field)
-	      end
-
-	      def hincrby(key, field, increment)
-	        return call('HINCRBY', key, field, increment)
-	      end
-
-	      def hincrbyfloat(key, field, increment)
-	        return call('HINCRBYFLOAT', key, field, increment)
-	      end
-
-	      def hkeys(key)
-	        return call('HKEYS', key)
-	      end
-
-	      def hvals(key)
-	        return call('HVALS', key)
-	      end
-
-	      def hgetall(key)
-	        return call('HGETALL', key)
-	      end
+					return call('HLEN', key)
+				end
+				
+				def hset(key, field, value)
+					return call('HSET', key, field, value)
+				end
+				
+				def hsetnx(key, field, value)
+					return call('HSETNX', key, field, value)
+				end
+				
+				def hmset(key, *attrs)
+					return call('HMSET', key, *attrs)
+				end
+				
+				def hget(key, field)
+					return call('HGET', key, field)
+				end
+				
+				def hmget(key, *fields, &blk)
+					return call('HMGET', key, *fields, &blk)
+				end
+				
+				def hdel(key, *fields)
+					return call('HDEL', key, *fields)
+				end
+				
+				def hexists(key, field)
+					return call('HEXISTS', key, field)
+				end
+				
+				def hincrby(key, field, increment)
+					return call('HINCRBY', key, field, increment)
+				end
+				
+				def hincrbyfloat(key, field, increment)
+					return call('HINCRBYFLOAT', key, field, increment)
+				end
+				
+				def hkeys(key)
+					return call('HKEYS', key)
+				end
+				
+				def hvals(key)
+					return call('HVALS', key)
+				end
+				
+				def hgetall(key)
+					return call('HGETALL', key)
+				end
 			end
 		end
 	end

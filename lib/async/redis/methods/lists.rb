@@ -26,37 +26,37 @@ module Async
 				def blpop(*keys, timeout: 0)
 					return call('BLPOP', *keys, timeout)
 				end
-
+				
 				def brpop(*keys, timeout: 0)
 					return call('BRPOP', *keys, timeout)
 				end
-
+				
 				def brpoplpush(source, destination, timeout)
 					return call('BRPOPLPUSH', source, destination, timeout)
 				end
-
+				
 				def lindex(key, index)
 					return call('LINDEX', key, index)
 				end
-
+				
 				def linsert(key, position=:before, index, value)
 					if position == :before
 						offset = 'BEFORE'
 					else
 						offset = 'AFTER'
 					end
-
+					
 					return call('LINSERT', key, offset, index, value)
 				end
-
+				
 				def llen(key)
 					return call('LLEN', key)
 				end
-
+				
 				def lpop(key)
 					return call('LPOP', key)
 				end
-
+				
 				def lpush(key, value, *values)
 					case value
 					when Array
@@ -64,40 +64,40 @@ module Async
 					else
 						values = [value] + values
 					end
-
+					
 					return call('LPUSH', key, *values)
 				end
-
+				
 				def lpushx(key, value)
 					return call('LPUSHX', key, value)
 				end
-
+				
 				def lrange(key, start, stop)
 					return call('LRANGE', key, start, stop)
 				end
-
+				
 				def lrem(key, count, value)
 					return call('LREM', key, count)
 				end
-
+				
 				def lset(key, index, values)
 					return call('LSET', key, index, values)
 				end
-
+				
 				def ltrim(key, start, stop)
 					return call('LTRIM', key, start, stop)
 				end
-
+				
 				def rpop(key)
 					return call('RPOP', key)
 				end
-
+				
 				def rpoplpush(source, destination=nil)
 					destination = source if destination.nil?
-
+					
 					return call('RPOPLPUSH', source, destination)
 				end
-
+				
 				def rpush(key, value, *values)
 					case value
 					when Array
@@ -105,10 +105,10 @@ module Async
 					else
 						values = [value] + values
 					end
-
+					
 					return call('RPUSH', key, *values)
 				end
-
+				
 				def rpushx(key, value)
 					return call('RPUSHX', key, value)
 				end
