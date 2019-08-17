@@ -25,7 +25,9 @@ module Async
 	module Redis
 		module Context
 			# Send multiple commands without waiting for the response, instead of sending them one by one.
-			class Pipeline < Nested
+			class Pipeline < Generic
+				include ::Protocol::Redis::Methods
+				
 				class Sync
 					include ::Protocol::Redis::Methods
 					

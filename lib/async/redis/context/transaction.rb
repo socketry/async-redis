@@ -19,14 +19,32 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'generic'
+require_relative 'pipeline'
 
 module Async
 	module Redis
 		module Context
-			class Nested < Generic
-				include ::Protocol::Redis::Methods
+			class Transaction < Pipeline
+				def initialize(pool, *args)
+					super(pool)
+				end
+				
+				def multi
+					sync.call('MULTI')
+				end
+				
+				def watch(*keys)
+					sync.call('WATCH', *keys)
+				end
+				
+				def execute
+					sync.call('EXEC')
+				end
+				
+				def discard
+					sync.call('DISCARD')
+				end
 			end
 		end
-	end
+	end 
 end

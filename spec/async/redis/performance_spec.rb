@@ -45,18 +45,6 @@ RSpec.describe "Client Performance", timeout: nil do
 				end
 			end
 			
-			benchmark.report("async-redis (nested)") do |times|
-				key = keys.sample
-				value = times.to_s
-				
-				async_client.nested do |nested|
-					i = 0; while i < times; i += 1
-						nested.set(key, value)
-						expect(nested.get(key)).to be == value
-					end
-				end
-			end
-			
 			benchmark.report("async-redis (pipeline)") do |times|
 				key = keys.sample
 				value = times.to_s

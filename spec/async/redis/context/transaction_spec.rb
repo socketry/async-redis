@@ -1,5 +1,4 @@
 # Copyright, 2018, by Samuel G. D. Williams. <http://www.codeotaku.com>
-# Copyright, 2018, by Huba Nagy.
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,28 +18,37 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'nested'
+require 'async/redis/client'
 
-module Async
-	module Redis
-		module Context
-			class Multi < Nested
-				def initialize(pool, *args)
-					super(pool)
-					
-					@connection.write_request(['MULTI'])
-					@connection.flush
-					@connection.read_response
-				end
-				
-				def execute
-					call 'EXEC'
-				end
-				
-				def discard
-					call 'DISCARD'
-				end
+RSpec.describe Async::Redis::Context::Transaction, timeout: 5 do
+	include_context Async::RSpec::Reactor
+	
+	let(:endpoint) {Async::Redis.local_endpoint}
+	let(:client) {Async::Redis::Client.new(endpoint)}
+	
+	let (:multi_key_base) {"async-redis:test:multi"}
+	
+	it "can atomically execute commands" do
+		response = nil
+		
+		client.transaction do |context|
+			context.multi
+			
+			(0..5).each do |id|
+				response = context.sync.set "#{multi_key_base}:#{id}", "multi-test 6"
+				expect(response).to be == "QUEUED"
 			end
+			
+			response = context.execute
 		end
-	end 
+		
+		# all 5 SET + 1 EXEC commands should return OK
+		expect(response).to be == ["OK"] * 6
+		
+		(0..5).each do |id|
+			expect(client.call("GET", "#{multi_key_base}:#{id}")).to be == "multi-test 6"
+		end
+		
+		client.close
+	end
 end

@@ -19,9 +19,9 @@
 # THE SOFTWARE.
 
 require_relative 'pool'
-require_relative 'context/multi'
-require_relative 'context/subscribe'
 require_relative 'context/pipeline'
+require_relative 'context/transaction'
+require_relative 'context/subscribe'
 
 require_relative 'protocol/resp2'
 
@@ -100,8 +100,8 @@ module Async
 				end
 			end
 			
-			def nested(&block)
-				context = Context::Nested.new(@pool)
+			def transaction(&block)
+				context = Context::Transaction.new(@pool)
 				
 				return context unless block_given?
 				
