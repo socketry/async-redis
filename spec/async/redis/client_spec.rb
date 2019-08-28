@@ -81,7 +81,7 @@ RSpec.describe Async::Redis::Client, timeout: 5 do
 		
 		client.close
 	end
-
+	
 	it "retrieves large responses from redis", timeout: 30 do
 		size = 5000
 		
