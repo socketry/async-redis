@@ -123,7 +123,10 @@ module Async
 					context.close
 				end
 			end
-
+			
+			# Deprecated.
+			alias nested pipeline
+			
 			def call(*arguments)
 				@pool.acquire do |connection|
 					connection.write_request(arguments)
