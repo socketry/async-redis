@@ -19,20 +19,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'async/redis/client'
-require_relative '../database_cleanup'
+require_relative '../client_context'
 
 RSpec.describe Protocol::Redis::Methods::Lists, timeout: 5 do
-	include_context Async::RSpec::Reactor
-	include_context "database cleanup"
-
-	let(:endpoint) {Async::Redis.local_endpoint}
-	let(:client) {Async::Redis::Client.new(endpoint)}
-
-	let(:list_a) {'async-redis:test:list_a'}
-	let(:list_b) {'async-redis:test:list_b'}
+	include_context Async::Redis::Client
+	
+	let(:list_a) {root['list_a']}
+	let(:list_b) {root['list_b']}
 	let(:test_list) {(0..4).to_a}
-
+	
 	it "can do non blocking push/pop operations" do
 		expect(client.lpush list_a, test_list).to be == test_list.length
 		expect(client.rpush list_b, test_list).to be == test_list.length
@@ -44,8 +39,6 @@ RSpec.describe Protocol::Redis::Methods::Lists, timeout: 5 do
 			item_b = client.rpop list_b
 			expect(item_a).to be == item_b
 		end
-
-		client.close
 	end
 
 	it "can conditionally push and pop items from lists" do
@@ -63,8 +56,6 @@ RSpec.describe Protocol::Redis::Methods::Lists, timeout: 5 do
 
 		expect(client.lrange(list_a, 0, slice_size - 1))
 			.to match_array test_list.take(slice_size).map(&:to_s)
-
-		client.close
 	end
 
 	it "can trim lists" do

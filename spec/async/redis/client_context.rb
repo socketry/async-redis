@@ -21,11 +21,20 @@
 
 require 'async/redis'
 require 'async/redis/client'
+require 'async/redis/key'
 
-RSpec.shared_context "database cleanup", shared_context: :metadata do
-	before :example do
-		Async::Redis::Client.open do |client|
-			client.flushdb!
-		end
+RSpec.shared_context Async::Redis::Client do
+	include_context Async::RSpec::Reactor
+
+	let(:endpoint) {Async::Redis.local_endpoint}
+	let(:client) {@client = Async::Redis::Client.new(endpoint)}
+	
+	let (:root) {Async::Redis::Key["async-redis:test:transaction"]}
+	
+	before do
+		keys = client.keys("#{root}:*")
+		client.del(*keys) if keys.any?
 	end
+	
+	after {@client&.close}
 end

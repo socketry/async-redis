@@ -18,21 +18,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'async/redis/client'
-require_relative '../database_cleanup'
+require_relative '../client_context'
 
 RSpec.describe Protocol::Redis::Methods::Hashes, timeout: 5 do
-	include_context Async::RSpec::Reactor
-	include_context "database cleanup"
-
-	let(:endpoint) {Async::Redis.local_endpoint}
-	let(:client) {Async::Redis::Client.new(endpoint)}
-
+	include_context Async::Redis::Client
+	
 	let(:hash_field_one) {"beep-boop"}
 	let(:hash_field_two) {"cowboy"}
-	let(:prefix) {"async-redis:test:"}
 	let(:hash_value) { "la la land" }
-	let(:hash_key) {"async-redis:test:hash_key"}
+	let(:hash_key) {root["hash_key"]}
 	
 	it "can set a fields value" do
 		client.hset(hash_key, hash_field_one, hash_value)
@@ -41,8 +35,6 @@ RSpec.describe Protocol::Redis::Methods::Hashes, timeout: 5 do
 		expect(client.hexists hash_key, hash_field_one).to be == 1
 		expect(client.hexists hash_key, "notafield").to be == 0
 		expect(client.hlen hash_key).to be == 1
-
-		client.close()
 	end
 	
 	it "can set multiple field values" do
@@ -52,24 +44,18 @@ RSpec.describe Protocol::Redis::Methods::Hashes, timeout: 5 do
 		expect(client.hexists hash_key, hash_field_one).to be == 1
 		expect(client.hexists hash_key, hash_field_two).to be == 1
 		expect(client.hlen hash_key).to be == 2
-		
-		client.close()
 	end
 	
 	it "can get keys" do
 		client.hset(hash_key, hash_field_one, hash_value)
 		
 		expect(client.hkeys hash_key).to eq([hash_field_one])
-
-		client.close()
 	end
 	
 	it "can get values" do
 		client.hset(hash_key, hash_field_one, hash_value)
 		
 		expect(client.hvals hash_key).to eq([hash_value])
-
-		client.close()
 	end
 	
 	it "can delete fields" do
@@ -78,7 +64,5 @@ RSpec.describe Protocol::Redis::Methods::Hashes, timeout: 5 do
 		expect(client.hdel hash_key, hash_field_one).to be == 1
 		expect(client.hget hash_key, hash_field_one).to be_nil
 		expect(client.hlen hash_key).to be == 0
-
-		client.close()
 	end
 end

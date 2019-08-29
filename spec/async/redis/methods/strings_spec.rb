@@ -19,18 +19,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'async/redis/client'
-require_relative '../database_cleanup'
+require_relative '../client_context'
 
 RSpec.describe Protocol::Redis::Methods::Strings, timeout: 5 do
-	include_context Async::RSpec::Reactor
-	include_context "database cleanup"
-
-	let(:endpoint) {Async::Redis.local_endpoint}
-	let(:client) {Async::Redis::Client.new(endpoint)}
+	include_context Async::Redis::Client
 	
-	let(:string_key) {"async-redis:test:string"}
-	let(:other_string_key) {"async-redis:test:other_string"}
+	let(:string_key) {root["my_string"]}
+	let(:other_string_key) {root["other_string"]}
 	let(:test_string) {"beep-boop"}
 	let(:other_string) {"doot"}
 
@@ -47,8 +42,6 @@ RSpec.describe Protocol::Redis::Methods::Strings, timeout: 5 do
 
 		expect(client.getset(string_key, test_string)).to be == "beep-beep-boop"
 		expect(client.get(string_key)).to be == test_string
-
-		client.close
 	end
 
 	it "can conditionally set values based on whether they exist or not" do
@@ -69,8 +62,6 @@ RSpec.describe Protocol::Redis::Methods::Strings, timeout: 5 do
 		# only set if it exists, which it does
 		expect(client.set other_string_key, other_string, condition: :xx).to be == "OK"
 		expect(client.get other_string_key).to be == other_string
-
-		client.close
 	end
 
 	let(:seconds) {3}
@@ -89,8 +80,6 @@ RSpec.describe Protocol::Redis::Methods::Strings, timeout: 5 do
 		expect{
 			client.set string_key, test_string, seconds: seconds, milliseconds: milliseconds
 		}.to raise_error(Async::Redis::ServerError)
-
-		client.close
 	end
 
 	let(:integer_key) {"async-redis:test:integer"}
@@ -105,8 +94,6 @@ RSpec.describe Protocol::Redis::Methods::Strings, timeout: 5 do
 
 		expect(client.incrby(integer_key, 5)).to be == test_integer + 5
 		expect(client.decrby(integer_key, 5)).to be == test_integer
-
-		client.close
 	end
 
 	let(:float_key) {"async-redis:test:float"}
@@ -116,30 +103,28 @@ RSpec.describe Protocol::Redis::Methods::Strings, timeout: 5 do
 		expect(client.set(float_key, test_float)).to be == "OK"
 		
 		expect(client.incrbyfloat(float_key, 1.1)).to be == "555.5"
-
-		client.close
 	end
 
 	let(:test_pairs) do
 		{
-			:'async-redis:test:key_a' => "a",
-			:'async-redis:test:key_b' => "b",
-			:'async-redis:test:key_c' => "c"
+			root['key_a'] => "a",
+			root['key_b'] => "b",
+			root['key_c'] => "c"
 		}
 	end
 
 	let(:overlapping_pairs) do
 		{
-			:'async-redis:test:key_a' => "x",
-			:'async-redis:test:key_d' => "y",
-			:'async-redis:test:key_e' => "z",
+			root['key_a'] => "x",
+			root['key_d'] => "y",
+			root['key_e'] => "z",
 		}
 	end
 
 	let(:disjoint_pairs) do
 		{
-			:'async-redis:test:key_d' => "d",
-			:'async-redis:test:key_e' => "e",
+			root['key_d'] => "d",
+			root['key_e'] => "e",
 		}
 	end
 
@@ -152,7 +137,5 @@ RSpec.describe Protocol::Redis::Methods::Strings, timeout: 5 do
 
 		expect(client.msetnx(disjoint_pairs)).to be == 1
 		expect(client.mget(*disjoint_pairs.keys)).to be == disjoint_pairs.values
-
-		client.close
 	end
 end

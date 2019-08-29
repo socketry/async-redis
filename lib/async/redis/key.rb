@@ -1,5 +1,4 @@
 # Copyright, 2018, by Samuel G. D. Williams. <http://www.codeotaku.com>
-# Copyright, 2018, by Huba Nagy.
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,33 +18,40 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'pipeline'
-
 module Async
 	module Redis
-		module Context
-			class Transaction < Pipeline
-				def initialize(pool, *args)
-					super(pool)
-				end
-				
-				def multi
-					call('MULTI')
-				end
-				
-				def watch(*keys)
-					sync.call('WATCH', *keys)
-				end
-				
-				# Execute all queued commands, provided that no watched keys have been modified. It's important to note that even when a command fails, all the other commands in the queue are processed – Redis will not stop the processing of commands.
-				def execute
-					sync.call('EXEC')
-				end
-				
-				def discard
-					sync.call('DISCARD')
-				end
+		class Key
+			def self.[] path
+				self.new(path)
+			end
+			
+			include Comparable
+			
+			def initialize(path)
+				@path = path
+			end
+			
+			def size
+				@path.bytesize
+			end
+			
+			attr :path
+			
+			def to_s
+				@path
+			end
+			
+			def to_str
+				@path
+			end
+			
+			def [] key
+				self.class.new("#{@path}:#{key}")
+			end
+			
+			def <=> other
+				@path <=> other.to_str
 			end
 		end
-	end 
+	end
 end

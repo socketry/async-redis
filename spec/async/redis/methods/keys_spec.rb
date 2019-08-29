@@ -19,30 +19,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'async/redis/client'
-require_relative '../database_cleanup'
+require_relative '../client_context'
 
 RSpec.describe Protocol::Redis::Methods::Keys, timeout: 5 do
-	include_context Async::RSpec::Reactor
-	include_context "database cleanup"
-
-	let(:endpoint) {Async::Redis.local_endpoint}
-	let(:client) {Async::Redis::Client.new(endpoint)}
-
+	include_context Async::Redis::Client
+	
 	let(:test_string) {"beep-boop"}
-	let(:prefix) {"async-redis:test:"}
-	let(:string_key) {"async-redis:test:string_key"}
+	let(:string_key) {root["string_key"]}
 	
 	it "can delete keys" do
 		client.set(string_key, test_string)
 		
 		expect(client.del string_key).to be == 1
 		expect(client.get string_key).to be_nil
-
-		client.close()
 	end
 
-	let(:other_key) {"other_key"}
+	let(:other_key) {root["other_key"]}
 
 	it "can rename keys" do
 		client.set(string_key, test_string)
@@ -54,8 +46,6 @@ RSpec.describe Protocol::Redis::Methods::Keys, timeout: 5 do
 		client.set(string_key, test_string)
 
 		expect(client.renamenx string_key, other_key).to be == 0
-
-		client.close
 	end
 
 	let(:whole_day) {24 * 60 * 60}
@@ -74,8 +64,6 @@ RSpec.describe Protocol::Redis::Methods::Keys, timeout: 5 do
 
 		client.expire string_key, one_hour
 		expect(client.ttl string_key).to be_within(10).of(one_hour)
-
-		client.close
 	end
 
 	it "can serialize and restore values" do
@@ -84,22 +72,5 @@ RSpec.describe Protocol::Redis::Methods::Keys, timeout: 5 do
 
 		expect(client.restore other_key, serialized).to be == "OK"
 		expect(client.get other_key).to be == test_string
-
-		client.close
-	end
-
-	let(:test_data) do
-		keys = %w[a b c d e]
-		pairs = Hash.new
-		keys.each do |k|
-			pairs['async-redis:test:' + k] = k
-		end
-		pairs
-	end
-
-	it "can pick a random key" do
-		client.mset test_data
-		expect(test_data.keys).to include(client.randomkey)
-		client.close
 	end
 end
