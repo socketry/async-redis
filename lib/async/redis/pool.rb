@@ -112,8 +112,8 @@ module Async
 			end
 			
 			def available_resource
-				if @resources.any?
-					return @resources.pop
+				while resource = @resources.pop
+					return resource if resource.connected?
 				end
 				
 				if !@limit or @active < @limit

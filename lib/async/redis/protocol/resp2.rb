@@ -24,8 +24,14 @@ module Async
 	module Redis
 		module Protocol
 			module RESP2
+				class Connection < ::Protocol::Redis::Connection
+					def connected?
+						@stream.connected?
+					end
+				end
+				
 				def self.client(stream)
-					::Protocol::Redis::Connection.new(stream)
+					Connection.new(stream)
 				end
 			end
 		end
