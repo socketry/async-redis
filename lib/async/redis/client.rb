@@ -18,7 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'pool'
 require_relative 'context/pipeline'
 require_relative 'context/transaction'
 require_relative 'context/subscribe'
@@ -27,6 +26,7 @@ require_relative 'protocol/resp2'
 
 require 'async/io'
 require 'async/io/stream'
+require 'async/pool/controller'
 
 require 'protocol/redis/methods'
 
@@ -139,8 +139,8 @@ module Async
 			
 			protected
 			
-			def connect(connection_limit: nil)
-				Pool.new(connection_limit) do
+			def connect(**options)
+				Async::Pool::Controller.wrap(**options) do
 					peer = @endpoint.connect
 					
 					peer.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)

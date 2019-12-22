@@ -25,8 +25,16 @@ module Async
 		module Protocol
 			module RESP2
 				class Connection < ::Protocol::Redis::Connection
-					def connected?
+					def concurrency
+						1
+					end
+					
+					def viable?
 						@stream.connected?
+					end
+					
+					def reusable?
+						!@stream.closed?
 					end
 				end
 				

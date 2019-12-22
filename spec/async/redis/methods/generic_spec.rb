@@ -21,7 +21,7 @@
 
 require_relative '../client_context'
 
-RSpec.describe Protocol::Redis::Methods::Keys, timeout: 5 do
+RSpec.describe Protocol::Redis::Methods::Generic, timeout: 5 do
 	include_context Async::Redis::Client
 	
 	let(:test_string) {"beep-boop"}
