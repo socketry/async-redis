@@ -21,6 +21,7 @@
 require_relative 'context/pipeline'
 require_relative 'context/transaction'
 require_relative 'context/subscribe'
+require_relative 'context/psubscribe'
 
 require_relative 'protocol/resp2'
 
@@ -88,6 +89,18 @@ module Async
 				end
 			end
 			
+      def psubscribe(*channels)
+				context = Context::Psubscribe.new(@pool, channels)
+
+				return context unless block_given?
+
+				begin
+					yield context
+				ensure
+					context.close
+				end
+			end
+
 			def multi(&block)
 				context = Context::Multi.new(@pool)
 				
