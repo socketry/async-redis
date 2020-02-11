@@ -50,19 +50,19 @@ RSpec.describe Protocol::Redis::Methods::Strings, timeout: 5 do
 		expect(client.set(string_key, test_string)).to be == "OK"
 
 		# only set if it doesn't exist, which it does already
-		expect(client.setnx(string_key, other_string)).to be_nil
+		expect(client.setnx(string_key, other_string)).to be false
 		expect(client.get(string_key)).to be == test_string
 
 		# only set if it exists, which it doesn't yet
-		expect(client.set other_string_key, other_string, condition: :xx).to be_nil
+		expect(client.set other_string_key, other_string, update: true).to be_nil
 		expect(client.get other_string_key).to be_nil
 
 		# only set if it doesn't exist, which it doesn't
-		expect(client.setnx(other_string_key, test_string)).to be == "OK"
+		expect(client.setnx(other_string_key, test_string)).to be true
 		expect(client.get(other_string_key)).to be == test_string
 
 		# only set if it exists, which it does
-		expect(client.set other_string_key, other_string, condition: :xx).to be == "OK"
+		expect(client.set other_string_key, other_string, update: true).to be == "OK"
 		expect(client.get other_string_key).to be == other_string
 	end
 
