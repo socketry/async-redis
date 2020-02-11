@@ -25,7 +25,7 @@ module Async
 	module Redis
 		module Context
 			class Generic
-				def initialize(pool, *args)
+				def initialize(pool, *arguments)
 					@pool = pool
 					@connection = pool.acquire
 				end
@@ -37,8 +37,8 @@ module Async
 					end
 				end
 				
-				def write_request(command, *args)
-					@connection.write_request([command, *args])
+				def write_request(command, *arguments)
+					@connection.write_request([command, *arguments])
 				end
 				
 				def read_response
@@ -47,8 +47,8 @@ module Async
 					return @connection.read_response
 				end
 				
-				def call(command, *args)
-					write_request(command, *args)
+				def call(command, *arguments)
+					write_request(command, *arguments)
 					
 					return read_response
 				end

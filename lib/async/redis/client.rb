@@ -54,8 +54,8 @@ module Async
 			
 			# @return [client] if no block provided.
 			# @yield [client, task] yield the client in an async task.
-			def self.open(*args, &block)
-				client = self.new(*args)
+			def self.open(*arguments, &block)
+				client = self.new(*arguments)
 				
 				return client unless block_given?
 				

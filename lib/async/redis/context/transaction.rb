@@ -25,7 +25,7 @@ module Async
 	module Redis
 		module Context
 			class Transaction < Pipeline
-				def initialize(pool, *args)
+				def initialize(pool, *arguments)
 					super(pool)
 				end
 				

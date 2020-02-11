@@ -36,8 +36,8 @@ module Async
 					end
 					
 					# This method just accumulates the commands and their params.
-					def call(command, *args)
-						@pipeline.call(command, *args)
+					def call(command, *arguments)
+						@pipeline.call(command, *arguments)
 						
 						@pipeline.flush(1)
 						
@@ -72,8 +72,8 @@ module Async
 				end
 				
 				# This method just accumulates the commands and their params.
-				def call(command, *args)
-					write_request(command, *args)
+				def call(command, *arguments)
+					write_request(command, *arguments)
 					
 					return nil
 				end
