@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Copyright, 2019, by Pierre Montelle.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
