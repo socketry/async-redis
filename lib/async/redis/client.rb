@@ -90,18 +90,6 @@ module Async
 				end
 			end
 			
-			def multi(&block)
-				context = Context::Multi.new(@pool)
-				
-				return context unless block_given?
-				
-				begin
-					yield context
-				ensure
-					context.close
-				end
-			end
-			
 			def transaction(&block)
 				context = Context::Transaction.new(@pool)
 				
@@ -113,6 +101,7 @@ module Async
 					context.close
 				end
 			end
+			alias multi transaction
 
 			def pipeline(&block)
 				context = Context::Pipeline.new(@pool)
