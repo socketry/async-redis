@@ -2,8 +2,7 @@
 
 An asynchronous client for Redis including TLS. Support for streaming requests and responses. Built on top of [async] and [async-io].
 
-[![Build Status](https://secure.travis-ci.org/socketry/async-redis.svg)](https://travis-ci.org/socketry/async-redis)
-[![Code Climate](https://codeclimate.com/github/socketry/async-redis.svg)](https://codeclimate.com/github/socketry/async-redis)
+[![Actions Status](https://github.com/socketry/async-redis/workflows/Development/badge.svg)](https://github.com/socketry/async-redis/actions?workflow=Development)
 [![Coverage Status](https://coveralls.io/repos/socketry/async-redis/badge.svg)](https://coveralls.io/r/socketry/async-redis)
 
 [async]: https://github.com/socketry/async

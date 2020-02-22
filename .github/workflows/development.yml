@@ -1,0 +1,34 @@
+name: Development
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os:
+          - ubuntu
+          - macos
+        
+        ruby:
+          - 2.4
+          - 2.5
+          - 2.6
+          - 2.7
+        
+        include:
+          - os: 'ubuntu'
+            ruby: '2.6'
+            env: COVERAGE=PartialSummary,Coveralls
+    
+    runs-on: ${{matrix.os}}-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{matrix.ruby}}
+    - name: Install dependencies
+      run: bundle install
+    - name: Run tests
+      run: ${{matrix.env}} bundle exec rspec
