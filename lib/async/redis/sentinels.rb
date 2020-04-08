@@ -41,7 +41,13 @@ module Async
 			def resolve_master
 				@sentinel_endpoints.each do |sentinel_endpoint|
 					client = Client.new(sentinel_endpoint)
-					address = client.call('sentinel', 'get-master-addr-by-name', @master_name)
+
+					begin
+						address = client.call('sentinel', 'get-master-addr-by-name', @master_name)
+					rescue Errno::ECONNREFUSED
+						next
+					end
+
 					return Async::IO::Endpoint.tcp(address[0], address[1]) if address
 				end
 
@@ -51,7 +57,12 @@ module Async
 			def resolve_slave
 				@sentinel_endpoints.each do |sentinel_endpoint|
 					client = Client.new(sentinel_endpoint)
-					reply = client.call('sentinel', 'slaves', @master_name)
+
+					begin
+						reply = client.call('sentinel', 'slaves', @master_name)
+					rescue Errno::ECONNREFUSED
+						next
+					end
 
 					if slave = select_slave(reply)
 						return Async::IO::Endpoint.tcp(slave['ip'], slave['port'])
