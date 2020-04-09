@@ -64,24 +64,27 @@ module Async
 						next
 					end
 
-					if slave = select_slave(reply)
-						return Async::IO::Endpoint.tcp(slave['ip'], slave['port'])
-					end
+					slaves = available_slaves(reply)
+					next if slaves.empty?
+
+					slave = select_slave(slaves)
+					return Async::IO::Endpoint.tcp(slave['ip'], slave['port'])
 				end
 
 				nil
 			end
 
-			def select_slave(slaves_cmd_reply)
-				return nil unless slaves_cmd_reply
-
+			def available_slaves(slaves_cmd_reply)
 				# The reply is an array with the format: [field1, value1, field2,
 				# value2, etc.].
 				# When a slave is marked as down by the sentinel, the "flags" field
 				# (comma-separated array) contains the "s_down" value.
 				slaves_cmd_reply.map { |s| s.each_slice(2).to_h }
-						.reject { |s| s.fetch('flags').split(',').include?('s_down') }
-						.sample
+						            .reject { |s| s.fetch('flags').split(',').include?('s_down') }
+			end
+
+			def select_slave(available_slaves)
+				available_slaves.sample
 			end
 		end
 	end
