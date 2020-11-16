@@ -35,6 +35,13 @@ module Async
 					subscribe(channels)
 				end
 				
+				def close
+					# There is no way to reset subscription state. On Redis v6+ you can use RESET, but this is not supported in <= v6.
+					@connection&.close
+					
+					super
+				end
+				
 				def listen
 					return @connection.read_response
 				end
@@ -67,7 +74,7 @@ module Async
 						return response
 					else
 						@channels.subtract(channels)
-						return call 'UNSUBSCRIBE', *channels
+						return call('UNSUBSCRIBE', *channels)
 					end
 				end
 			end

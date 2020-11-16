@@ -55,6 +55,10 @@ RSpec.describe Async::Redis::Context::Subscribe, timeout: 5 do
 		publisher.wait
 		listener.wait
 		
+		# At this point, we should check if the client is still working. i.e. we don't leak the state of the subscriptions:
+		
+		expect(client.info).to be_kind_of(Hash)
+		
 		client.close
 	end
 end
