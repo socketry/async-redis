@@ -101,13 +101,14 @@ module Async
 					context.close
 				end
 			end
+			
 			alias multi transaction
-
+			
 			def pipeline(&block)
 				context = Context::Pipeline.new(@pool)
-
+				
 				return context unless block_given?
-
+				
 				begin
 					yield context
 				ensure
