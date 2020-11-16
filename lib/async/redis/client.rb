@@ -37,8 +37,8 @@ module Async
 		# Legacy.
 		ServerError = ::Protocol::Redis::ServerError
 		
-		def self.local_endpoint
-			Async::IO::Endpoint.tcp('localhost', 6379)
+		def self.local_endpoint(port: 6379)
+			Async::IO::Endpoint.tcp('localhost', port)
 		end
 		
 		class Client
