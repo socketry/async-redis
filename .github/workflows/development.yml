@@ -4,6 +4,9 @@ on: [push, pull_request]
 
 jobs:
   test:
+    runs-on: ${{matrix.os}}-latest
+    continue-on-error: ${{matrix.experimental}}
+    
     strategy:
       matrix:
         os:
@@ -11,26 +14,34 @@ jobs:
           - macos
         
         ruby:
-          - 2.4
           - 2.5
           - 2.6
           - 2.7
         
+        experimental: [false]
+        env: [""]
+        
         include:
-          - os: 'ubuntu'
-            ruby: '2.6'
-            env: COVERAGE=PartialSummary,Coveralls
-    
-    runs-on: ${{matrix.os}}-latest
+          - os: ubuntu
+            ruby: truffleruby
+            experimental: true
+          - os: ubuntu
+            ruby: jruby
+            experimental: true
+          - os: ubuntu
+            ruby: head
+            experimental: true
     
     steps:
-    - uses: actions/checkout@v1
-    - uses: ruby/setup-ruby@v1
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@master
       with:
         ruby-version: ${{matrix.ruby}}
-    - name: Install dependencies
-      run: bundle install
+        bundler-cache: true
+
     - name: Setup redis
       uses: shogo82148/actions-setup-redis@v1
+
     - name: Run tests
+      timeout-minutes: 5
       run: ${{matrix.env}} bundle exec rspec
