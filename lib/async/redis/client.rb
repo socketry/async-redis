@@ -74,10 +74,6 @@ module Async
 				@pool.close
 			end
 			
-			def publish(channel, message)
-				call('PUBLISH', channel, message)
-			end
-			
 			def subscribe(*channels)
 				context = Context::Subscribe.new(@pool, channels)
 				
