@@ -61,4 +61,18 @@ RSpec.describe Async::Redis::Context::Subscribe, timeout: 5 do
 		
 		client.close
 	end
+	
+	it "can add subscriptions" do
+		subscription = client.subscribe('news.breaking')
+		
+		listener = reactor.async do
+			type, name, message = subscription.listen
+			expect(message).to be == 'Sunny'
+		end
+		
+		subscription.subscribe(['news.weather'])
+		client.publish('news.weather', 'Sunny')
+		
+		listener.wait
+	end
 end

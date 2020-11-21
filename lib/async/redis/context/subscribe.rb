@@ -27,10 +27,10 @@ module Async
 	module Redis
 		module Context
 			class Subscribe < Generic
+				MESSAGE = 'message'
+				
 				def initialize(pool, channels)
 					super(pool)
-					
-					@channels = channels
 					
 					subscribe(channels)
 				end
@@ -43,39 +43,19 @@ module Async
 				end
 				
 				def listen
-					return @connection.read_response
+					while response = @connection.read_response
+						return response if response.first == MESSAGE
+					end
 				end
-				
-				private
 				
 				def subscribe(channels)
 					@connection.write_request ['SUBSCRIBE', *channels]
 					@connection.flush
-					
-					response = nil
-					
-					channels.length.times do |i|
-						response = @connection.read_response
-					end
-					
-					return response
 				end
 				
-				def unsubscribe(*channels)
-					if channels.empty? # unsubscribe from everything if no specific channels are given
-						@connection.write_request ['UNSUBSCRIBE']
-						
-						response = nil
-						
-						@channels.length.times do |i|
-							response = @connection.read_response
-						end
-						
-						return response
-					else
-						@channels.subtract(channels)
-						return call('UNSUBSCRIBE', *channels)
-					end
+				def unsubscribe(channels)
+					@connection.write_request ['UNSUBSCRIBE', *channels]
+					@connection.flush
 				end
 			end
 		end
