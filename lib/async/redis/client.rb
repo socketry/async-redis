@@ -131,7 +131,8 @@ module Async
 				Async::Pool::Controller.wrap(**options) do
 					peer = @endpoint.connect
 					
-					peer.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
+					# We will manage flushing ourselves:
+					peer.sync = true
 					
 					stream = IO::Stream.new(peer)
 					
