@@ -27,6 +27,37 @@ ensure
 end
 ```
 
+### Connecting to Redis SSL Endpoint
+
+This example demonstrates parsing an environment variable with a `redis://` or SSL `rediss://` scheme, and demonstrates how you can specify SSL parameters on the SSLContext object.
+
+``` ruby
+require 'async/redis'
+
+def make_redis_endpoint(uri)
+	tcp_endpoint = Async::IO::Endpoint.tcp(uri.hostname, uri.port)
+	case uri.scheme
+	when 'redis'
+		tcp_endpoint
+	when 'rediss'
+		ssl_context = OpenSSL::SSL::SSLContext.new
+		ssl_context.set_params(
+			ca_file: "/path/to/ca.crt",
+			cert: OpenSSL::X509::Certificate.new(File.read("client.crt")),
+			key: OpenSSL::PKey::RSA.new(File.read("client.key")),
+		)
+		Async::IO::SSLEndpoint.new(tcp_endpoint, ssl_context: ssl_context)
+	else
+		raise ArgumentError
+	end
+end
+
+endpoint = make_redis_endpoint(URI(ENV['REDIS_URL']))
+client = Async::Redis::Client.new(endpoint)
+
+# ...
+```
+
 ### Variables
 
 ``` ruby
