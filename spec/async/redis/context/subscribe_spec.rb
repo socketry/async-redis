@@ -33,19 +33,19 @@ RSpec.describe Async::Redis::Context::Subscribe, timeout: 5 do
 		
 		publisher = reactor.async do
 			condition.wait
-			Async.logger.debug("Publishing message...")
+			Console.logger.debug("Publishing message...")
 			client.publish 'news.breaking', 'AAA'
 		end
 		
 		listener = reactor.async do
-			Async.logger.debug("Subscribing...")
+			Console.logger.debug("Subscribing...")
 			client.subscribe 'news.breaking', 'news.weather', 'news.sport' do |context|
-				Async.logger.debug("Waiting for message...")
+				Console.logger.debug("Waiting for message...")
 				condition.signal
 				
 				type, name, message = context.listen
 				
-				Async.logger.debug("Got: #{type} #{name} #{message}")
+				Console.logger.debug("Got: #{type} #{name} #{message}")
 				expect(type).to be == 'message'
 				expect(name).to be == 'news.breaking'
 				expect(message).to be == 'AAA'
