@@ -97,7 +97,7 @@ module Async
 				
 				def close
 					flush
-					
+			  ensure
 					super
 				end
 			end
