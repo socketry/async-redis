@@ -7,6 +7,6 @@ gemspec
 # gem "protocol-redis", path: "../protocol-redis"
 
 group :maintenance, optional: true do
-	gem "bake-bundler"
+	gem "bake-gem"
 	gem "bake-modernize"
 end
