@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 require_relative "lib/async/redis/version"
 
@@ -6,14 +7,14 @@ Gem::Specification.new do |spec|
 	spec.version = Async::Redis::VERSION
 	
 	spec.summary = "A Redis client library."
-	spec.authors = ["Samuel Williams", "Huba Nagy"]
+	spec.authors = ["Samuel Williams", "Huba Nagy", "David Ortiz", "Gleb Sinyavskiy", "Troex Nevelin", "Jeremy Jung", "Mika Hel", "Mikael Henriksson", "Olle Jonsson", "Salim Semaoune", "Tim Willard", "k1tsu", "machty"]
 	spec.license = "MIT"
 	
 	spec.homepage = "https://github.com/socketry/async-redis"
 	
 	spec.files = Dir.glob('{lib}/**/*', File::FNM_DOTMATCH, base: __dir__)
 	
-	spec.add_dependency "async", ">= 1.8", "< 3.0"
+	spec.add_dependency "async", [">= 1.8", "< 3.0"]
 	spec.add_dependency "async-io", "~> 1.10"
 	spec.add_dependency "async-pool", "~> 0.2"
 	spec.add_dependency "protocol-redis", "~> 0.6.0"
