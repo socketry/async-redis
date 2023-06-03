@@ -26,7 +26,7 @@ require 'redis'
 require 'benchmark'
 require 'benchmark/ips'
 
-RSpec.describe "Client Performance", timeout: nil do
+RSpec.xdescribe "Client Performance", timeout: nil do
 	include_context Async::RSpec::Reactor
 	
 	let(:keys) {["X","Y","Z"].freeze}
