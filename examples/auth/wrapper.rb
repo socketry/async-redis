@@ -1,3 +1,9 @@
+# frozen_string_literal: true
+
+# Released under the MIT License.
+# Copyright, 2021, by Troex Nevelin.
+# Copyright, 2023, by Samuel Williams.
+
 require_relative '../../lib/async/redis'
 
 # Friendly client wrapper that supports SSL, AUTH and db SELECT
