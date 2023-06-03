@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# Released under the MIT License.
+# Copyright, 2020, by David Ortiz.
+# Copyright, 2023, by Samuel Williams.
+
 module Async
 	module Redis
 		class SentinelsClient < Client
