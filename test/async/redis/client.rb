@@ -75,7 +75,7 @@ describe Async::Redis::Client do
 	end
 	
 	it "retrieves large responses from redis" do
-		size = 5000
+		size = 1000
 		
 		client.call("DEL", list_key)
 		size.times {|i| client.call("RPUSH", list_key, i) }

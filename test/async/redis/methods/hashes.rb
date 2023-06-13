@@ -17,19 +17,19 @@ describe Protocol::Redis::Methods::Hashes do
 	it "can set a fields value" do
 		client.hset(hash_key, hash_field_one, hash_value)
 		
-		expect(client.hget hash_key, hash_field_one).to be == hash_value
-		expect(client.hexists hash_key, hash_field_one).to be == 1
-		expect(client.hexists hash_key, "notafield").to be == 0
-		expect(client.hlen hash_key).to be == 1
+		expect(client.hget(hash_key, hash_field_one)).to be == hash_value
+		expect(client.hexists(hash_key, hash_field_one)).to be == true
+		expect(client.hexists(hash_key, "notafield")).to be == false
+		expect(client.hlen(hash_key)).to be == 1
 	end
 	
 	it "can set multiple field values" do
 		client.hmset(hash_key, hash_field_two, hash_value, hash_field_one, hash_value)
 		
-		expect(client.hmget hash_key, hash_field_one, hash_field_two).to be == [hash_value, hash_value]
-		expect(client.hexists hash_key, hash_field_one).to be == 1
-		expect(client.hexists hash_key, hash_field_two).to be == 1
-		expect(client.hlen hash_key).to be == 2
+		expect(client.hmget(hash_key, hash_field_one, hash_field_two)).to be == [hash_value, hash_value]
+		expect(client.hexists(hash_key, hash_field_one)).to be == true
+		expect(client.hexists(hash_key, hash_field_two)).to be == true
+		expect(client.hlen(hash_key)).to be == 2
 	end
 	
 	it "can get keys" do
