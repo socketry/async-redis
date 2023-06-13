@@ -7,8 +7,8 @@
 
 require 'async/clock'
 require 'async/redis/client'
-
 require 'sus/fixtures/async'
+require 'securerandom'
 
 describe Async::Redis::Client do
 	include Sus::Fixtures::Async::ReactorContext
@@ -27,7 +27,7 @@ describe Async::Redis::Client do
 		client.close
 	end
 	
-	let(:string_key) {"async-redis:test:string"}
+	let(:string_key) {"async-redis:test:#{SecureRandom.uuid}:string"}
 	let(:test_string) {"beep-boop"}
 	
 	it "can set simple string and retrieve it" do
@@ -39,7 +39,7 @@ describe Async::Redis::Client do
 		client.close
 	end
 	
-	let(:list_key) {"async-redis:test:list"}
+	let(:list_key) {"async-redis:test::#{SecureRandom.uuid}:list"}
 	
 	it "can add items to list and retrieve them" do
 		client.call("LTRIM", list_key, 0, 0)

@@ -5,6 +5,7 @@
 
 require 'async/redis/client'
 require 'sus/fixtures/async'
+require 'securerandom'
 
 describe Async::Redis::Context::Subscribe do
 	include Sus::Fixtures::Async::ReactorContext
@@ -12,18 +13,24 @@ describe Async::Redis::Context::Subscribe do
 	let(:endpoint) {Async::Redis.local_endpoint}
 	let(:client) {Async::Redis::Client.new(endpoint)}
 	
+	let(:channel_root) {"async-redis:test:#{SecureRandom.uuid}"}
+	let(:news_channel) {"#{channel_root}:news"}
+	let(:weather_channel) {"#{channel_root}:weather"}
+	let(:sport_channel) {"#{channel_root}:sport"}
+	let(:channels) {[news_channel, weather_channel, sport_channel]}
+	
 	it "should subscribe to channels and report incoming messages" do
 		condition = Async::Condition.new
 		
 		publisher = reactor.async do
 			condition.wait
 			Console.logger.debug("Publishing message...")
-			client.publish 'news.breaking', 'AAA'
+			client.publish(news_channel, 'AAA')
 		end
 		
 		listener = reactor.async do
 			Console.logger.debug("Subscribing...")
-			client.subscribe 'news.breaking', 'news.weather', 'news.sport' do |context|
+			client.subscribe(*channels) do |context|
 				Console.logger.debug("Waiting for message...")
 				condition.signal
 				
@@ -31,7 +38,7 @@ describe Async::Redis::Context::Subscribe do
 				
 				Console.logger.debug("Got: #{type} #{name} #{message}")
 				expect(type).to be == 'message'
-				expect(name).to be == 'news.breaking'
+				expect(name).to be == news_channel
 				expect(message).to be == 'AAA'
 			end
 		end
@@ -47,15 +54,15 @@ describe Async::Redis::Context::Subscribe do
 	end
 	
 	it "can add subscriptions" do
-		subscription = client.subscribe('news.breaking')
+		subscription = client.subscribe(news_channel)
 		
 		listener = reactor.async do
 			type, name, message = subscription.listen
 			expect(message).to be == 'Sunny'
 		end
 		
-		subscription.subscribe(['news.weather'])
-		client.publish('news.weather', 'Sunny')
+		subscription.subscribe([weather_channel])
+		client.publish(weather_channel, 'Sunny')
 		
 		listener.wait
 	ensure
