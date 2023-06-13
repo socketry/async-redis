@@ -23,6 +23,7 @@ group :test do
 	gem "hiredis"
 	
 	gem "covered"
+	
 	gem "sus"
 	gem "sus-fixtures-async"
 end
