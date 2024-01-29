@@ -44,7 +44,7 @@ module Async
 
 			def resolve_master
 				@sentinel_endpoints.each do |sentinel_endpoint|
-					client = Client.new(sentinel_endpoint)
+					client = Client.new(sentinel_endpoint, protocol: @protocol)
 
 					begin
 						address = client.call('sentinel', 'get-master-addr-by-name', @master_name)
@@ -60,7 +60,7 @@ module Async
 
 			def resolve_slave
 				@sentinel_endpoints.each do |sentinel_endpoint|
-					client = Client.new(sentinel_endpoint)
+					client = Client.new(sentinel_endpoint, protocol: @protocol)
 
 					begin
 						reply = client.call('sentinel', 'slaves', @master_name)
