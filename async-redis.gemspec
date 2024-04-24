@@ -15,10 +15,17 @@ Gem::Specification.new do |spec|
 	
 	spec.homepage = "https://github.com/socketry/async-redis"
 	
+	spec.metadata = {
+		"source_code_uri" => "https://github.com/socketry/async-redis.git",
+	}
+	
 	spec.files = Dir.glob(['{lib}/**/*', '*.md'], File::FNM_DOTMATCH, base: __dir__)
 	
+	spec.required_ruby_version = ">= 3.1"
+	
 	spec.add_dependency "async", [">= 1.8", "< 3.0"]
-	spec.add_dependency "async-io", "~> 1.10"
 	spec.add_dependency "async-pool", "~> 0.2"
+	spec.add_dependency "io-endpoint", "~> 0.10"
+	spec.add_dependency "io-stream", "~> 0.4"
 	spec.add_dependency "protocol-redis", "~> 0.8.0"
 end

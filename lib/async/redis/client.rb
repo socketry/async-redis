@@ -10,14 +10,13 @@
 require_relative 'context/pipeline'
 require_relative 'context/transaction'
 require_relative 'context/subscribe'
-
 require_relative 'protocol/resp2'
 
-require 'async/io'
-require 'async/io/stream'
+require 'io/endpoint/host_endpoint'
 require 'async/pool/controller'
-
 require 'protocol/redis/methods'
+
+require 'io/stream'
 
 module Async
 	module Redis
@@ -25,7 +24,7 @@ module Async
 		ServerError = ::Protocol::Redis::ServerError
 		
 		def self.local_endpoint(port: 6379)
-			Async::IO::Endpoint.tcp('localhost', port)
+			::IO::Endpoint.tcp('localhost', port)
 		end
 		
 		class Client
@@ -121,7 +120,7 @@ module Async
 					# We will manage flushing ourselves:
 					peer.sync = true
 					
-					stream = IO::Stream.new(peer)
+					stream = ::IO::Stream(peer)
 					
 					@protocol.client(stream)
 				end

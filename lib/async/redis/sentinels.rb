@@ -4,13 +4,15 @@
 # Copyright, 2020, by David Ortiz.
 # Copyright, 2023, by Samuel Williams.
 
+require 'io/stream'
+
 module Async
 	module Redis
 		class SentinelsClient < Client
 			def initialize(master_name, sentinels, role = :master, protocol = Protocol::RESP2, **options)
 				@master_name = master_name
 				@sentinel_endpoints = sentinels.map do |sentinel|
-					Async::IO::Endpoint.tcp(sentinel[:host], sentinel[:port])
+					::IO::Endpoint.tcp(sentinel[:host], sentinel[:port])
 				end
 				@role = role
 
@@ -26,7 +28,7 @@ module Async
 				Async::Pool::Controller.wrap(**options) do
 					endpoint = resolve_address
 					peer = endpoint.connect
-					stream = IO::Stream.new(peer)
+					stream = ::IO::Stream(peer)
 
 					@protocol.client(stream)
 				end
@@ -52,7 +54,7 @@ module Async
 						next
 					end
 
-					return Async::IO::Endpoint.tcp(address[0], address[1]) if address
+					return ::IO::Endpoint.tcp(address[0], address[1]) if address
 				end
 
 				nil
@@ -72,7 +74,7 @@ module Async
 					next if slaves.empty?
 
 					slave = select_slave(slaves)
-					return Async::IO::Endpoint.tcp(slave['ip'], slave['port'])
+					return ::IO::Endpoint.tcp(slave['ip'], slave['port'])
 				end
 
 				nil

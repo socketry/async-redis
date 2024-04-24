@@ -4,4 +4,5 @@
 /.covered.db
 /external
 
+/.github/workflows/test-external.yaml
 /dump.rdb

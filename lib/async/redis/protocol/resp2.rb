@@ -15,7 +15,7 @@ module Async
 					end
 					
 					def viable?
-						@stream.connected?
+						@stream.readable?
 					end
 					
 					def reusable?

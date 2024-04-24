@@ -11,14 +11,13 @@ require 'sus/fixtures/async'
 describe Async::Redis::Client do
 	include Sus::Fixtures::Async::ReactorContext
 
-	let(:endpoint) {Async::IO::Endpoint.tcp('localhost', 5555)}
+	let(:endpoint) {::IO::Endpoint.tcp('localhost', 5555)}
 
-	it "should raise EOFError on unexpected disconnect" do
+	it "should raise error on unexpected disconnect" do
 		server_task = reactor.async do
 			endpoint.accept do |connection|
-				stream = Async::IO::Stream.new(connection)
-				stream.read(8)
-				stream.close
+				connection.read(8)
+				connection.close
 			end
 		end
 
@@ -26,7 +25,7 @@ describe Async::Redis::Client do
 		
 		expect do
 			client.call("GET", "test")
-		end.to raise_exception(EOFError)
+		end.to raise_exception(Errno::ECONNRESET)
 		
 		client.close
 		server_task.stop

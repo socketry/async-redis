@@ -1,6 +1,6 @@
 # Async::Redis
 
-An asynchronous client for Redis including TLS. Support for streaming requests and responses. Built on top of [async](https://github.com/socketry/async) and [async-io](https://github.com/socketry/async-io).
+An asynchronous client for Redis including TLS. Support for streaming requests and responses. Built on top of [async](https://github.com/socketry/async).
 
 [![Development Status](https://github.com/socketry/async-redis/workflows/Test/badge.svg)](https://github.com/socketry/async-redis/actions?workflow=Test)
 
@@ -35,7 +35,7 @@ This example demonstrates parsing an environment variable with a `redis://` or S
 require 'async/redis'
 
 def make_redis_endpoint(uri)
-	tcp_endpoint = Async::IO::Endpoint.tcp(uri.hostname, uri.port)
+	tcp_endpoint = ::IO::Endpoint.tcp(uri.hostname, uri.port)
 	case uri.scheme
 	when 'redis'
 		tcp_endpoint
@@ -46,7 +46,7 @@ def make_redis_endpoint(uri)
 			cert: OpenSSL::X509::Certificate.new(File.read("client.crt")),
 			key: OpenSSL::PKey::RSA.new(File.read("client.key")),
 		)
-		Async::IO::SSLEndpoint.new(tcp_endpoint, ssl_context: ssl_context)
+		::IO::SSLEndpoint.new(tcp_endpoint, ssl_context: ssl_context)
 	else
 		raise ArgumentError
 	end
@@ -116,3 +116,11 @@ We welcome contributions to this project.
 3.  Commit your changes (`git commit -am 'Add some feature'`).
 4.  Push to the branch (`git push origin my-new-feature`).
 5.  Create new Pull Request.
+
+### Developer Certificate of Origin
+
+This project uses the [Developer Certificate of Origin](https://developercertificate.org/). All contributors to this project must agree to this document to have their contributions accepted.
+
+### Contributor Covenant
+
+This project is governed by the [Contributor Covenant](https://www.contributor-covenant.org/). All contributors and participants agree to abide by its terms.

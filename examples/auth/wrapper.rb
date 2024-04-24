@@ -32,16 +32,16 @@ class AsyncRedisClientWrapper
 
 		# @param uri [URI]
 		# @param ssl_params [Hash]
-		# @return [Async::IO::Endpoint]
+		# @return [::IO::Endpoint::Generic]
 		def prepare_endpoint(uri, ssl_params = nil)
-			tcp_endpoint = Async::IO::Endpoint.tcp(uri.hostname, uri.port)
+			tcp_endpoint = ::IO::Endpoint.tcp(uri.hostname, uri.port)
 			case uri.scheme
 			when 'redis'
 				tcp_endpoint
 			when 'rediss'
 				ssl_context = OpenSSL::SSL::SSLContext.new
 				ssl_context.set_params(ssl_params) if ssl_params
-				Async::IO::SSLEndpoint.new(tcp_endpoint, ssl_context: ssl_context)
+				::IO::SSLEndpoint.new(tcp_endpoint, ssl_context: ssl_context)
 			else
 				raise ArgumentError
 			end
