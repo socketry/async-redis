@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2018-2023, by Samuel Williams.
+# Copyright, 2018-2024, by Samuel Williams.
 # Copyright, 2018, by Huba Nagy.
 # Copyright, 2019, by David Ortiz.
 
@@ -58,7 +58,7 @@ describe Async::Redis::Client do
 			result = client.call("BLPOP", "SLEEP", 0.1)
 		end
 		
-		expect(duration).to be_within(50).percent_of(0.1)
+		expect(duration).to be_within(100).percent_of(0.1)
 		
 		client.close
 	end

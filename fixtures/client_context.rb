@@ -2,7 +2,7 @@
 
 # Released under the MIT License.
 # Copyright, 2018, by Huba Nagy.
-# Copyright, 2018-2023, by Samuel Williams.
+# Copyright, 2018-2024, by Samuel Williams.
 
 require 'async/redis'
 require 'async/redis/client'

@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright, 2018-2023, by Samuel Williams.  
+Copyright, 2018-2024, by Samuel Williams.  
 Copyright, 2018, by Huba Nagy.  
 Copyright, 2019-2020, by David Ortiz.  
 Copyright, 2019, by Pierre Montelle.  

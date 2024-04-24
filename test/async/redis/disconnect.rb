@@ -3,7 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2019, by Jeremy Jung.
 # Copyright, 2019, by David Ortiz.
-# Copyright, 2019-2023, by Samuel Williams.
+# Copyright, 2019-2024, by Samuel Williams.
 
 require 'async/redis/client'
 require 'sus/fixtures/async'
