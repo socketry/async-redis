@@ -20,14 +20,12 @@ ClientContext = Sus::Shared("client context") do
 	
 	let(:root) {Async::Redis::Key["async-redis:test:#{SecureRandom.uuid}"]}
 	
-	def before
-		super
+	before do
 		keys = client.keys("#{root}:*")
 		client.del(*keys) if keys.any?
 	end
 	
-	def after
+	after do
 		@client&.close
-		super
 	end
 end
