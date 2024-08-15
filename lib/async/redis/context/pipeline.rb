@@ -47,6 +47,11 @@ module Async
 				end
 				
 				def collect
+					if block_given?
+						flush
+						yield
+					end
+					
 					@count.times.map{read_response}
 				end
 				
