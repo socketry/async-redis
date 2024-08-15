@@ -46,6 +46,10 @@ module Async
 					end
 				end
 				
+				def collect
+					@count.times.map{read_response}
+				end
+				
 				def sync
 					@sync ||= Sync.new(self)
 				end
@@ -71,12 +75,6 @@ module Async
 					else
 						raise RuntimeError, "No more responses available!"
 					end
-				end
-				
-				def collect
-					yield
-					
-					@count.times.map{read_response}
 				end
 				
 				def close

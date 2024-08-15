@@ -20,7 +20,7 @@ describe Async::Redis::Context::Pipeline do
 		{pipeline_key_1: '123', pipeline_key_2: '456'}
 	end
 	
-	describe '.call' do
+	with '#call' do
 		it 'accumulates commands without running them' do
 			pairs.each do |key, value|
 				pipeline.call('SET', key, value)
@@ -31,8 +31,26 @@ describe Async::Redis::Context::Pipeline do
 			pairs.each do |key, value|
 				expect(client.get(key)).to be == value
 			end
-			
+		ensure
 			client.close
+		end
+	end
+	
+	with '#collect' do
+		it 'accumulates commands and runs them' do
+			pairs.each do |key, value|
+				pipeline.call('SET', key, value)
+			end
+			
+			pipeline.flush
+			
+			pairs.each do |key, value|
+				pipeline.call('GET', key)
+			end
+			
+			expect(pipeline.collect).to be == pairs.values
+		ensure
+			pipeline.close
 		end
 	end
 end
