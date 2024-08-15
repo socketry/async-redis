@@ -2,7 +2,7 @@
 
 # Released under the MIT License.
 # Copyright, 2019, by Pierre Montelle.
-# Copyright, 2019-2023, by Samuel Williams.
+# Copyright, 2019-2024, by Samuel Williams.
 # Copyright, 2019, by David Ortiz.
 
 require 'async/redis'
@@ -25,7 +25,9 @@ Sync do
 			key = keys.sample
 			value = times.to_s
 			
-			i = 0; while i < times; i += 1
+			i = 0
+			while i < times
+				i += 1
 				async_client.set(key, value)
 			end
 		end
@@ -37,7 +39,9 @@ Sync do
 			async_client.pipeline do |pipeline|
 				sync = pipeline.sync
 				
-				i = 0; while i < times; i += 1
+				i = 0
+				while i < times
+					i += 1
 					pipeline.set(key, value)
 				end
 			end
@@ -47,7 +51,9 @@ Sync do
 			key = keys.sample
 			value = times.to_s
 			
-			i = 0; while i < times; i += 1
+			i = 0
+			while i < times
+				i += 1
 				redis_client.set(key, value)
 			end
 		end
@@ -56,7 +62,9 @@ Sync do
 			key = keys.sample
 			value = times.to_s
 			
-			i = 0; while i < times; i += 1
+			i = 0
+			while i < times
+				i += 1
 				redis_client_hiredis.set(key, value)
 			end
 		end

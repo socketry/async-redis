@@ -2,7 +2,7 @@
 
 # Released under the MIT License.
 # Copyright, 2019, by David Ortiz.
-# Copyright, 2019-2023, by Samuel Williams.
+# Copyright, 2019-2024, by Samuel Williams.
 # Copyright, 2022, by Tim Willard.
 
 require_relative 'generic'
@@ -81,7 +81,7 @@ module Async
 				
 				def close
 					flush
-			  ensure
+				ensure
 					super
 				end
 			end
