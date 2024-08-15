@@ -17,13 +17,42 @@ $ bundle add async-redis
 ``` ruby
 require 'async/redis'
 
-endpoint = Async::Redis.local_endpoint
-client = Async::Redis::Client.new(endpoint)
+Async do
+	endpoint = Async::Redis.local_endpoint
+	client = Async::Redis::Client.new(endpoint)
+	puts client.info
+end
+```
+
+### Authenticated Protocol
+
+In order to authenticate, it is necessary to issue an `AUTH` command after connecting to the server. The `Async::Redis::Protocol::Authenticated` protocol class does this for you:
+
+``` ruby
+require 'async/redis'
+require 'async/redis/protocol/authenticated'
 
 Async do
+	endpoint = Async::Redis.local_endpoint
+	protocol = Async::Redis::Protocol::Authenticated.new(["username", "password"])
+	client = Async::Redis::Client.new(endpoint, protocol: protocol)
 	puts client.info
-ensure
-	client.close
+end
+```
+
+### Selected Database
+
+In order to select a database, it is necessary to issue a `SELECT` command after connecting to the server. The `Async::Redis::Protocol::Selected` protocol class does this for you:
+
+``` ruby
+require 'async/redis'
+require 'async/redis/protocol/selected'
+
+Async do
+	endpoint = Async::Redis.local_endpoint
+	protocol = Async::Redis::Protocol::Selected.new(1)
+	client = Async::Redis::Client.new(endpoint, protocol: protocol)
+	puts client.client_info
 end
 ```
 
