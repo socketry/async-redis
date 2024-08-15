@@ -10,7 +10,7 @@
 require_relative 'context/pipeline'
 require_relative 'context/transaction'
 require_relative 'context/subscribe'
-require_relative 'protocol/resp2'
+require_relative 'endpoint'
 
 require 'io/endpoint/host_endpoint'
 require 'async/pool/controller'
@@ -23,14 +23,10 @@ module Async
 		# Legacy.
 		ServerError = ::Protocol::Redis::ServerError
 		
-		def self.local_endpoint(port: 6379)
-			::IO::Endpoint.tcp('localhost', port)
-		end
-		
 		class Client
 			include ::Protocol::Redis::Methods
 			
-			def initialize(endpoint = Redis.local_endpoint, protocol: Protocol::RESP2, **options)
+			def initialize(endpoint = Endpoint.local, protocol: endpoint.protocol, **options)
 				@endpoint = endpoint
 				@protocol = protocol
 				

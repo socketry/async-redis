@@ -10,18 +10,30 @@ require 'sus/fixtures/async'
 
 describe Async::Redis::Client do
 	include Sus::Fixtures::Async::ReactorContext
-
-	let(:endpoint) {::IO::Endpoint.tcp('localhost', 5555)}
-
+	
+	# Intended to not be connected:
+	let(:endpoint) {Async::Redis::Endpoint.local(port: 5555)}
+	
+	before do
+		@server_endpoint = ::IO::Endpoint.tcp("localhost").bound
+	end
+	
+	after do
+		@server_endpoint&.close
+	end
+	
 	it "should raise error on unexpected disconnect" do
-		server_task = reactor.async do
-			endpoint.accept do |connection|
+		server_task = Async do
+			@server_endpoint.accept do |connection|
 				connection.read(8)
 				connection.close
 			end
 		end
-
-		client = Async::Redis::Client.new(endpoint)
+		
+		client = Async::Redis::Client.new(
+			@server_endpoint.local_address_endpoint,
+			protocol: Async::Redis::Protocol::RESP2,
+		)
 		
 		expect do
 			client.call("GET", "test")

@@ -18,7 +18,7 @@ module Async
 				#
 				# @parameter index [Integer] The database index to select.
 				# @parameter protocol [Object] The delegated protocol for connecting.
-				def initialize(index, protocol: Async::Redis::Protocol::RESP2)
+				def initialize(index, protocol = Async::Redis::Protocol::RESP2)
 					@index = index
 					@protocol = protocol
 				end

@@ -18,7 +18,7 @@ module Async
 				#
 				# @parameter credentials [Array] The credentials to use for authentication.
 				# @parameter protocol [Object] The delegated protocol for connecting.
-				def initialize(credentials, protocol: Async::Redis::Protocol::RESP2)
+				def initialize(credentials, protocol = Async::Redis::Protocol::RESP2)
 					@credentials = credentials
 					@protocol = protocol
 				end
