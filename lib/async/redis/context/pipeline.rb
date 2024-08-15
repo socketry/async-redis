@@ -22,8 +22,8 @@ module Async
 					end
 					
 					# This method just accumulates the commands and their params.
-					def call(command, *arguments)
-						@pipeline.call(command, *arguments)
+					def call(...)
+						@pipeline.call(...)
 						
 						@pipeline.flush(1)
 						
