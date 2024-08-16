@@ -49,8 +49,41 @@ jobs:
         name: coverage-${{matrix.os}}-${{matrix.ruby}}
         path: .covered.db
   
+  test-sentinel:
+    name: ${{matrix.ruby}} on ${{matrix.os}} (Sentinel)
+    runs-on: ${{matrix.os}}-latest
+    
+    strategy:
+      matrix:
+        os:
+          - ubuntu
+        
+        ruby:
+          - "3.3"
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+    
+    - name: Run tests
+      timeout-minutes: 10
+      env:
+        RUBY_VERSION: ${{matrix.ruby}}
+      run: docker-compose -f sentinel/docker-compose.yaml up tests
+    
+    - uses: actions/upload-artifact@v3
+      with:
+        name: coverage-${{matrix.os}}-${{matrix.ruby}}
+        path: .covered.db
+  
   validate:
-    needs: test
+    needs: 
+      - test
+      - test-sentinel
     runs-on: ubuntu-latest
     
     steps:
