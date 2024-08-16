@@ -19,6 +19,8 @@ services:
     volumes:
       - ../:/code
     command: bash -c "cd /code && bundle install && bundle exec sus sentinel/test"
+    environment:
+      - COVERAGE=${COVERAGE}
     depends_on:
       - redis-master
       - redis-slave
