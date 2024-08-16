@@ -80,10 +80,42 @@ jobs:
         name: coverage-${{matrix.os}}-${{matrix.ruby}}
         path: .covered.db
   
+  test-cluster:
+    name: ${{matrix.ruby}} on ${{matrix.os}} (Cluster)
+    runs-on: ${{matrix.os}}-latest
+    
+    strategy:
+      matrix:
+        os:
+          - ubuntu
+        
+        ruby:
+          - "3.3"
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+    
+    - name: Run tests
+      timeout-minutes: 10
+      env:
+        RUBY_VERSION: ${{matrix.ruby}}
+      run: docker-compose -f cluster/docker-compose.yaml up --exit-code-from tests
+    
+    - uses: actions/upload-artifact@v3
+      with:
+        name: coverage-${{matrix.os}}-${{matrix.ruby}}
+        path: .covered.db
+  
   validate:
     needs: 
       - test
       - test-sentinel
+      - test-cluster
     runs-on: ubuntu-latest
     
     steps:
