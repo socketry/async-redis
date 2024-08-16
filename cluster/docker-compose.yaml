@@ -1,0 +1,43 @@
+services:
+  redis-a:
+    image: redis
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - ./node-a/cluster.conf:/etc/redis/redis.conf
+  redis-b:
+    image: redis
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - ./node-b/cluster.conf:/etc/redis/redis.conf
+  redis-c:
+    image: redis
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - ./node-c/cluster.conf:/etc/redis/redis.conf
+  controller:
+    image: redis
+    command: >
+      bash -c "
+      redis-cli --cluster create --cluster-yes --cluster-replicas 0 redis-a:6379 redis-b:6379 redis-c:6379;
+      while true; do
+        redis-cli -h redis-a cluster info | grep cluster_state:fail;
+        sleep 1;
+      done"
+    healthcheck:
+      test: "redis-cli -h redis-a cluster info | grep cluster_state:ok"
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    depends_on:
+      - redis-a
+      - redis-b
+      - redis-c
+  tests:
+    image: ruby:${RUBY_VERSION:-latest}
+    volumes:
+      - ../:/code
+    command: bash -c "cd /code && bundle install && bundle exec sus cluster/test"
+    environment:
+      - COVERAGE=${COVERAGE}
+    depends_on:
+      - controller
