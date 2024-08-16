@@ -22,7 +22,7 @@ describe Async::Redis::ClusterClient do
 	
 	let(:cluster) {subject.new(endpoints)}
 	
-	let(:key) {"cluster-test:#{SecureRandom.hex(8)}"}
+	let(:key) {"cluster-test:fixed"}
 	let(:value) {"cluster-test-value"}
 	
 	it "can get a client for a given key" do
@@ -35,9 +35,7 @@ describe Async::Redis::ClusterClient do
 	it "can get and set values" do
 		result = nil
 		
-		pp key: key, slot: cluster.slot_for(key)
-		
-		cluster.clients_for(key) do |client, key|
+		cluster.clients_for(key) do |client|
 			client.set(key, value)
 			
 			result = client.get(key)

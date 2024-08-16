@@ -86,15 +86,9 @@ module Async
 				
 				nodes = @shards.find(slot)
 				
-				pp slot: slot, nodes: nodes
-				
 				nodes = nodes.select{|node| node.role == role}
 				
-				pp filtered_nodes: nodes
-				
 				if node = nodes.sample
-					pp sampled_node: node
-					
 					return (node.client ||= Client.new(node.endpoint))
 				end
 			end
@@ -127,7 +121,6 @@ module Async
 						shards.add(range, nodes)
 					end
 					
-					pp shards: shards
 					@shards = shards
 					# @endpoints = @endpoints | endpoints
 					
