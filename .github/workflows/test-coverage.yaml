@@ -81,7 +81,7 @@ jobs:
         path: .covered.db
   
   test-cluster:
-    name: ${{matrix.ruby}} on ${{matrix.os}} (Sentinel)
+    name: ${{matrix.ruby}} on ${{matrix.os}} (Cluster)
     runs-on: ${{matrix.os}}-latest
     
     strategy:
