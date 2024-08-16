@@ -23,6 +23,8 @@ module Async
 					@protocol = protocol
 				end
 				
+				attr :credentials
+				
 				# Create a new client and authenticate it.
 				def client(stream)
 					client = @protocol.client(stream)

@@ -118,12 +118,12 @@ module Async
 			def protocol
 				protocol = @options.fetch(:protocol, Protocol::RESP2)
 				
-				if database = self.database
-					protocol = Protocol::Selected.new(database, protocol)
-				end
-				
 				if credentials = self.credentials
 					protocol = Protocol::Authenticated.new(credentials, protocol)
+				end
+				
+				if database = self.database
+					protocol = Protocol::Selected.new(database, protocol)
 				end
 				
 				return protocol
@@ -151,7 +151,13 @@ module Async
 			end
 			
 			def database
-				@options[:database] || @url.path[1..-1].to_i
+				@options[:database] || extract_database(@url.path)
+			end
+			
+			private def extract_database(path)
+				if path =~ /\/(\d+)$/
+					return $1.to_i
+				end
 			end
 			
 			def credentials
