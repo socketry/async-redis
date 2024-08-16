@@ -6,9 +6,9 @@ An asynchronous client for Redis including TLS. Support for streaming requests a
 
 ## Usage
 
-Please see the [project documentation](https://github.com/socketry/async-redis) for more details.
+Please see the [project documentation](https://socketry.github.io/async-redis/) for more details.
 
-  - [Getting Started](https://github.com/socketry/async-redisguides/getting-started/index) - This guide explains how to use the `async-redis` gem to connect to a Redis server and perform basic operations.
+  - [Getting Started](https://socketry.github.io/async-redis/guides/getting-started/index) - This guide explains how to use the `async-redis` gem to connect to a Redis server and perform basic operations.
 
 ## Contributing
 
