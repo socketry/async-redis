@@ -12,6 +12,23 @@ describe Async::Redis::Endpoint do
 	
 	let(:endpoint) {Async::Redis.local_endpoint}
 	
+	with '#credentials' do
+		it "can parse a url with username and password" do
+			endpoint = Async::Redis::Endpoint.parse("redis://testuser:testpassword@localhost")
+			expect(endpoint.credentials).to be == ["testuser", "testpassword"]
+		end
+		
+		it "can parse a url with a blank username and password" do
+			endpoint = Async::Redis::Endpoint.parse("redis://:testpassword@localhost")
+			expect(endpoint.credentials).to be == ["testpassword"]
+		end
+		
+		it "can parse a url with a password only" do
+			endpoint = Async::Redis::Endpoint.parse("redis://testpassword@localhost")
+			expect(endpoint.credentials).to be == ["testpassword"]
+		end
+	end
+	
 	with '#protocol' do
 		it "defaults to RESP2" do
 			expect(endpoint.protocol).to be == Async::Redis::Protocol::RESP2

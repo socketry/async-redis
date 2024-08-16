@@ -161,7 +161,17 @@ module Async
 			end
 			
 			def credentials
-				@options[:credentials] || @url.userinfo&.split(":")
+				@options[:credentials] || extract_userinfo(@url.userinfo)
+			end
+			
+			private def extract_userinfo(userinfo)
+				if userinfo
+					credentials = userinfo.split(":").reject(&:empty?)
+					
+					if credentials.any?
+						return credentials
+					end
+				end
 			end
 			
 			def localhost?
