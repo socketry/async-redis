@@ -57,35 +57,45 @@ module Async
 				@shards = nil
 			end
 			
-			def clients_for(*keys, attempts: 3)
+			def clients_for(*keys, role: :master, attempts: 3)
 				slots = slots_for(keys)
 				
-				slots.map do |slot, keys|
-					yield client_for(slot), keys
+				slots.each do |slot, keys|
+					yield client_for(slot, role), keys
 				end
 			rescue ServerError => error
+				Console.warn(self, error)
+				
 				if error.message =~ /MOVED|ASK/
 					reload_cluster!
 					
 					attempts -= 1
 					
 					retry if attempts > 0
+					
+					raise
 				else
 					raise
 				end
 			end
 			
 			def client_for(slot, role = :master)
-				unless @nodes
+				unless @shards
 					reload_cluster!
 				end
 				
 				nodes = @shards.find(slot)
 				
+				pp slot: slot, nodes: nodes
+				
 				nodes = nodes.select{|node| node.role == role}
 				
+				pp filtered_nodes: nodes
+				
 				if node = nodes.sample
-					node.client ||= Client.new(node.endpoint)
+					pp sampled_node: node
+					
+					return (node.client ||= Client.new(node.endpoint))
 				end
 			end
 			
@@ -117,6 +127,7 @@ module Async
 						shards.add(range, nodes)
 					end
 					
+					pp shards: shards
 					@shards = shards
 					# @endpoints = @endpoints | endpoints
 					
@@ -166,16 +177,18 @@ module Async
 			# This is the CRC16 algorithm used by Redis Cluster to hash keys.
 			# Copied from https://github.com/antirez/redis-rb-cluster/blob/master/crc16.rb
 			def crc16(bytes)
-				crc = 0
+				sum = 0
 				
-				bytes.each_byte do |b|
-					crc = ((crc << 8) & 0xffff) ^ XMODEM_CRC16_LOOKUP[((crc >> 8) ^ b) & 0xff]
+				bytes.each_byte do |byte|
+					sum = ((sum << 8) & 0xffff) ^ XMODEM_CRC16_LOOKUP[((sum >> 8) ^ byte) & 0xff]
 				end
 				
-				return crc
+				return sum
 			end
 			
 			HASH_SLOTS = 16_384
+			
+			public
 			
 			# Return Redis::Client for a given key.
 			# Modified from https://github.com/antirez/redis-rb-cluster/blob/master/cluster.rb#L104-L117
