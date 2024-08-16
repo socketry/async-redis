@@ -43,4 +43,4 @@ end
 
 ## Integration Tests
 
-Integration tests for Redis Cluster and Sentinel have been added, using `docker-compose` to start the required services and run the tests. These tests are not part of the default test suite and must be run separate. See the documentation in the `sentinel/` and `cluster/` directories for more information.
+Integration tests for Redis Cluster and Sentinel have been added, using `docker-compose` to start the required services and run the tests. These tests are not part of the default test suite and must be run separately. See the documentation in the `sentinel/` and `cluster/` directories for more information.
