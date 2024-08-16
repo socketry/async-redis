@@ -32,19 +32,20 @@ describe Async::Redis::SentinelClient do
 		expect(client.get(key)).to be == value
 	end
 	
-	it "can handle failover" do
-		current_master = client.master
+	it "should resolve slave address" do
+		client.set(key, value)
 		
-		client.failover
-		
-		# Failover takes some time to fully complete:
+		# It takes a while to replicate:
 		while true
-			failover_master = client.master
-			break if failover_master['ip'] != current_master['ip']
-			sleep 0.1
+			break if slave_client.get(key) == value
+			sleep 0.01
 		end
 		
-		expect(failover_master['ip']).not.to be == current_master['ip']
+		expect(slave_client.get(key)).to be == value
+	end
+	
+	it "can handle failover" do
+		client.failover
 		
 		# We can still connect and do stuff:
 		client.set(key, value)

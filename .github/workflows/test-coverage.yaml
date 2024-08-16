@@ -73,7 +73,7 @@ jobs:
       timeout-minutes: 10
       env:
         RUBY_VERSION: ${{matrix.ruby}}
-      run: docker-compose -f sentinel/docker-compose.yaml up tests
+      run: docker-compose -f sentinel/docker-compose.yaml up --exit-code-from tests
     
     - uses: actions/upload-artifact@v3
       with:
