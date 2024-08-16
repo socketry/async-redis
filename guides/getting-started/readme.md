@@ -18,43 +18,21 @@ $ bundle add async-redis
 require 'async/redis'
 
 Async do
-	endpoint = Async::Redis.local_endpoint
+	endpoint = Async::Redis.local_endpoint(
+		# Optional database index:
+		database: 1,
+		# Optional credentials:
+		credentials: ["username", "password"]
+	)
+	
 	client = Async::Redis::Client.new(endpoint)
 	puts client.info
 end
 ```
 
-### Authenticated Protocol
+You can also encode this information in a URL:
 
-In order to authenticate, it is necessary to issue an `AUTH` command after connecting to the server. The `Async::Redis::Protocol::Authenticated` protocol class does this for you:
 
-``` ruby
-require 'async/redis'
-require 'async/redis/protocol/authenticated'
-
-Async do
-	endpoint = Async::Redis.local_endpoint
-	protocol = Async::Redis::Protocol::Authenticated.new(["username", "password"])
-	client = Async::Redis::Client.new(endpoint, protocol: protocol)
-	puts client.info
-end
-```
-
-### Selected Database
-
-In order to select a database, it is necessary to issue a `SELECT` command after connecting to the server. The `Async::Redis::Protocol::Selected` protocol class does this for you:
-
-``` ruby
-require 'async/redis'
-require 'async/redis/protocol/selected'
-
-Async do
-	endpoint = Async::Redis.local_endpoint
-	protocol = Async::Redis::Protocol::Selected.new(1)
-	client = Async::Redis::Client.new(endpoint, protocol: protocol)
-	puts client.client_info
-end
-```
 
 ### Connecting to Redis SSL Endpoint
 
@@ -63,28 +41,32 @@ This example demonstrates parsing an environment variable with a `redis://` or S
 ``` ruby
 require 'async/redis'
 
-def make_redis_endpoint(uri)
-	tcp_endpoint = ::IO::Endpoint.tcp(uri.hostname, uri.port)
-	case uri.scheme
-	when 'redis'
-		tcp_endpoint
-	when 'rediss'
-		ssl_context = OpenSSL::SSL::SSLContext.new
-		ssl_context.set_params(
-			ca_file: "/path/to/ca.crt",
-			cert: OpenSSL::X509::Certificate.new(File.read("client.crt")),
-			key: OpenSSL::PKey::RSA.new(File.read("client.key")),
-		)
-		::IO::SSLEndpoint.new(tcp_endpoint, ssl_context: ssl_context)
-	else
-		raise ArgumentError
+ssl_context = OpenSSL::SSL::SSLContext.new.tap do |context|
+	# Load the certificate store:
+	context.cert_store = OpenSSL::X509::Store.new.tap do |store|
+		store.add_file(Rails.root.join("config/redis.pem").to_s)
 	end
+	
+	# Load the certificate:
+	context.cert = OpenSSL::X509::Certificate.new(File.read(
+		Rails.root.join("config/redis.crt")
+	))
+	
+	# Load the private key:
+	context.key = OpenSSL::PKey::RSA.new(
+		Rails.application.credentials.services.redis.private_key
+	)
+	
+	# Ensure the connection is verified according to the above certificates:
+	context.verify_mode = OpenSSL::SSL::VERIFY_PEER
 end
 
-endpoint = make_redis_endpoint(URI(ENV['REDIS_URL']))
+# e.g. REDIS_URL=rediss://:PASSWORD@redis.example.com:12345
+endpoint = Async::Redis::Endpoint.parse(ENV["REDIS_URL"], ssl_context: ssl_context)
 client = Async::Redis::Client.new(endpoint)
-
-# ...
+Sync do
+	puts client.call("PING")
+end
 ```
 
 ### Variables
