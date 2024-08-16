@@ -26,6 +26,65 @@ module Async
 		class Client
 			include ::Protocol::Redis::Methods
 			
+			module Methods
+				def subscribe(*channels)
+					context = Context::Subscribe.new(@pool, channels)
+					
+					return context unless block_given?
+					
+					begin
+						yield context
+					ensure
+						context.close
+					end
+				end
+				
+				def transaction(&block)
+					context = Context::Transaction.new(@pool)
+					
+					return context unless block_given?
+					
+					begin
+						yield context
+					ensure
+						context.close
+					end
+				end
+				
+				alias multi transaction
+				
+				def pipeline(&block)
+					context = Context::Pipeline.new(@pool)
+					
+					return context unless block_given?
+					
+					begin
+						yield context
+					ensure
+						context.close
+					end
+				end
+				
+				# Deprecated.
+				alias nested pipeline
+				
+				def call(*arguments)
+					@pool.acquire do |connection|
+						connection.write_request(arguments)
+						
+						connection.flush
+						
+						return connection.read_response
+					end
+				end
+				
+				def close
+					@pool.close
+				end
+			end
+			
+			include Methods
+			
 			def initialize(endpoint = Endpoint.local, protocol: endpoint.protocol, **options)
 				@endpoint = endpoint
 				@protocol = protocol
@@ -38,8 +97,8 @@ module Async
 			
 			# @return [client] if no block provided.
 			# @yield [client, task] yield the client in an async task.
-			def self.open(*arguments, &block)
-				client = self.new(*arguments)
+			def self.open(*arguments, **options, &block)
+				client = self.new(*arguments, **options)
 				
 				return client unless block_given?
 				
@@ -50,61 +109,6 @@ module Async
 						client.close
 					end
 				end.wait
-			end
-			
-			def close
-				@pool.close
-			end
-			
-			def subscribe(*channels)
-				context = Context::Subscribe.new(@pool, channels)
-				
-				return context unless block_given?
-				
-				begin
-					yield context
-				ensure
-					context.close
-				end
-			end
-			
-			def transaction(&block)
-				context = Context::Transaction.new(@pool)
-				
-				return context unless block_given?
-				
-				begin
-					yield context
-				ensure
-					context.close
-				end
-			end
-			
-			alias multi transaction
-			
-			def pipeline(&block)
-				context = Context::Pipeline.new(@pool)
-				
-				return context unless block_given?
-				
-				begin
-					yield context
-				ensure
-					context.close
-				end
-			end
-			
-			# Deprecated.
-			alias nested pipeline
-			
-			def call(*arguments)
-				@pool.acquire do |connection|
-					connection.write_request(arguments)
-					
-					connection.flush
-					
-					return connection.read_response
-				end
 			end
 			
 			protected

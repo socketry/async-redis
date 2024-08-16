@@ -23,7 +23,11 @@ module Async
 			
 			def self.local(**options)
 				self.new(LOCALHOST, **options)
-			end	
+			end
+			
+			def self.remote(host, port = 6379, **options)
+				self.new(URI.parse("redis://#{host}:#{port}"), **options)
+			end
 			
 			SCHEMES = {
 				'redis' => URI::Generic,

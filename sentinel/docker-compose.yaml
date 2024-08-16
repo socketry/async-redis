@@ -1,0 +1,27 @@
+services:
+  redis-master:
+    image: redis
+  redis-slave:
+    image: redis
+    command: redis-server --slaveof redis-master 6379
+    depends_on:
+      - redis-master
+  redis-sentinel:
+    image: redis
+    command: redis-sentinel /etc/redis/sentinel.conf
+    volumes:
+      - ./sentinel.conf:/etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+      - redis-slave
+  tests:
+    image: ruby:${RUBY_VERSION:-latest}
+    volumes:
+      - ../:/code
+    command: bash -c "cd /code && bundle install && bundle exec sus sentinel/test"
+    environment:
+      - COVERAGE=${COVERAGE}
+    depends_on:
+      - redis-master
+      - redis-slave
+      - redis-sentinel

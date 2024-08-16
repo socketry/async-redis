@@ -1,0 +1,41 @@
+name: Test Sentinel
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+env:
+  CONSOLE_OUTPUT: XTerm
+
+jobs:
+  test:
+    name: ${{matrix.ruby}} on ${{matrix.os}}
+    runs-on: ${{matrix.os}}-latest
+    continue-on-error: ${{matrix.experimental}}
+    
+    strategy:
+      matrix:
+        os:
+          - ubuntu
+        
+        ruby:
+          - "3.1"
+          - "3.2"
+          - "3.3"
+        
+        experimental: [false]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+    
+    - name: Run tests
+      timeout-minutes: 10
+      env:
+        RUBY_VERSION: ${{matrix.ruby}}
+      run: docker-compose -f sentinel/docker-compose.yaml up --exit-code-from tests

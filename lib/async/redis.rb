@@ -6,4 +6,4 @@
 
 require_relative 'redis/version'
 require_relative 'redis/client'
-require_relative 'redis/sentinels'
+require_relative 'redis/sentinel_client'
