@@ -44,7 +44,7 @@ module Async
 			#
 			# @parameter scheme [String] The scheme to use, e.g. "redis" or "rediss".
 			# @parameter hostname [String] The hostname to connect to (or bind to).
-			# @parameter *options [Hash] Additional options, passed to {#initialize}.
+			# @parameter options [Hash] Additional options, passed to {#initialize}.
 			def self.for(scheme, hostname, credentials: nil, port: nil, database: nil, **options)
 				uri_klass = SCHEMES.fetch(scheme.downcase) do
 					raise ArgumentError, "Unsupported scheme: #{scheme.inspect}"
@@ -74,9 +74,10 @@ module Async
 			#
 			# @parameter url [URI] The URL to connect to.
 			# @parameter endpoint [Endpoint] The underlying endpoint to use.
-			# @parameter scheme [String] The scheme to use, e.g. "redis" or "rediss".
-			# @parameter hostname [String] The hostname to connect to (or bind to), overrides the URL hostname (used for SNI).
-			# @parameter port [Integer] The port to bind to, overrides the URL port.
+			# @option scheme [String] The scheme to use, e.g. "redis" or "rediss".
+			# @option hostname [String] The hostname to connect to (or bind to), overrides the URL hostname (used for SNI).
+			# @option port [Integer] The port to bind to, overrides the URL port.
+			# @option ssl_context [OpenSSL::SSL::SSLContext] The SSL context to use for secure connections.
 			def initialize(url, endpoint = nil, **options)
 				super(**options)
 				
