@@ -106,7 +106,7 @@ module Async
 						shard = shard.each_slice(2).to_h
 						
 						slots = shard['slots']
-						range = Range.new(*slots, exclude_end: false)
+						range = Range.new(*slots)
 						
 						nodes = shard['nodes'].map do |node|
 							node = node.each_slice(2).to_h
