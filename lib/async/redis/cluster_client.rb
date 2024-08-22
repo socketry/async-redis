@@ -13,6 +13,9 @@ module Async
 			class ReloadError < StandardError
 			end
 			
+			class SlotError < StandardError
+			end
+			
 			Node = Struct.new(:id, :endpoint, :role, :health, :client)
 			
 			class RangeMap
@@ -84,9 +87,11 @@ module Async
 					reload_cluster!
 				end
 				
-				nodes = @shards.find(slot)
-				
-				nodes = nodes.select{|node| node.role == role}
+				if nodes = @shards.find(slot)
+					nodes = nodes.select{|node| node.role == role}
+				else
+					raise SlotError, "No nodes found for slot #{slot}"
+				end
 				
 				if node = nodes.sample
 					return (node.client ||= Client.new(node.endpoint))
@@ -106,7 +111,7 @@ module Async
 						shard = shard.each_slice(2).to_h
 						
 						slots = shard['slots']
-						range = Range.new(*slots, exclude_end: false)
+						range = Range.new(*slots)
 						
 						nodes = shard['nodes'].map do |node|
 							node = node.each_slice(2).to_h
@@ -179,9 +184,9 @@ module Async
 				return sum
 			end
 			
-			HASH_SLOTS = 16_384
-			
 			public
+			
+			HASH_SLOTS = 16_384
 			
 			# Return Redis::Client for a given key.
 			# Modified from https://github.com/antirez/redis-rb-cluster/blob/master/cluster.rb#L104-L117
