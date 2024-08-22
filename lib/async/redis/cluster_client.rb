@@ -13,6 +13,9 @@ module Async
 			class ReloadError < StandardError
 			end
 			
+			class SlotError < StandardError
+			end
+			
 			Node = Struct.new(:id, :endpoint, :role, :health, :client)
 			
 			class RangeMap
@@ -84,9 +87,11 @@ module Async
 					reload_cluster!
 				end
 				
-				nodes = @shards.find(slot)
-				
-				nodes = nodes.select{|node| node.role == role}
+				if nodes = @shards.find(slot)
+					nodes = nodes.select{|node| node.role == role}
+				else
+					raise SlotError, "No nodes found for slot #{slot}"
+				end
 				
 				if node = nodes.sample
 					return (node.client ||= Client.new(node.endpoint))
