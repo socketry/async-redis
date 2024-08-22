@@ -43,4 +43,12 @@ describe Async::Redis::ClusterClient do
 		
 		expect(result).to be == value
 	end
+	
+	it "can map every slot to a client" do
+		Async::Redis::ClusterClient::HASH_SLOTS.times do |slot|
+			client = cluster.client_for(slot)
+			
+			expect(client).not.to be_nil
+		end
+	end
 end

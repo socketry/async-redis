@@ -179,9 +179,9 @@ module Async
 				return sum
 			end
 			
-			HASH_SLOTS = 16_384
-			
 			public
+			
+			HASH_SLOTS = 16_384
 			
 			# Return Redis::Client for a given key.
 			# Modified from https://github.com/antirez/redis-rb-cluster/blob/master/cluster.rb#L104-L117
