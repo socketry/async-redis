@@ -3,9 +3,9 @@
 # Released under the MIT License.
 # Copyright, 2024, by Samuel Williams.
 
-require 'async/redis/client'
-require 'async/redis/protocol/authenticated'
-require 'sus/fixtures/async'
+require "async/redis/client"
+require "async/redis/protocol/authenticated"
+require "sus/fixtures/async"
 
 describe Async::Redis::Protocol::Authenticated do
 	include Sus::Fixtures::Async::ReactorContext

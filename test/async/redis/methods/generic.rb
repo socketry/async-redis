@@ -4,7 +4,7 @@
 # Copyright, 2018, by Huba Nagy.
 # Copyright, 2018-2023, by Samuel Williams.
 
-require 'client_context'
+require "client_context"
 
 describe Protocol::Redis::Methods::Generic do
 	include_context ClientContext

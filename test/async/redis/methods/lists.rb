@@ -5,13 +5,13 @@
 # Copyright, 2018-2023, by Samuel Williams.
 # Copyright, 2019, by David Ortiz.
 
-require 'client_context'
+require "client_context"
 
 describe Protocol::Redis::Methods::Lists do
 	include_context ClientContext
 	
-	let(:list_a) {root['list_a']}
-	let(:list_b) {root['list_b']}
+	let(:list_a) {root["list_a"]}
+	let(:list_b) {root["list_b"]}
 	let(:test_list) {(0..4).to_a}
 	
 	it "can do non blocking push/pop operations" do

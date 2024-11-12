@@ -4,9 +4,9 @@
 # Released under the MIT License.
 # Copyright, 2022-2023, by Samuel Williams.
 
-require 'async'
-require 'async/barrier'
-require 'redis'
+require "async"
+require "async/barrier"
+require "redis"
 
 Async do |parent|
 	child = Async do |task|

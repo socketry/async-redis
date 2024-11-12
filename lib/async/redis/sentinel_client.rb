@@ -3,14 +3,15 @@
 # Released under the MIT License.
 # Copyright, 2020, by David Ortiz.
 # Copyright, 2023-2024, by Samuel Williams.
+# Copyright, 2024, by Joan Lledó.
 
-require_relative 'client'
-require 'io/stream'
+require_relative "client"
+require "io/stream"
 
 module Async
 	module Redis
 		class SentinelClient
-			DEFAULT_MASTER_NAME = 'mymaster'
+			DEFAULT_MASTER_NAME = "mymaster"
 			
 			include ::Protocol::Redis::Methods
 			include Client::Methods
@@ -64,26 +65,26 @@ module Async
 			
 			def failover(name = @master_name)
 				sentinels do |client|
-					return client.call('SENTINEL', 'FAILOVER', name)
+					return client.call("SENTINEL", "FAILOVER", name)
 				end
 			end
 			
 			def masters
 				sentinels do |client|
-					return client.call('SENTINEL', 'MASTERS').map{|fields| fields.each_slice(2).to_h}
+					return client.call("SENTINEL", "MASTERS").map{|fields| fields.each_slice(2).to_h}
 				end
 			end
 			
 			def master(name = @master_name)
 				sentinels do |client|
-					return client.call('SENTINEL', 'MASTER', name).each_slice(2).to_h
+					return client.call("SENTINEL", "MASTER", name).each_slice(2).to_h
 				end
 			end
 			
 			def resolve_master
 				sentinels do |client|
 					begin
-						address = client.call('SENTINEL', 'GET-MASTER-ADDR-BY-NAME', @master_name)
+						address = client.call("SENTINEL", "GET-MASTER-ADDR-BY-NAME", @master_name)
 					rescue Errno::ECONNREFUSED
 						next
 					end
@@ -97,7 +98,7 @@ module Async
 			def resolve_slave
 				sentinels do |client|
 					begin
-						reply = client.call('SENTINEL', 'SLAVES', @master_name)
+						reply = client.call("SENTINEL", "SLAVES", @master_name)
 					rescue Errno::ECONNREFUSED
 						next
 					end
@@ -106,7 +107,7 @@ module Async
 					next if slaves.empty?
 					
 					slave = select_slave(slaves)
-					return Endpoint.remote(slave['ip'], slave['port'])
+					return Endpoint.remote(slave["ip"], slave["port"])
 				end
 				
 				return nil
@@ -147,7 +148,7 @@ module Async
 				slaves = reply.map{|fields| fields.each_slice(2).to_h}
 				
 				slaves.reject do |slave|
-					slave['flags'].split(',').include?('s_down')
+					slave["flags"].split(",").include?("s_down")
 				end
 			end
 			

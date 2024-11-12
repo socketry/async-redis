@@ -7,11 +7,11 @@ Gem::Specification.new do |spec|
 	spec.version = Async::Redis::VERSION
 	
 	spec.summary = "A Redis client library."
-	spec.authors = ["Samuel Williams", "Huba Nagy", "David Ortiz", "Gleb Sinyavskiy", "Mikael Henriksson", "Troex Nevelin", "Alex Matchneer", "Jeremy Jung", "Olle Jonsson", "Pierre Montelle", "Salim Semaoune", "Tim Willard"]
+	spec.authors = ["Samuel Williams", "Huba Nagy", "David Ortiz", "Gleb Sinyavskiy", "Mikael Henriksson", "Troex Nevelin", "Alex Matchneer", "Jeremy Jung", "Joan Lledó", "Olle Jonsson", "Pierre Montelle", "Salim Semaoune", "Tim Willard"]
 	spec.license = "MIT"
 	
-	spec.cert_chain  = ['release.cert']
-	spec.signing_key = File.expand_path('~/.gem/release.pem')
+	spec.cert_chain  = ["release.cert"]
+	spec.signing_key = File.expand_path("~/.gem/release.pem")
 	
 	spec.homepage = "https://github.com/socketry/async-redis"
 	
@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 		"source_code_uri" => "https://github.com/socketry/async-redis.git",
 	}
 	
-	spec.files = Dir.glob(['{lib}/**/*', '*.md'], File::FNM_DOTMATCH, base: __dir__)
+	spec.files = Dir.glob(["{lib}/**/*", "*.md"], File::FNM_DOTMATCH, base: __dir__)
 	
 	spec.required_ruby_version = ">= 3.1"
 	

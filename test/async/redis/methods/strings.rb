@@ -4,7 +4,7 @@
 # Copyright, 2018, by Huba Nagy.
 # Copyright, 2018-2023, by Samuel Williams.
 
-require 'client_context'
+require "client_context"
 
 describe Protocol::Redis::Methods::Strings do
 	include_context ClientContext
@@ -92,24 +92,24 @@ describe Protocol::Redis::Methods::Strings do
 
 	let(:test_pairs) do
 		{
-			root['key_a'] => "a",
-			root['key_b'] => "b",
-			root['key_c'] => "c"
+			root["key_a"] => "a",
+			root["key_b"] => "b",
+			root["key_c"] => "c"
 		}
 	end
 
 	let(:overlapping_pairs) do
 		{
-			root['key_a'] => "x",
-			root['key_d'] => "y",
-			root['key_e'] => "z",
+			root["key_a"] => "x",
+			root["key_d"] => "y",
+			root["key_e"] => "z",
 		}
 	end
 
 	let(:disjoint_pairs) do
 		{
-			root['key_d'] => "d",
-			root['key_e'] => "e",
+			root["key_d"] => "d",
+			root["key_e"] => "e",
 		}
 	end
 

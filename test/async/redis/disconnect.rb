@@ -5,8 +5,8 @@
 # Copyright, 2019, by David Ortiz.
 # Copyright, 2019-2024, by Samuel Williams.
 
-require 'async/redis/client'
-require 'sus/fixtures/async'
+require "async/redis/client"
+require "sus/fixtures/async"
 
 describe Async::Redis::Client do
 	include Sus::Fixtures::Async::ReactorContext

@@ -3,10 +3,10 @@
 # Released under the MIT License.
 # Copyright, 2024, by Samuel Williams.
 
-require 'async/clock'
-require 'async/redis/sentinel_client'
-require 'sus/fixtures/async'
-require 'securerandom'
+require "async/clock"
+require "async/redis/sentinel_client"
+require "sus/fixtures/async"
+require "securerandom"
 
 describe Async::Redis::SentinelClient do
 	include Sus::Fixtures::Async::ReactorContext

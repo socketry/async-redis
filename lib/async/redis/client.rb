@@ -7,16 +7,16 @@
 # Copyright, 2019, by David Ortiz.
 # Copyright, 2020, by Salim Semaoune.
 
-require_relative 'context/pipeline'
-require_relative 'context/transaction'
-require_relative 'context/subscribe'
-require_relative 'endpoint'
+require_relative "context/pipeline"
+require_relative "context/transaction"
+require_relative "context/subscribe"
+require_relative "endpoint"
 
-require 'io/endpoint/host_endpoint'
-require 'async/pool/controller'
-require 'protocol/redis/methods'
+require "io/endpoint/host_endpoint"
+require "async/pool/controller"
+require "protocol/redis/methods"
 
-require 'io/stream'
+require "io/stream"
 
 module Async
 	module Redis

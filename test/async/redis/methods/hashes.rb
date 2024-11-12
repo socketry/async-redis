@@ -4,7 +4,7 @@
 # Copyright, 2019, by Mikael Henriksson.
 # Copyright, 2019-2023, by Samuel Williams.
 
-require 'client_context'
+require "client_context"
 
 describe Protocol::Redis::Methods::Hashes do
 	include_context ClientContext

@@ -3,7 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2021-2023, by Samuel Williams.
 
-require_relative '../../lib/async/redis'
+require_relative "../../lib/async/redis"
 
 class AuthenticatedRESP2
 	def initialize(credentials, protocol: Async::Redis::Protocol::RESP2)

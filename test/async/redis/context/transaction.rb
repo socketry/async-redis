@@ -3,12 +3,12 @@
 # Released under the MIT License.
 # Copyright, 2018-2023, by Samuel Williams.
 
-require 'client_context'
+require "client_context"
 
 describe Async::Redis::Context::Transaction do
 	include_context ClientContext
 	
-	describe '#execute' do
+	describe "#execute" do
 		let(:value) {"3"}
 		
 		it "can atomically execute commands" do
@@ -43,7 +43,7 @@ describe Async::Redis::Context::Transaction do
 			end
 		end
 		
-		with 'an invalid command' do
+		with "an invalid command" do
 			let(:key) {root[:thing]}
 			
 			it "results in error" do
@@ -63,7 +63,7 @@ describe Async::Redis::Context::Transaction do
 		end
 	end
 	
-	describe '#discard' do
+	describe "#discard" do
 		it "ignores increment" do
 			client.transaction do |context|
 				context.set root["foo"], "1"
@@ -77,7 +77,7 @@ describe Async::Redis::Context::Transaction do
 		end
 	end
 	
-	describe '#watch' do
+	describe "#watch" do
 		it "can atomically increment" do
 			foo_key = root[:foo]
 			

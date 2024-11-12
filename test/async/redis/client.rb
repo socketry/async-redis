@@ -5,10 +5,10 @@
 # Copyright, 2018, by Huba Nagy.
 # Copyright, 2019, by David Ortiz.
 
-require 'async/clock'
-require 'async/redis/client'
-require 'sus/fixtures/async'
-require 'securerandom'
+require "async/clock"
+require "async/redis/client"
+require "sus/fixtures/async"
+require "securerandom"
 
 describe Async::Redis::Client do
 	include Sus::Fixtures::Async::ReactorContext
@@ -22,7 +22,7 @@ describe Async::Redis::Client do
 	it "should connect to redis server" do
 		result = client.call("INFO")
 		
-		expect(result).to be(:include?, 'redis_version')
+		expect(result).to be(:include?, "redis_version")
 		
 		client.close
 	end
@@ -89,15 +89,15 @@ describe Async::Redis::Client do
 
 	it "can use pipelining" do
 		client.pipeline do |context|
-			client.set 'async_redis_test_key_1', 'a'
-			client.set 'async_redis_test_key_2', 'b'
+			client.set "async_redis_test_key_1", "a"
+			client.set "async_redis_test_key_2", "b"
 			
 			results = context.collect do
-				context.get 'async_redis_test_key_1'
-				context.get 'async_redis_test_key_2'
+				context.get "async_redis_test_key_1"
+				context.get "async_redis_test_key_2"
 			end
 			
-			expect(results).to be == ['a', 'b']
+			expect(results).to be == ["a", "b"]
 		end
 		
 		client.close

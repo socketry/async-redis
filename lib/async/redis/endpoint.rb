@@ -3,13 +3,13 @@
 # Released under the MIT License.
 # Copyright, 2024, by Samuel Williams.
 
-require 'io/endpoint'
-require 'io/endpoint/host_endpoint'
-require 'io/endpoint/ssl_endpoint'
+require "io/endpoint"
+require "io/endpoint/host_endpoint"
+require "io/endpoint/ssl_endpoint"
 
-require_relative 'protocol/resp2'
-require_relative 'protocol/authenticated'
-require_relative 'protocol/selected'
+require_relative "protocol/resp2"
+require_relative "protocol/authenticated"
+require_relative "protocol/selected"
 
 module Async
 	module Redis
@@ -30,8 +30,8 @@ module Async
 			end
 			
 			SCHEMES = {
-				'redis' => URI::Generic,
-				'rediss' => URI::Generic,
+				"redis" => URI::Generic,
+				"rediss" => URI::Generic,
 			}
 			
 			def self.parse(string, endpoint = nil, **options)
@@ -117,7 +117,7 @@ module Async
 			end
 			
 			def secure?
-				['rediss'].include?(self.scheme)
+				["rediss"].include?(self.scheme)
 			end
 			
 			def protocol

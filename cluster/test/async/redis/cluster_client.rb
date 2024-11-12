@@ -3,9 +3,9 @@
 # Released under the MIT License.
 # Copyright, 2024, by Samuel Williams.
 
-require 'async/redis/cluster_client'
-require 'sus/fixtures/async'
-require 'securerandom'
+require "async/redis/cluster_client"
+require "sus/fixtures/async"
+require "securerandom"
 
 describe Async::Redis::ClusterClient do
 	include Sus::Fixtures::Async::ReactorContext

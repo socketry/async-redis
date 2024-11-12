@@ -4,13 +4,13 @@
 # Copyright, 2018, by Huba Nagy.
 # Copyright, 2018-2024, by Samuel Williams.
 
-require 'async/redis'
-require 'async/redis/client'
-require 'async/redis/key'
+require "async/redis"
+require "async/redis/client"
+require "async/redis/key"
 
-require 'sus/fixtures/async'
+require "sus/fixtures/async"
 
-require 'securerandom'
+require "securerandom"
 
 ClientContext = Sus::Shared("client context") do
 	include Sus::Fixtures::Async::ReactorContext

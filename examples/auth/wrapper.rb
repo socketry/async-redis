@@ -4,7 +4,7 @@
 # Copyright, 2021, by Troex Nevelin.
 # Copyright, 2023-2024, by Samuel Williams.
 
-require_relative '../../lib/async/redis'
+require_relative "../../lib/async/redis"
 
 # Friendly client wrapper that supports SSL, AUTH and db SELECT
 class AsyncRedisClientWrapper
@@ -13,7 +13,7 @@ class AsyncRedisClientWrapper
 		# @param ssl_params [Hash] passed to OpenSSL::SSL::SSLContext
 		# @param options [Hash] passed to Async::Redis::Client.new
 		# @return [Async::Redis::Client]
-		def call(url = 'redis://localhost:6379', ssl_params: nil, **options)
+		def call(url = "redis://localhost:6379", ssl_params: nil, **options)
 			uri = URI(url)
 
 			endpoint = prepare_endpoint(uri, ssl_params)
@@ -36,9 +36,9 @@ class AsyncRedisClientWrapper
 		def prepare_endpoint(uri, ssl_params = nil)
 			tcp_endpoint = ::IO::Endpoint.tcp(uri.hostname, uri.port)
 			case uri.scheme
-			when 'redis'
+			when "redis"
 				tcp_endpoint
-			when 'rediss'
+			when "rediss"
 				ssl_context = OpenSSL::SSL::SSLContext.new
 				ssl_context.set_params(ssl_params) if ssl_params
 				::IO::SSLEndpoint.new(tcp_endpoint, ssl_context: ssl_context)

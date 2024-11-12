@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2018-2023, by Samuel Williams.
+# Copyright, 2018-2024, by Samuel Williams.
 
-require 'async/redis/client'
-require 'sus/fixtures/async'
-require 'securerandom'
+require "async/redis/client"
+require "sus/fixtures/async"
+require "securerandom"
 
 describe Async::Redis::Context::Subscribe do
 	include Sus::Fixtures::Async::ReactorContext
@@ -25,7 +25,7 @@ describe Async::Redis::Context::Subscribe do
 		publisher = reactor.async do
 			condition.wait
 			Console.logger.debug("Publishing message...")
-			client.publish(news_channel, 'AAA')
+			client.publish(news_channel, "AAA")
 		end
 		
 		listener = reactor.async do
@@ -37,9 +37,9 @@ describe Async::Redis::Context::Subscribe do
 				type, name, message = context.listen
 				
 				Console.logger.debug("Got: #{type} #{name} #{message}")
-				expect(type).to be == 'message'
+				expect(type).to be == "message"
 				expect(name).to be == news_channel
-				expect(message).to be == 'AAA'
+				expect(message).to be == "AAA"
 			end
 		end
 		
@@ -58,11 +58,11 @@ describe Async::Redis::Context::Subscribe do
 		
 		listener = reactor.async do
 			type, name, message = subscription.listen
-			expect(message).to be == 'Sunny'
+			expect(message).to be == "Sunny"
 		end
 		
 		subscription.subscribe([weather_channel])
-		client.publish(weather_channel, 'Sunny')
+		client.publish(weather_channel, "Sunny")
 		
 		listener.wait
 	ensure
@@ -75,15 +75,15 @@ describe Async::Redis::Context::Subscribe do
 			
 			listener = reactor.async do
 				subscription.each do |type, name, message|
-					expect(type).to be == 'message'
+					expect(type).to be == "message"
 					expect(name).to be == news_channel
-					expect(message).to be == 'Hello'
+					expect(message).to be == "Hello"
 					
 					break
 				end
 			end
 			
-			client.publish(news_channel, 'Hello')
+			client.publish(news_channel, "Hello")
 			
 			listener.wait
 		ensure

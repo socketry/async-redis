@@ -4,7 +4,7 @@
 # Copyright, 2019, by Mikael Henriksson.
 # Copyright, 2019-2023, by Samuel Williams.
 
-require 'protocol/redis/methods'
+require "protocol/redis/methods"
 
 module Async
 	module Redis

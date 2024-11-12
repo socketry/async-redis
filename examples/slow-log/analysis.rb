@@ -4,9 +4,9 @@
 # Released under the MIT License.
 # Copyright, 2022-2023, by Samuel Williams.
 
-require 'set'
-require 'async'
-require_relative '../../lib/async/redis'
+require "set"
+require "async"
+require_relative "../../lib/async/redis"
 
 endpoint = Async::Redis.local_endpoint(port: 6380)
 client = Async::Redis::Client.new(endpoint)

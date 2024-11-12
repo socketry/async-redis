@@ -5,7 +5,7 @@
 # Copyright, 2019-2024, by Samuel Williams.
 # Copyright, 2022, by Tim Willard.
 
-require_relative 'generic'
+require_relative "generic"
 
 module Async
 	module Redis

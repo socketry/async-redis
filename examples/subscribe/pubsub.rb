@@ -4,7 +4,7 @@
 # Released under the MIT License.
 # Copyright, 2023, by Samuel Williams.
 
-require_relative '../../lib/async/redis'
+require_relative "../../lib/async/redis"
 
 class Subscription
 	def initialize(topic, endpoint = Async::Redis.local_endpoint)

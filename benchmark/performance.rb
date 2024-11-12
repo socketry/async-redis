@@ -5,13 +5,13 @@
 # Copyright, 2019-2024, by Samuel Williams.
 # Copyright, 2019, by David Ortiz.
 
-require 'async/redis'
+require "async/redis"
 
-require 'redis'
-require 'redis/connection/hiredis'
+require "redis"
+require "redis/connection/hiredis"
 
-require 'benchmark'
-require 'benchmark/ips'
+require "benchmark"
+require "benchmark/ips"
 
 keys = ["X","Y","Z"].freeze
 endpoint = Async::Redis.local_endpoint

@@ -2,15 +2,15 @@
 
 # Released under the MIT License.
 # Copyright, 2018, by Huba Nagy.
-# Copyright, 2018-2023, by Samuel Williams.
+# Copyright, 2018-2024, by Samuel Williams.
 
-require_relative 'generic'
+require_relative "generic"
 
 module Async
 	module Redis
 		module Context
 			class Subscribe < Generic
-				MESSAGE = 'message'
+				MESSAGE = "message"
 				
 				def initialize(pool, channels)
 					super(pool)
@@ -40,12 +40,12 @@ module Async
 				end
 				
 				def subscribe(channels)
-					@connection.write_request ['SUBSCRIBE', *channels]
+					@connection.write_request ["SUBSCRIBE", *channels]
 					@connection.flush
 				end
 				
 				def unsubscribe(channels)
-					@connection.write_request ['UNSUBSCRIBE', *channels]
+					@connection.write_request ["UNSUBSCRIBE", *channels]
 					@connection.flush
 				end
 			end

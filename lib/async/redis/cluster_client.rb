@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2020, by David Ortiz.
-# Copyright, 2023-2024, by Samuel Williams.
+# Copyright, 2024, by Samuel Williams.
 
-require_relative 'client'
-require 'io/stream'
+require_relative "client"
+require "io/stream"
 
 module Async
 	module Redis
@@ -107,20 +106,20 @@ module Async
 					shards = RangeMap.new
 					endpoints = []
 					
-					client.call('CLUSTER', 'SHARDS').each do |shard|
+					client.call("CLUSTER", "SHARDS").each do |shard|
 						shard = shard.each_slice(2).to_h
 						
-						slots = shard['slots']
+						slots = shard["slots"]
 						range = Range.new(*slots)
 						
-						nodes = shard['nodes'].map do |node|
+						nodes = shard["nodes"].map do |node|
 							node = node.each_slice(2).to_h
-							endpoint = Endpoint.remote(node['ip'], node['port'])
+							endpoint = Endpoint.remote(node["ip"], node["port"])
 							
 							# Collect all endpoints:
 							endpoints << endpoint
 							
-							Node.new(node['id'], endpoint, node['role'].to_sym, node['health'].to_sym)
+							Node.new(node["id"], endpoint, node["role"].to_sym, node["health"].to_sym)
 						end
 						
 						shards.add(range, nodes)
@@ -193,8 +192,8 @@ module Async
 			def slot_for(key)
 				key = key.to_s
 				
-				if s = key.index('{')
-					if e = key.index('}', s + 1) and e != s + 1
+				if s = key.index("{")
+					if e = key.index("}", s + 1) and e != s + 1
 						key = key[s + 1..e - 1]
 					end
 				end
