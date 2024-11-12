@@ -30,7 +30,7 @@ module Async
 				# A cache of sentinel connections.
 				@sentinels = {}
 				
-				@pool = connect(**options)
+				@pool = make_pool(**options)
 			end
 			
 			# @attribute [String] The name of the master instance.
@@ -114,8 +114,14 @@ module Async
 			
 			protected
 			
+			def assign_default_tags(tags)
+				tags[:protocol] = @protocol.to_s
+			end
+			
 			# Override the parent method. The only difference is that this one needs to resolve the master/slave address.
-			def connect(**options)
+			def make_pool(**options)
+				self.assign_default_tags(options[:tags] ||= {})
+				
 				Async::Pool::Controller.wrap(**options) do
 					endpoint = resolve_address
 					peer = endpoint.connect

@@ -89,7 +89,7 @@ module Async
 				@endpoint = endpoint
 				@protocol = protocol
 				
-				@pool = connect(**options)
+				@pool = make_pool(**options)
 			end
 			
 			attr :endpoint
@@ -113,7 +113,14 @@ module Async
 			
 			protected
 			
-			def connect(**options)
+			def assign_default_tags(tags)
+				tags[:endpoint] = @endpoint.to_s
+				tags[:protocol] = @protocol.to_s
+			end
+			
+			def make_pool(**options)
+				self.assign_default_tags(options[:tags] ||= {})
+				
 				Async::Pool::Controller.wrap(**options) do
 					peer = @endpoint.connect
 					
