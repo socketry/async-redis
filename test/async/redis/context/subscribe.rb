@@ -68,4 +68,26 @@ describe Async::Redis::Context::Subscribe do
 	ensure
 		subscription.close
 	end
+	
+	with "#each" do
+		it "should iterate over messages" do
+			subscription = client.subscribe(news_channel)
+			
+			listener = reactor.async do
+				subscription.each do |type, name, message|
+					expect(type).to be == 'message'
+					expect(name).to be == news_channel
+					expect(message).to be == 'Hello'
+					
+					break
+				end
+			end
+			
+			client.publish(news_channel, 'Hello')
+			
+			listener.wait
+		ensure
+			subscription.close
+		end
+	end
 end

@@ -31,6 +31,14 @@ module Async
 					end
 				end
 				
+				def each
+					return to_enum unless block_given?
+					
+					while response = self.listen
+						yield response
+					end
+				end
+				
 				def subscribe(channels)
 					@connection.write_request ['SUBSCRIBE', *channels]
 					@connection.flush
