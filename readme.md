@@ -4,6 +4,10 @@ An asynchronous client for Redis including TLS. Support for streaming requests a
 
 [![Development Status](https://github.com/socketry/async-redis/workflows/Test/badge.svg)](https://github.com/socketry/async-redis/actions?workflow=Test)
 
+## Support
+
+This gem supports both Valkey and Redis. It is designed to be compatible with the latest versions of both libraries. We also test Redis sentinel and cluster configurations.
+
 ## Usage
 
 Please see the [project documentation](https://socketry.github.io/async-redis/) for more details.
