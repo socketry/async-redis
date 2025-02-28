@@ -77,11 +77,11 @@ jobs:
         RUBY_VERSION: ${{matrix.ruby}}
       run: docker-compose -f sentinel/docker-compose.yaml up --exit-code-from tests
     
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         include-hidden-files: true
         if-no-files-found: error
-        name: coverage-${{matrix.os}}-${{matrix.ruby}}
+        name: coverage-${{matrix.os}}-${{matrix.ruby}}-sentinel
         path: .covered.db
   
   test-cluster:
@@ -110,11 +110,11 @@ jobs:
         RUBY_VERSION: ${{matrix.ruby}}
       run: docker-compose -f cluster/docker-compose.yaml up --exit-code-from tests
     
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         include-hidden-files: true
         if-no-files-found: error
-        name: coverage-${{matrix.os}}-${{matrix.ruby}}
+        name: coverage-${{matrix.os}}-${{matrix.ruby}}-cluster
         path: .covered.db
   
   validate:
