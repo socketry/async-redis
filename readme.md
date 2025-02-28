@@ -18,7 +18,7 @@ Please see the [project documentation](https://socketry.github.io/async-redis/) 
 
 Please see the [project releases](https://socketry.github.io/async-redis/releases/index) for all releases.
 
-### Unreleased
+### v0.11.1
 
   - Correctly pass `@options` to `Async::Redis::Client` instances created by `Async::Redis::ClusterClient`.
 

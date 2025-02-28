@@ -1,6 +1,6 @@
 # Releases
 
-## Unreleased
+## v0.11.1
 
   - Correctly pass `@options` to `Async::Redis::Client` instances created by `Async::Redis::ClusterClient`.
 
@@ -10,7 +10,7 @@
 
 `Async::Redis::ClusterClient` is a new class that provides a high-level interface to a Redis Cluster. Due to the way clustering works, it does not provide the same interface as the `Async::Redis::Client` class. Instead, you must request an appropriate client for the key you are working with.
 
-```ruby
+``` ruby
 endpoints = [
 	Async::Redis::Endpoint.parse("redis://redis-a"),
 	Async::Redis::Endpoint.parse("redis://redis-b"),
@@ -28,7 +28,7 @@ end
 
 The previous implementation `Async::Redis::SentinelsClient` has been replaced with `Async::Redis::SentinelClient`. This new class uses `Async::Redis::Endpoint` objects to represent the sentinels and the master.
 
-```ruby
+``` ruby
 sentinels = [
 	Async::Redis::Endpoint.parse("redis://redis-sentinel-a"),
 	Async::Redis::Endpoint.parse("redis://redis-sentinel-b"),
