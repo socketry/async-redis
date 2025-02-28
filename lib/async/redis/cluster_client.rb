@@ -56,6 +56,7 @@ module Async
 			# @property endpoints [Array(Endpoint)] The list of cluster endpoints.
 			def initialize(endpoints, **options)
 				@endpoints = endpoints
+				@options = options
 				@shards = nil
 			end
 			
@@ -93,7 +94,7 @@ module Async
 				end
 				
 				if node = nodes.sample
-					return (node.client ||= Client.new(node.endpoint))
+					return (node.client ||= Client.new(node.endpoint, **@options))
 				end
 			end
 			
@@ -101,7 +102,7 @@ module Async
 			
 			def reload_cluster!(endpoints = @endpoints)
 				@endpoints.each do |endpoint|
-					client = Client.new(endpoint)
+					client = Client.new(endpoint, **@options)
 					
 					shards = RangeMap.new
 					endpoints = []
