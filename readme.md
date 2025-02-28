@@ -14,6 +14,20 @@ Please see the [project documentation](https://socketry.github.io/async-redis/) 
 
   - [Getting Started](https://socketry.github.io/async-redis/guides/getting-started/index) - This guide explains how to use the `async-redis` gem to connect to a Redis server and perform basic operations.
 
+## Releases
+
+Please see the [project releases](https://socketry.github.io/async-redis/releases/index) for all releases.
+
+### Unreleased
+
+  - Correctly pass `@options` to `Async::Redis::Client` instances created by `Async::Redis::ClusterClient`.
+
+### v0.10.0
+
+  - [Add support for Redis Clusters](https://socketry.github.io/async-redis/releases/index#add-support-for-redis-clusters)
+  - [Add support for Redis Sentinels](https://socketry.github.io/async-redis/releases/index#add-support-for-redis-sentinels)
+  - [Improved Integration Tests](https://socketry.github.io/async-redis/releases/index#improved-integration-tests)
+
 ## Contributing
 
 We welcome contributions to this project.

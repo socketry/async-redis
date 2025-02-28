@@ -1,6 +1,12 @@
-# v0.10.0
+# Releases
 
-## Cluster Client
+## Unreleased
+
+  - Correctly pass `@options` to `Async::Redis::Client` instances created by `Async::Redis::ClusterClient`.
+
+## v0.10.0
+
+### Add support for Redis Clusters
 
 `Async::Redis::ClusterClient` is a new class that provides a high-level interface to a Redis Cluster. Due to the way clustering works, it does not provide the same interface as the `Async::Redis::Client` class. Instead, you must request an appropriate client for the key you are working with.
 
@@ -18,7 +24,7 @@ cluster_client.clients_for("key") do |client|
 end
 ```
 
-## Sentinel Client
+### Add support for Redis Sentinels
 
 The previous implementation `Async::Redis::SentinelsClient` has been replaced with `Async::Redis::SentinelClient`. This new class uses `Async::Redis::Endpoint` objects to represent the sentinels and the master.
 
@@ -41,6 +47,6 @@ slave_client.session do |session|
 end
 ```
 
-## Integration Tests
+### Improved Integration Tests
 
 Integration tests for Redis Cluster and Sentinel have been added, using `docker-compose` to start the required services and run the tests. These tests are not part of the default test suite and must be run separately. See the documentation in the `sentinel/` and `cluster/` directories for more information.
