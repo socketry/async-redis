@@ -2,7 +2,7 @@
 
 # Released under the MIT License.
 # Copyright, 2018, by Huba Nagy.
-# Copyright, 2018-2023, by Samuel Williams.
+# Copyright, 2018-2025, by Samuel Williams.
 
 require_relative "pipeline"
 

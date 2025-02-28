@@ -2,7 +2,7 @@
 
 # Released under the MIT License.
 # Copyright, 2019, by Mikael Henriksson.
-# Copyright, 2019-2023, by Samuel Williams.
+# Copyright, 2019-2025, by Samuel Williams.
 
 require "client_context"
 

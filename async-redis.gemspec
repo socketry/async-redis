@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
 	spec.version = Async::Redis::VERSION
 	
 	spec.summary = "A Redis client library."
-	spec.authors = ["Samuel Williams", "Huba Nagy", "David Ortiz", "Gleb Sinyavskiy", "Mikael Henriksson", "Troex Nevelin", "Alex Matchneer", "Jeremy Jung", "Joan Lledó", "Olle Jonsson", "Pierre Montelle", "Salim Semaoune", "Tim Willard"]
+	spec.authors = ["Samuel Williams", "Huba Nagy", "David Ortiz", "Gleb Sinyavskiy", "Mikael Henriksson", "Troex Nevelin", "Alex Matchneer", "Jeremy Jung", "Joan Lledó", "Olle Jonsson", "Pierre Montelle", "Salim Semaoune", "Tim Willard", "Travis Bell"]
 	spec.license = "MIT"
 	
 	spec.cert_chain  = ["release.cert"]
