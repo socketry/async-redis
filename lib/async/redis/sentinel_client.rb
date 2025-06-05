@@ -26,7 +26,7 @@ module Async
 			def initialize(endpoints, master_name: DEFAULT_MASTER_NAME, master_options: nil, role: :master, **options)
 				@endpoints = endpoints
 				@master_name = master_name
-				@master_options = master_options
+				@master_options = master_options || {}
 				@role = role
 
 				@ssl = !!master_options&.key?(:ssl_context)
