@@ -116,7 +116,7 @@ module Async
 						
 						nodes = shard["nodes"].map do |node|
 							node = node.each_slice(2).to_h
-							endpoint = Endpoint.remote(node["ip"], node["port"])
+							endpoint = Endpoint.for(endpoint.scheme, node["endpoint"], port: node["port"])
 							
 							# Collect all endpoints:
 							endpoints << endpoint
