@@ -81,7 +81,7 @@ describe Async::Redis::Endpoint do
 	with ".for" do
 		it "handles IPv4 addresses correctly" do
 			endpoint = Async::Redis::Endpoint.for("redis", "127.0.0.1", port: 6380)
-			expect(endpoint.url.to_s).to be == "redis://127.0.0.1:6380/"
+			expect(endpoint.url.to_s).to be == "redis://127.0.0.1:6380"
 			expect(endpoint.url.host).to be == "127.0.0.1"
 			expect(endpoint.url.hostname).to be == "127.0.0.1"
 			expect(endpoint.port).to be == 6380
@@ -89,7 +89,7 @@ describe Async::Redis::Endpoint do
 		
 		it "handles IPv6 addresses correctly" do
 			endpoint = Async::Redis::Endpoint.for("redis", "::1", port: 6380)
-			expect(endpoint.url.to_s).to be == "redis://[::1]:6380/"
+			expect(endpoint.url.to_s).to be == "redis://[::1]:6380"
 			expect(endpoint.url.host).to be == "[::1]"
 			expect(endpoint.url.hostname).to be == "::1"
 			expect(endpoint.port).to be == 6380
@@ -98,7 +98,7 @@ describe Async::Redis::Endpoint do
 		it "handles expanded IPv6 addresses correctly" do
 			ipv6 = "2600:1f28:372:c404:5c2d:ce68:3620:cc4b"
 			endpoint = Async::Redis::Endpoint.for("redis", ipv6, port: 6380)
-			expect(endpoint.url.to_s).to be == "redis://[#{ipv6}]:6380/"
+			expect(endpoint.url.to_s).to be == "redis://[#{ipv6}]:6380"
 			expect(endpoint.url.host).to be == "[#{ipv6}]"
 			expect(endpoint.url.hostname).to be == ipv6
 			expect(endpoint.port).to be == 6380
@@ -106,7 +106,7 @@ describe Async::Redis::Endpoint do
 		
 		it "handles credentials correctly" do
 			endpoint = Async::Redis::Endpoint.for("redis", "localhost", credentials: ["user", "pass"], port: 6380)
-			expect(endpoint.url.to_s).to be == "redis://user:pass@localhost:6380/"
+			expect(endpoint.url.to_s).to be == "redis://user:pass@localhost:6380"
 			expect(endpoint.url.userinfo).to be == "user:pass"
 			expect(endpoint.credentials).to be == ["user", "pass"]
 		end
@@ -120,7 +120,7 @@ describe Async::Redis::Endpoint do
 		
 		it "handles secure connections correctly" do
 			endpoint = Async::Redis::Endpoint.for("rediss", "localhost")
-			expect(endpoint.url.to_s).to be == "rediss://localhost/"
+			expect(endpoint.url.to_s).to be == "rediss://localhost"
 			expect(endpoint).to be(:secure?)
 		end
 		

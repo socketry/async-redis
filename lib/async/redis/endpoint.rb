@@ -36,7 +36,7 @@ module Async
 			}
 			
 			def self.parse(string, endpoint = nil, **options)
-				url = URI.parse(string).normalize
+				url = URI.parse(string)
 				
 				return self.new(url, endpoint, **options)
 			end
@@ -55,10 +55,14 @@ module Async
 					path = "/#{database}"
 				end
 				
-				host = host.include?(":") ? "[#{host}]" : host
-				
 				self.new(
-					uri_klass.new(scheme, credentials&.join(":"), host, port, nil, path, nil, nil, nil).normalize,
+					uri_klass.build(
+						scheme: scheme,
+						userinfo: credentials&.join(":"),
+						host: host,
+						port: port,
+						path: path,
+					),
 					**options
 				)
 			end
