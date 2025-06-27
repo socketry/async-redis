@@ -19,14 +19,15 @@ module Async
 		
 		# Represents a way to connect to a remote Redis server.
 		class Endpoint < ::IO::Endpoint::Generic
-			LOCALHOST = URI.parse("redis://localhost").freeze
+			LOCALHOST = URI::Generic.build(scheme: "redis", host: "localhost").freeze
 			
 			def self.local(**options)
 				self.new(LOCALHOST, **options)
 			end
 			
 			def self.remote(host, port = 6379, **options)
-				self.new(URI.parse("redis://#{host}:#{port}"), **options)
+				# URI::Generic.build automatically handles IPv6 addresses correctly:
+				self.new(URI::Generic.build(scheme: "redis", host: host, port: port), **options)
 			end
 			
 			SCHEMES = {
@@ -45,7 +46,7 @@ module Async
 			# @parameter scheme [String] The scheme to use, e.g. "redis" or "rediss".
 			# @parameter hostname [String] The hostname to connect to (or bind to).
 			# @parameter options [Hash] Additional options, passed to {#initialize}.
-			def self.for(scheme, hostname, credentials: nil, port: nil, database: nil, **options)
+			def self.for(scheme, host, credentials: nil, port: nil, database: nil, **options)
 				uri_klass = SCHEMES.fetch(scheme.downcase) do
 					raise ArgumentError, "Unsupported scheme: #{scheme.inspect}"
 				end
@@ -54,8 +55,10 @@ module Async
 					path = "/#{database}"
 				end
 				
+				host = host.include?(":") ? "[#{host}]" : host
+				
 				self.new(
-					uri_klass.new(scheme, credentials&.join(":"), hostname, port, nil, path, nil, nil, nil).normalize,
+					uri_klass.new(scheme, credentials&.join(":"), host, port, nil, path, nil, nil, nil).normalize,
 					**options
 				)
 			end
