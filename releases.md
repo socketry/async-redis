@@ -1,5 +1,9 @@
 # Releases
 
+## Unreleased
+
+  - Fix handling of IPv6 address literals, including those returned by Redis Cluster / Sentinel.
+
 ## v0.11.1
 
   - Correctly pass `@options` to `Async::Redis::Client` instances created by `Async::Redis::ClusterClient`.
