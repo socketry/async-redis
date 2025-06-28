@@ -1,6 +1,6 @@
 # Releases
 
-## Unreleased
+## v0.11.2
 
   - Fix handling of IPv6 address literals, including those returned by Redis Cluster / Sentinel.
 
