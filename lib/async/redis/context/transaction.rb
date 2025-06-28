@@ -9,15 +9,22 @@ require_relative "pipeline"
 module Async
 	module Redis
 		module Context
+			# Context for Redis transaction operations using MULTI/EXEC.
 			class Transaction < Pipeline
+				# Initialize a new transaction context.
+				# @parameter pool [Pool] The connection pool to use.
+				# @parameter arguments [Array] Additional arguments for the transaction.
 				def initialize(pool, *arguments)
 					super(pool)
 				end
 				
+				# Begin a transaction block.
 				def multi
 					call("MULTI")
 				end
 				
+				# Watch keys for changes during the transaction.
+				# @parameter keys [Array(String)] The keys to watch.
 				def watch(*keys)
 					sync.call("WATCH", *keys)
 				end
@@ -27,6 +34,7 @@ module Async
 					sync.call("EXEC")
 				end
 				
+				# Discard all queued commands in the transaction.
 				def discard
 					sync.call("DISCARD")
 				end

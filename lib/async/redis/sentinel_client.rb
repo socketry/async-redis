@@ -10,6 +10,7 @@ require "io/stream"
 
 module Async
 	module Redis
+		# A Redis Sentinel client for high availability Redis deployments.
 		class SentinelClient
 			DEFAULT_MASTER_NAME = "mymaster"
 			
@@ -40,6 +41,9 @@ module Async
 			# @attribute [Symbol] The role of the instance that you want to connect to.
 			attr :role
 			
+			# Resolve an address for the specified role.
+			# @parameter role [Symbol] The role to resolve (:master or :slave).
+			# @returns [Endpoint] The resolved endpoint address.
 			def resolve_address(role = @role)
 				case role
 				when :master
@@ -55,6 +59,7 @@ module Async
 				address or raise RuntimeError, "Unable to fetch #{role} via Sentinel."
 			end
 			
+			# Close the sentinel client and all connections.
 			def close
 				super
 				
@@ -63,24 +68,34 @@ module Async
 				end
 			end
 			
+			# Initiate a failover for the specified master.
+			# @parameter name [String] The name of the master to failover.
+			# @returns [Object] The result of the failover command.
 			def failover(name = @master_name)
 				sentinels do |client|
 					return client.call("SENTINEL", "FAILOVER", name)
 				end
 			end
 			
+			# Get information about all masters.
+			# @returns [Array(Hash)] Array of master information hashes.
 			def masters
 				sentinels do |client|
 					return client.call("SENTINEL", "MASTERS").map{|fields| fields.each_slice(2).to_h}
 				end
 			end
 			
+			# Get information about a specific master.
+			# @parameter name [String] The name of the master.
+			# @returns [Hash] The master information hash.
 			def master(name = @master_name)
 				sentinels do |client|
 					return client.call("SENTINEL", "MASTER", name).each_slice(2).to_h
 				end
 			end
 			
+			# Resolve the master endpoint address.
+			# @returns [Endpoint | Nil] The master endpoint or nil if not found.
 			def resolve_master
 				sentinels do |client|
 					begin
@@ -95,6 +110,8 @@ module Async
 				return nil
 			end
 			
+			# Resolve a slave endpoint address.
+			# @returns [Endpoint | Nil] A slave endpoint or nil if not found.
 			def resolve_slave
 				sentinels do |client|
 					begin

@@ -13,6 +13,9 @@ require_relative "protocol/selected"
 
 module Async
 	module Redis
+		# Create a local Redis endpoint.
+		# @parameter options [Hash] Options for the endpoint.
+		# @returns [Endpoint] A local Redis endpoint.
 		def self.local_endpoint(**options)
 			Endpoint.local(**options)
 		end
@@ -21,10 +24,18 @@ module Async
 		class Endpoint < ::IO::Endpoint::Generic
 			LOCALHOST = URI::Generic.build(scheme: "redis", host: "localhost").freeze
 			
+			# Create a local Redis endpoint.
+			# @parameter options [Hash] Additional options for the endpoint.
+			# @returns [Endpoint] A local Redis endpoint.
 			def self.local(**options)
 				self.new(LOCALHOST, **options)
 			end
 			
+			# Create a remote Redis endpoint.
+			# @parameter host [String] The hostname to connect to.
+			# @parameter port [Integer] The port to connect to.
+			# @parameter options [Hash] Additional options for the endpoint.
+			# @returns [Endpoint] A remote Redis endpoint.
 			def self.remote(host, port = 6379, **options)
 				# URI::Generic.build automatically handles IPv6 addresses correctly:
 				self.new(URI::Generic.build(scheme: "redis", host: host, port: port), **options)
@@ -35,6 +46,11 @@ module Async
 				"rediss" => URI::Generic,
 			}
 			
+			# Parse a Redis URL string into an endpoint.
+			# @parameter string [String] The URL string to parse.
+			# @parameter endpoint [Endpoint] Optional underlying endpoint.
+			# @parameter options [Hash] Additional options for the endpoint.
+			# @returns [Endpoint] The parsed endpoint.
 			def self.parse(string, endpoint = nil, **options)
 				url = URI.parse(string)
 				
@@ -99,6 +115,8 @@ module Async
 				end
 			end
 			
+			# Convert the endpoint to a URL.
+			# @returns [URI] The URL representation of the endpoint.
 			def to_url
 				url = @url.dup
 				
@@ -109,24 +127,34 @@ module Async
 				return url
 			end
 			
+			# Convert the endpoint to a string representation.
+			# @returns [String] A string representation of the endpoint.
 			def to_s
 				"\#<#{self.class} #{self.to_url} #{@options}>"
 			end
 			
+			# Convert the endpoint to an inspectable string.
+			# @returns [String] An inspectable string representation of the endpoint.
 			def inspect
 				"\#<#{self.class} #{self.to_url} #{@options.inspect}>"
 			end
 			
 			attr :url
 			
+			# Get the address of the underlying endpoint.
+			# @returns [String] The address of the endpoint.
 			def address
 				endpoint.address
 			end
 			
+			# Check if the connection is secure (using TLS).
+			# @returns [Boolean] True if the connection uses TLS.
 			def secure?
 				["rediss"].include?(self.scheme)
 			end
 			
+			# Get the protocol for this endpoint.
+			# @returns [Protocol] The protocol instance configured for this endpoint.
 			def protocol
 				protocol = @options.fetch(:protocol, Protocol::RESP2)
 				
@@ -141,14 +169,20 @@ module Async
 				return protocol
 			end
 			
+			# Get the default port for Redis connections.
+			# @returns [Integer] The default Redis port (6379).
 			def default_port
 				6379
 			end
 			
+			# Check if the endpoint is using the default port.
+			# @returns [Boolean] True if using the default port.
 			def default_port?
 				port == default_port
 			end
 			
+			# Get the port for this endpoint.
+			# @returns [Integer] The port number.
 			def port
 				@options[:port] || @url.port || default_port
 			end
@@ -158,10 +192,14 @@ module Async
 				@options[:hostname] || @url.hostname
 			end
 			
+			# Get the scheme for this endpoint.
+			# @returns [String] The URL scheme (e.g., "redis" or "rediss").
 			def scheme
 				@options[:scheme] || @url.scheme
 			end
 			
+			# Get the database number for this endpoint.
+			# @returns [Integer | Nil] The database number or nil if not specified.
 			def database
 				@options[:database] || extract_database(@url.path)
 			end

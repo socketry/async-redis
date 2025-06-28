@@ -14,9 +14,12 @@ module Async
 			class Pipeline < Generic
 				include ::Protocol::Redis::Methods
 				
+				# A synchronous wrapper for pipeline operations that executes one command at a time.
 				class Sync
 					include ::Protocol::Redis::Methods
 					
+					# Initialize a new sync wrapper.
+					# @parameter pipeline [Pipeline] The pipeline to wrap.
 					def initialize(pipeline)
 						@pipeline = pipeline
 					end
@@ -31,6 +34,8 @@ module Async
 					end
 				end
 				
+				# Initialize a new pipeline context.
+				# @parameter pool [Pool] The connection pool to use.
 				def initialize(pool)
 					super(pool)
 					
@@ -46,6 +51,9 @@ module Async
 					end
 				end
 				
+				# Collect all pending responses.
+				# @yields {...} Optional block to execute while collecting responses.
+				# @returns [Array] Array of all responses if no block given.
 				def collect
 					if block_given?
 						flush
@@ -55,6 +63,8 @@ module Async
 					@count.times.map{read_response}
 				end
 				
+				# Get a synchronous wrapper for this pipeline.
+				# @returns [Sync] A synchronous wrapper that executes commands immediately.
 				def sync
 					@sync ||= Sync.new(self)
 				end
@@ -73,6 +83,8 @@ module Async
 					return nil
 				end
 				
+				# Read a response from the pipeline.
+				# @returns [Object] The next response in the pipeline.
 				def read_response
 					if @count > 0
 						@count -= 1
@@ -82,6 +94,7 @@ module Async
 					end
 				end
 				
+				# Close the pipeline and flush all pending responses.
 				def close
 					flush
 				ensure

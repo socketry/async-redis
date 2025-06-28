@@ -9,26 +9,39 @@ require "io/stream"
 
 module Async
 	module Redis
+		# A Redis cluster client that manages multiple Redis instances and handles cluster operations.
 		class ClusterClient
+			# Raised when cluster configuration cannot be reloaded.
 			class ReloadError < StandardError
 			end
 			
+			# Raised when no nodes are found for a specific slot.
 			class SlotError < StandardError
 			end
 			
 			Node = Struct.new(:id, :endpoint, :role, :health, :client)
 			
+			# A map that stores ranges and their associated values for efficient lookup.
 			class RangeMap
+				# Initialize a new RangeMap.
 				def initialize
 					@ranges = []
 				end
 				
+				# Add a range-value pair to the map.
+				# @parameter range [Range] The range to map.
+				# @parameter value [Object] The value to associate with the range.
+				# @returns [Object] The added value.
 				def add(range, value)
 					@ranges << [range, value]
 					
 					return value
 				end
 				
+				# Find the value associated with a key within any range.
+				# @parameter key [Object] The key to find.
+				# @yields {...} Block called if no range contains the key.
+				# @returns [Object] The value if found, result of block if given, or nil.
 				def find(key)
 					@ranges.each do |range, value|
 						return value if range.include?(key)
@@ -41,12 +54,16 @@ module Async
 					return nil
 				end
 				
+				# Iterate over all values in the map.
+				# @yields {|value| ...} Block called for each value.
+				# 	@parameter value [Object] The value from the range-value pair.
 				def each
 					@ranges.each do |range, value|
 						yield value
 					end
 				end
 				
+				# Clear all ranges from the map.
 				def clear
 					@ranges.clear
 				end
@@ -61,6 +78,13 @@ module Async
 				@shards = nil
 			end
 			
+			# Execute a block with clients for the given keys, grouped by cluster slot.
+			# @parameter keys [Array] The keys to find clients for.
+			# @parameter role [Symbol] The role of nodes to use (:master or :slave).
+			# @parameter attempts [Integer] Number of retry attempts for cluster errors.
+			# @yields {|client, keys| ...} Block called for each client-keys pair.
+			# 	@parameter client [Client] The Redis client for the slot.
+			# 	@parameter keys [Array] The keys handled by this client.
 			def clients_for(*keys, role: :master, attempts: 3)
 				slots = slots_for(keys)
 				
@@ -83,6 +107,10 @@ module Async
 				end
 			end
 			
+			# Get a client for a specific slot.
+			# @parameter slot [Integer] The cluster slot number.
+			# @parameter role [Symbol] The role of node to get (:master or :slave).
+			# @returns [Client] The Redis client for the slot.
 			def client_for(slot, role = :master)
 				unless @shards
 					reload_cluster!
@@ -203,6 +231,9 @@ module Async
 				return crc16(key) % HASH_SLOTS
 			end
 			
+			# Calculate the hash slots for multiple keys.
+			# @parameter keys [Array] The keys to calculate slots for.
+			# @returns [Hash] A hash mapping slot numbers to arrays of keys.
 			def slots_for(keys)
 				slots = Hash.new{|hash, key| hash[key] = []}
 				
