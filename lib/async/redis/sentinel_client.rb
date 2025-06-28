@@ -29,7 +29,7 @@ module Async
 				@master_options = master_options || {}
 				@role = role
 
-				@ssl = !!master_options&.key?(:ssl_context)
+				@ssl = !!@master_options.key?(:ssl_context)
 				@scheme = "redis#{@ssl ? 's' : ''}"
 				
 				# A cache of sentinel connections.
