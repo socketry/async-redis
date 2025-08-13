@@ -243,6 +243,69 @@ module Async
 				
 				return slots
 			end
+			
+			# Subscribe to one or more channels for pub/sub messaging in cluster environment.
+			# The subscription will be created on the node responsible for the first channel.
+			# @parameter channels [Array(String)] The channels to subscribe to.
+			# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
+			# 	@parameter context [Context::Subscribe] The subscription context.
+			# @returns [Object] The result of the block if block given.
+			# @returns [Context::Subscribe] The subscription context if no block given.
+			def subscribe(*channels)
+				# For regular pub/sub, route to node based on first channel
+				slot = channels.any? ? slot_for(channels.first) : 0
+				client = client_for(slot)
+				
+				client.subscribe(*channels) do |context|
+					if block_given?
+						yield context
+					else
+						return context
+					end
+				end
+			end
+			
+			# Subscribe to one or more channel patterns for pub/sub messaging in cluster environment.
+			# The subscription will be created on the node responsible for a deterministic slot.
+			# @parameter patterns [Array(String)] The channel patterns to subscribe to.
+			# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
+			# 	@parameter context [Context::Subscribe] The subscription context.
+			# @returns [Object] The result of the block if block given.
+			# @returns [Context::Subscribe] The subscription context if no block given.
+			def psubscribe(*patterns)
+				# For pattern subscriptions, use a deterministic slot since patterns can match any channel
+				slot = patterns.any? ? slot_for(patterns.first) : 0
+				client = client_for(slot)
+				
+				client.psubscribe(*patterns) do |context|
+					if block_given?
+						yield context
+					else
+						return context
+					end
+				end
+			end
+			
+			# Subscribe to one or more sharded channels for pub/sub messaging in cluster environment (Redis 7.0+).
+			# The subscription will be created on the node responsible for the channel's hash slot.
+			# @parameter channels [Array(String)] The sharded channels to subscribe to.
+			# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
+			# 	@parameter context [Context::Subscribe] The subscription context.
+			# @returns [Object] The result of the block if block given.
+			# @returns [Context::Subscribe] The subscription context if no block given.
+			def ssubscribe(*channels)
+				# For sharded subscriptions, route to appropriate node based on channel hash
+				slot = channels.any? ? slot_for(channels.first) : 0
+				client = client_for(slot)
+				
+				client.ssubscribe(*channels) do |context|
+					if block_given?
+						yield context
+					else
+						return context
+					end
+				end
+			end
 		end
 	end
 end

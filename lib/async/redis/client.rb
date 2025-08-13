@@ -47,6 +47,44 @@ module Async
 					end
 				end
 				
+				# Subscribe to one or more channel patterns for pub/sub messaging.
+				# @parameter patterns [Array(String)] The channel patterns to subscribe to.
+				# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
+				# 	@parameter context [Context::Subscribe] The subscription context.
+				# @returns [Object] The result of the block if block given.
+				# @returns [Context::Subscribe] The subscription context if no block given.
+				def psubscribe(*patterns)
+					context = Context::Subscribe.new(@pool, [])
+					context.psubscribe(patterns)
+					
+					return context unless block_given?
+					
+					begin
+						yield context
+					ensure
+						context.close
+					end
+				end
+				
+				# Subscribe to one or more sharded channels for pub/sub messaging (Redis 7.0+).
+				# @parameter channels [Array(String)] The sharded channels to subscribe to.
+				# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
+				# 	@parameter context [Context::Subscribe] The subscription context.
+				# @returns [Object] The result of the block if block given.
+				# @returns [Context::Subscribe] The subscription context if no block given.
+				def ssubscribe(*channels)
+					context = Context::Subscribe.new(@pool, [])
+					context.ssubscribe(channels)
+					
+					return context unless block_given?
+					
+					begin
+						yield context
+					ensure
+						context.close
+					end
+				end
+				
 				# Execute commands within a Redis transaction.
 				# @yields {|context| ...} If a block is given, it will be executed within the transaction context.
 				# 	@parameter context [Context::Transaction] The transaction context.
