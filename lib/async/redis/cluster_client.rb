@@ -63,6 +63,16 @@ module Async
 					end
 				end
 				
+				# Get a random value from the map.
+				# @returns [Object] A randomly selected value, or nil if map is empty.
+				def sample
+					return nil if @ranges.empty?
+					
+					range, value = @ranges.sample
+					
+					return value
+				end
+				
 				# Clear all ranges from the map.
 				def clear
 					@ranges.clear
@@ -125,6 +135,38 @@ module Async
 				if node = nodes.sample
 					return (node.client ||= Client.new(node.endpoint, **@options))
 				end
+			end
+			
+			# Get any available client from the cluster.
+			# This is useful for operations that don't require slot-specific routing,
+			# such as global pub/sub operations, INFO commands, or other cluster-wide operations.
+			# @parameter role [Symbol] The role of node to get (:master or :slave).
+			# @returns [Client] A Redis client for any available node.
+			def any_client(role = :master)
+				unless @shards
+					reload_cluster!
+				end
+				
+				# Sample a random shard to get better load distribution
+				if nodes = @shards.sample
+					nodes = nodes.select{|node| node.role == role}
+					
+					if node = nodes.sample
+						return (node.client ||= Client.new(node.endpoint, **@options))
+					end
+				end
+				
+				# Fallback to slot 0 if sampling fails
+				client_for(0, role)
+			end
+			
+			# Execute a Redis command on any available cluster node.
+			# This is useful for commands that don't require slot-specific routing.
+			# @parameter command [String] The Redis command to execute.
+			# @parameter arguments [Array] The command arguments.
+			# @returns [Object] The result of the Redis command.
+			def call(command, *arguments)
+				any_client.call(command, *arguments)
 			end
 			
 			protected
@@ -245,16 +287,22 @@ module Async
 			end
 			
 			# Subscribe to one or more channels for pub/sub messaging in cluster environment.
-			# The subscription will be created on the node responsible for the first channel.
+			# 
+			# NOTE: Regular pub/sub in Redis Cluster is GLOBAL - messages propagate to all nodes.
+			# This method is a convenience that subscribes via an arbitrary cluster node.
+			# The choice of node does not affect which messages you receive, since regular
+			# pub/sub messages are broadcast to all nodes in the cluster.
+			# 
+			# For slot-aware pub/sub, use ssubscribe() instead (Redis 7.0+).
+			# 
 			# @parameter channels [Array(String)] The channels to subscribe to.
 			# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
 			# 	@parameter context [Context::Subscribe] The subscription context.
 			# @returns [Object] The result of the block if block given.
 			# @returns [Context::Subscribe] The subscription context if no block given.
 			def subscribe(*channels)
-				# For regular pub/sub, route to node based on first channel
-				slot = channels.any? ? slot_for(channels.first) : 0
-				client = client_for(slot)
+				# For regular pub/sub, use any available node since messages are global
+				client = any_client
 				
 				client.subscribe(*channels) do |context|
 					if block_given?
@@ -266,16 +314,20 @@ module Async
 			end
 			
 			# Subscribe to one or more channel patterns for pub/sub messaging in cluster environment.
-			# The subscription will be created on the node responsible for a deterministic slot.
+			# 
+			# NOTE: Pattern subscriptions in Redis Cluster are GLOBAL - they match channels
+			# across all nodes. This method is a convenience that subscribes via an arbitrary
+			# cluster node. Pattern matching works across the entire cluster regardless of
+			# which node you subscribe from.
+			# 
 			# @parameter patterns [Array(String)] The channel patterns to subscribe to.
 			# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
 			# 	@parameter context [Context::Subscribe] The subscription context.
 			# @returns [Object] The result of the block if block given.
 			# @returns [Context::Subscribe] The subscription context if no block given.
 			def psubscribe(*patterns)
-				# For pattern subscriptions, use a deterministic slot since patterns can match any channel
-				slot = patterns.any? ? slot_for(patterns.first) : 0
-				client = client_for(slot)
+				# For pattern subscriptions, use any available node since patterns are global
+				client = any_client
 				
 				client.psubscribe(*patterns) do |context|
 					if block_given?

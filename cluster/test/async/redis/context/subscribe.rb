@@ -3,6 +3,7 @@
 # Released under the MIT License.
 # Copyright, 2025, by Samuel Williams.
 
+require "async/variable"
 require "async/redis/cluster_client"
 require "sus/fixtures/async"
 require "securerandom"
@@ -29,58 +30,34 @@ describe Async::Redis::Context::Subscribe do
 			
 			it "can subscribe to sharded channels and receive messages" do
 				received_message = nil
-				condition = Async::Condition.new
-				spublish_available = false
+				ready = Async::Variable.new
 				
 				# Set up the subscriber using cluster client's ssubscribe method
-				subscriber_task = reactor.async do
-					begin
-						cluster.ssubscribe(shard_channel) do |context|
-							condition.signal # Signal that we're ready
-							spublish_available = true
-							
-							type, name, message = context.listen
-							
-							expect(type).to be == "smessage"
-							expect(name).to be == shard_channel
-							received_message = message
-						end
-					rescue Protocol::Redis::ServerError => error
-						if error.message.include?("unknown command")
-							Console.warn("SSUBSCRIBE not available on this Redis version")
-							condition.signal
-						else
-							raise
-						end
+				subscriber_task = Async do
+					cluster.ssubscribe(shard_channel) do |context|
+						ready.resolve
+						
+						type, name, message = context.listen
+						
+						expect(type).to be == "smessage"
+						expect(name).to be == shard_channel
+						received_message = message
 					end
 				end
 				
 				# Set up the publisher
-				publisher_task = reactor.async do
-					condition.wait # Wait for subscriber to be ready
+				publisher_task = Async do
+					ready.wait
 					
-					if spublish_available
-						begin
-							# Get a client on the same node as the subscriber for SPUBLISH
-							slot = cluster.slot_for(shard_channel)
-							publisher_client = cluster.client_for(slot)
-							publisher_client.call("SPUBLISH", shard_channel, shard_message)
-						rescue => error
-							Console.warn("SPUBLISH failed: #{error}")
-						end
-					end
+					slot = cluster.slot_for(shard_channel)
+					publisher_client = cluster.client_for(slot)
+					publisher_client.call("SPUBLISH", shard_channel, shard_message)
 				end
 				
 				publisher_task.wait
-				sleep(0.1) # Allow message delivery
-				subscriber_task.stop
+				subscriber_task.wait
 				
-				# Only check message if sharded pub/sub was available
-				if spublish_available && received_message
-					expect(received_message).to be == shard_message
-				else
-					Console.warn("Skipping assertion - sharded pub/sub not available on this Redis version")
-				end
+				expect(received_message).to be == shard_message
 			end
 			
 			it "distributes sharded messages across cluster nodes" do
@@ -94,26 +71,26 @@ describe Async::Redis::Context::Subscribe do
 				]
 				
 				# Find channels that map to different slots/nodes
-				channel_slots = channels.map {|ch| [ch, cluster.slot_for(ch)]}
+				channel_slots = channels.map {|channel| [channel, cluster.slot_for(channel)]}
 				unique_slots = channel_slots.map(&:last).uniq
 				
 				# We should have channels distributed across different slots
 				expect(unique_slots.size).to be > 1
 				
 				received_messages = []
-				condition = Async::Condition.new
+				ready = Async::Variable.new
 				subscriber_count = 0
 				target_count = channels.size
 				
 				# Set up subscribers for each channel
 				subscriber_tasks = channels.map do |channel|
-					reactor.async do
+					Async do
 						slot = cluster.slot_for(channel)
 						client = cluster.client_for(slot)
 						
 						client.ssubscribe(channel) do |context|
 							subscriber_count += 1
-							condition.signal if subscriber_count == target_count
+							ready.resolve if subscriber_count == target_count
 							
 							type, name, message = context.listen
 							received_messages << {channel: name, message: message, slot: slot}
@@ -122,27 +99,19 @@ describe Async::Redis::Context::Subscribe do
 				end
 				
 				# Set up publisher
-				publisher_task = reactor.async do
-					condition.wait # Wait for all subscribers
+				publisher_task = Async do
+					ready.wait # Wait for all subscribers
 					
 					channels.each_with_index do |channel, index|
 						slot = cluster.slot_for(channel)
 						client = cluster.client_for(slot)
 						
-						begin
-							client.call("SPUBLISH", channel, "message-#{index}")
-						rescue => error
-							Console.warn("SPUBLISH failed for #{channel}: #{error}")
-							# Clean up and skip if SPUBLISH not available
-							subscriber_tasks.each(&:stop)
-							return
-						end
+						client.call("SPUBLISH", channel, "message-#{index}")
 					end
 				end
 				
 				publisher_task.wait
-				sleep(0.1) # Allow time for message delivery
-				subscriber_tasks.each(&:stop)
+				subscriber_tasks.each(&:wait)
 				
 				# Verify we received messages for different channels
 				expect(received_messages.size).to be == channels.size
@@ -197,20 +166,12 @@ describe Async::Redis::Context::Subscribe do
 					
 					# Publish to sharded channel
 					shard_client = cluster.client_for(shard_slot)
-					begin
-						shard_client.call("SPUBLISH", shard_channel, "sharded message")
-					rescue => error
-						Console.warn("SPUBLISH not available: #{error}")
-						regular_task.stop
-						shard_task.stop
-						return
-					end
+					shard_client.call("SPUBLISH", shard_channel, "sharded message")
 				end
 				
 				publisher_task.wait
-				sleep(0.1) # Allow time for message delivery
-				regular_task.stop
-				shard_task.stop
+				regular_task.wait
+				shard_task.wait
 				
 				# Should have received both messages
 				expect(received_messages.size).to be == 2
@@ -276,17 +237,11 @@ describe Async::Redis::Context::Subscribe do
 					publisher_client.publish(channel, "unified regular")
 					
 					# Publish sharded message
-					begin
-						publisher_client.call("SPUBLISH", shard_channel, "unified sharded")
-					rescue => error
-						Console.warn("SPUBLISH not available: #{error}")
-						# Skip sharded part if not available
-					end
+					publisher_client.call("SPUBLISH", shard_channel, "unified sharded")
 				end
 				
 				publisher_task.wait
-				sleep(0.1) # Allow message delivery
-				subscriber_task.stop
+				subscriber_task.wait
 				
 				# Should receive both message types on same context
 				expect(received_messages.size).to be == 2
