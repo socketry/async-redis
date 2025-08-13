@@ -5,6 +5,7 @@
 # Copyright, 2025, by Travis Bell.
 
 require_relative "client"
+require_relative "context/shard_subscribe"
 require "io/stream"
 
 module Async
@@ -138,8 +139,7 @@ module Async
 			end
 			
 			# Get any available client from the cluster.
-			# This is useful for operations that don't require slot-specific routing,
-			# such as global pub/sub operations, INFO commands, or other cluster-wide operations.
+			# This is useful for operations that don't require slot-specific routing, such as global pub/sub operations, INFO commands, or other cluster-wide operations.
 			# @parameter role [Symbol] The role of node to get (:master or :slave).
 			# @returns [Client] A Redis client for any available node.
 			def any_client(role = :master)
@@ -158,15 +158,6 @@ module Async
 				
 				# Fallback to slot 0 if sampling fails
 				client_for(0, role)
-			end
-			
-			# Execute a Redis command on any available cluster node.
-			# This is useful for commands that don't require slot-specific routing.
-			# @parameter command [String] The Redis command to execute.
-			# @parameter arguments [Array] The command arguments.
-			# @returns [Object] The result of the Redis command.
-			def call(command, *arguments)
-				any_client.call(command, *arguments)
 			end
 			
 			protected
@@ -339,23 +330,24 @@ module Async
 			end
 			
 			# Subscribe to one or more sharded channels for pub/sub messaging in cluster environment (Redis 7.0+).
-			# The subscription will be created on the node responsible for the channel's hash slot.
+			# The subscription will be created on the appropriate nodes responsible for each channel's hash slot.
 			# @parameter channels [Array(String)] The sharded channels to subscribe to.
 			# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
-			# 	@parameter context [Context::Subscribe] The subscription context.
+			# 	@parameter context [Context::ShardSubscribe] The shard subscription context.
 			# @returns [Object] The result of the block if block given.
-			# @returns [Context::Subscribe] The subscription context if no block given.
+			# @returns [Context::ShardSubscribe] The shard subscription context if no block given.
 			def ssubscribe(*channels)
-				# For sharded subscriptions, route to appropriate node based on channel hash
-				slot = channels.any? ? slot_for(channels.first) : 0
-				client = client_for(slot)
+				context = Context::ShardSubscribe.new(self)
+				context.subscribe(channels) if channels.any?
 				
-				client.ssubscribe(*channels) do |context|
-					if block_given?
+				if block_given?
+					begin
 						yield context
-					else
-						return context
+					ensure
+						context.close
 					end
+				else
+					return context
 				end
 			end
 		end
