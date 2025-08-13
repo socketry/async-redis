@@ -16,7 +16,7 @@ class Subscription
 	def client
 		@client ||= Async::Redis::Client.new(@endpoint)
 	end
-
+	
 	def subscribe
 		client.subscribe(@topic) do |context|
 			while event = context.listen
@@ -24,7 +24,7 @@ class Subscription
 			end
 		end
 	end
-
+	
 	def publish(message)
 		client.publish @topic, message
 	end

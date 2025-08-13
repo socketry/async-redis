@@ -26,11 +26,11 @@ describe Protocol::Redis::Methods::Lists do
 			expect(item_a).to be == item_b
 		end
 	end
-
+	
 	it "can conditionally push and pop items from lists" do
 		
 	end
-
+	
 	it "can get, set and remove values at specific list indexes" do
 		
 	end

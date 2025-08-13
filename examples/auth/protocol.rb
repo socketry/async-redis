@@ -10,7 +10,7 @@ class AuthenticatedRESP2
 		@credentials = credentials
 		@protocol = protocol
 	end
-
+	
 	def client(stream)
 		client = @protocol.client(stream)
 		

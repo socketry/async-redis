@@ -78,7 +78,7 @@ describe Async::Redis::Client do
 		size = 1000
 		
 		client.call("DEL", list_key)
-		size.times {|i| client.call("RPUSH", list_key, i) }
+		size.times {|i| client.call("RPUSH", list_key, i)}
 		
 		response = client.call("LRANGE", list_key, 0, size - 1)
 		
@@ -86,7 +86,7 @@ describe Async::Redis::Client do
 		
 		client.close
 	end
-
+	
 	it "can use pipelining" do
 		client.pipeline do |context|
 			client.set "async_redis_test_key_1", "a"

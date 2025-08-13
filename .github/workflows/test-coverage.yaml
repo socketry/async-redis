@@ -6,7 +6,6 @@ permissions:
   contents: read
 
 env:
-  CONSOLE_OUTPUT: XTerm
   COVERAGE: PartialSummary
 
 jobs:
@@ -31,7 +30,7 @@ jobs:
           - ubuntu
         
         ruby:
-          - "3.4"
+          - ruby
     
     steps:
     - uses: actions/checkout@v4
@@ -61,7 +60,7 @@ jobs:
           - ubuntu
         
         ruby:
-          - "3.4"
+          - ruby
     
     steps:
     - uses: actions/checkout@v4
@@ -94,7 +93,7 @@ jobs:
           - ubuntu
         
         ruby:
-          - "3.4"
+          - ruby
     
     steps:
     - uses: actions/checkout@v4
@@ -128,7 +127,7 @@ jobs:
     - uses: actions/checkout@v4
     - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: "3.4"
+        ruby-version: ruby
         bundler-cache: true
     
     - uses: actions/download-artifact@v4

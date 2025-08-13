@@ -15,21 +15,21 @@ class AsyncRedisClientWrapper
 		# @return [Async::Redis::Client]
 		def call(url = "redis://localhost:6379", ssl_params: nil, **options)
 			uri = URI(url)
-
+			
 			endpoint = prepare_endpoint(uri, ssl_params)
-
+			
 			credentials = []
 			credentials.push(uri.user) if uri.user && !uri.user.empty?
 			credentials.push(uri.password) if uri.password && !uri.password.empty?
-
+			
 			db = uri.path[1..-1].to_i if uri.path
-
+			
 			protocol = AsyncRedisProtocolWrapper.new(db: db, credentials: credentials)
-
+			
 			Async::Redis::Client.new(endpoint, protocol: protocol, **options)
 		end
 		alias :connect :call
-
+		
 		# @param uri [URI]
 		# @param ssl_params [Hash]
 		# @return [::IO::Endpoint::Generic]
@@ -55,20 +55,20 @@ class AsyncRedisProtocolWrapper
 		@credentials = credentials
 		@protocol = protocol
 	end
-
+	
 	def client(stream)
 		client = @protocol.client(stream)
-
+		
 		if @credentials.any?
 			client.write_request(["AUTH", *@credentials])
 			client.read_response
 		end
-
+		
 		if @db
 			client.write_request(["SELECT", @db])
 			client.read_response
 		end
-
+		
 		return client
 	end
 end

@@ -13,11 +13,11 @@ Async do |parent|
 		Console.logger.info(task, "blpop")
 		puts redis.blpop("mylist")
 	end
-
+	
 	redis = Redis.new
 	Console.logger.info(parent, "lpush")
 	redis.lpush("mylist", "Hello World")
-
+	
 	child.wait
 end
 

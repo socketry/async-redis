@@ -11,7 +11,7 @@ describe Protocol::Redis::Methods::Hashes do
 	
 	let(:hash_field_one) {"beep-boop"}
 	let(:hash_field_two) {"cowboy"}
-	let(:hash_value) { "la la land" }
+	let(:hash_value) {"la la land"}
 	let(:hash_key) {root["hash_key"]}
 	
 	it "can set a fields value" do
