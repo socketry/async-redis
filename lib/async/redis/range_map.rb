@@ -8,7 +8,7 @@ module Async
 			def initialize
 				@ranges = []
 			end
-
+			
 			# Add a range-value pair to the map.
 			# @parameter range [Range] The range to map.
 			# @parameter value [Object] The value to associate with the range.
@@ -17,7 +17,7 @@ module Async
 				@ranges << [range, value]
 				return value
 			end
-
+			
 			# Find the value associated with a key within any range.
 			# @parameter key [Object] The key to find.
 			# @yields {...} Block called if no range contains the key.
@@ -31,7 +31,7 @@ module Async
 				end
 				return nil
 			end
-
+			
 			# Iterate over all values in the map.
 			# @yields {|value| ...} Block called for each value.
 			#  @parameter value [Object] The value from the range-value pair.
@@ -40,7 +40,7 @@ module Async
 					yield value
 				end
 			end
-
+			
 			# Get a random value from the map.
 			# @returns [Object] A randomly selected value, or nil if map is empty.
 			def sample
@@ -48,7 +48,7 @@ module Async
 				range, value = @ranges.sample
 				return value
 			end
-
+			
 			# Clear all ranges from the map.
 			def clear
 				@ranges.clear

@@ -285,7 +285,7 @@ module Async
 				if channels.any?
 					context.subscribe(channels)
 				end
-
+				
 				if block_given?
 					begin
 						yield context
