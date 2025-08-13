@@ -8,7 +8,7 @@ module Async
 		# Context for managing sharded subscriptions across multiple Redis cluster nodes.
 		# This class handles the complexity of subscribing to channels that may be distributed
 		# across different shards in a Redis cluster.
-		class ClusterSubscribe
+		class ClusterSubscription
 			# Initialize a new shard subscription context.
 			# @parameter cluster_client [ClusterClient] The cluster client to use.
 			def initialize(cluster_client)

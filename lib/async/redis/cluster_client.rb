@@ -5,14 +5,18 @@
 # Copyright, 2025, by Travis Bell.
 
 require_relative "client"
-require_relative "cluster_subscribe"
+require_relative "cluster_subscription"
 require_relative "range_map"
 require "io/stream"
+
+require "protocol/redis/cluster/methods"
 
 module Async
 	module Redis
 		# A Redis cluster client that manages multiple Redis instances and handles cluster operations.
 		class ClusterClient
+			include ::Protocol::Redis::Cluster::Methods
+			
 			# Raised when cluster configuration cannot be reloaded.
 			class ReloadError < StandardError
 			end
@@ -220,67 +224,15 @@ module Async
 				return slots
 			end
 			
-			# Subscribe to one or more channels for pub/sub messaging in cluster environment.
-			# 
-			# NOTE: Regular pub/sub in Redis Cluster is GLOBAL - messages propagate to all nodes.
-			# This method is a convenience that subscribes via an arbitrary cluster node.
-			# The choice of node does not affect which messages you receive, since regular
-			# pub/sub messages are broadcast to all nodes in the cluster.
-			# 
-			# For slot-aware pub/sub, use ssubscribe() instead (Redis 7.0+).
-			# 
-			# @parameter channels [Array(String)] The channels to subscribe to.
-			# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
-			# 	@parameter context [Context::Subscribe] The subscription context.
-			# @returns [Object] The result of the block if block given.
-			# @returns [Context::Subscribe] The subscription context if no block given.
-			def subscribe(*channels)
-				# For regular pub/sub, use any available node since messages are global
-				client = any_client
-				
-				client.subscribe(*channels) do |context|
-					if block_given?
-						yield context
-					else
-						return context
-					end
-				end
-			end
-			
-			# Subscribe to one or more channel patterns for pub/sub messaging in cluster environment.
-			# 
-			# NOTE: Pattern subscriptions in Redis Cluster are GLOBAL - they match channels
-			# across all nodes. This method is a convenience that subscribes via an arbitrary
-			# cluster node. Pattern matching works across the entire cluster regardless of
-			# which node you subscribe from.
-			# 
-			# @parameter patterns [Array(String)] The channel patterns to subscribe to.
-			# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
-			# 	@parameter context [Context::Subscribe] The subscription context.
-			# @returns [Object] The result of the block if block given.
-			# @returns [Context::Subscribe] The subscription context if no block given.
-			def psubscribe(*patterns)
-				# For pattern subscriptions, use any available node since patterns are global
-				client = any_client
-				
-				client.psubscribe(*patterns) do |context|
-					if block_given?
-						yield context
-					else
-						return context
-					end
-				end
-			end
-			
-			# Subscribe to one or more sharded channels for pub/sub messaging in cluster environment (Redis 7.0+).
+			# Subscribe to one or more sharded channels for pub/sub messaging in cluster environment.
 			# The subscription will be created on the appropriate nodes responsible for each channel's hash slot.
 			# @parameter channels [Array(String)] The sharded channels to subscribe to.
 			# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
 			# 	@parameter context [Context::ShardSubscribe] The shard subscription context.
 			# @returns [Object] The result of the block if block given.
 			# @returns [Context::ShardSubscribe] The shard subscription context if no block given.
-			def ssubscribe(*channels)
-				context = ClusterSubscribe.new(self)
+			def subscribe(*channels)
+				context = ClusterSubscription.new(self)
 				
 				if channels.any?
 					context.subscribe(channels)

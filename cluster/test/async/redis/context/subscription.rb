@@ -8,7 +8,7 @@ require "async/redis/cluster_client"
 require "sus/fixtures/async"
 require "securerandom"
 
-describe Async::Redis::Context::Subscribe do
+describe Async::Redis::Context::Subscription do
 	include Sus::Fixtures::Async::ReactorContext
 	
 	with "in cluster environment" do
@@ -34,7 +34,7 @@ describe Async::Redis::Context::Subscribe do
 				
 				# Set up the subscriber using cluster client's ssubscribe method
 				subscriber_task = Async do
-					cluster.ssubscribe(shard_channel) do |context|
+					cluster.subscribe(shard_channel) do |context|
 						ready.resolve
 						
 						type, name, message = context.listen
@@ -49,9 +49,7 @@ describe Async::Redis::Context::Subscribe do
 				publisher_task = Async do
 					ready.wait
 					
-					slot = cluster.slot_for(shard_channel)
-					publisher_client = cluster.client_for(slot)
-					publisher_client.call("SPUBLISH", shard_channel, shard_message)
+					cluster.publish(shard_channel, shard_message)
 				end
 				
 				publisher_task.wait

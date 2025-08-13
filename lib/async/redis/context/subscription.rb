@@ -10,7 +10,7 @@ module Async
 	module Redis
 		module Context
 			# Context for Redis pub/sub subscription operations.
-			class Subscribe < Generic
+			class Subscription < Generic
 				MESSAGE = "message"
 				PMESSAGE = "pmessage"
 				SMESSAGE = "smessage"

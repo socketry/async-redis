@@ -7,7 +7,7 @@ require "async/redis/client"
 require "sus/fixtures/async"
 require "securerandom"
 
-describe Async::Redis::Context::Subscribe do
+describe Async::Redis::Context::Subscription do
 	include Sus::Fixtures::Async::ReactorContext
 	
 	let(:endpoint) {Async::Redis.local_endpoint}
