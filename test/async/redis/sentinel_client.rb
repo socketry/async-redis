@@ -53,7 +53,7 @@ describe Async::Redis::SentinelClient do
 	end
 	
 	with "scheme detection" do
-		let(:client) { subject.new(sentinels) }
+		let(:client) {subject.new(sentinels)}
 		
 		it "detects redis scheme for options without ssl_context" do
 			options = {database: 1, timeout: 5}
@@ -72,9 +72,9 @@ describe Async::Redis::SentinelClient do
 	end
 	
 	with "endpoint options by role" do
-		let(:master_options) { {database: 1, timeout: 5} }
-		let(:slave_options) { {database: 2, timeout: 10} }
-		let(:client) { subject.new(sentinels, master_options: master_options, slave_options: slave_options) }
+		let(:master_options) {{database: 1, timeout: 5}}
+		let(:slave_options) {{database: 2, timeout: 10}}
+		let(:client) {subject.new(sentinels, master_options: master_options, slave_options: slave_options)}
 		
 		it "stores master options correctly" do
 			expect(client.instance_variable_get(:@master_options)).to be == master_options

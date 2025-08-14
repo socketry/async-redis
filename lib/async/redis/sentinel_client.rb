@@ -107,7 +107,7 @@ module Async
 					rescue Errno::ECONNREFUSED
 						next
 					end
-
+					
 					return Endpoint.for(scheme, address[0], port: address[1], **options) if address
 				end
 				
@@ -156,7 +156,7 @@ module Async
 					endpoint = resolve_address
 					peer = endpoint.connect
 					stream = ::IO::Stream(peer)
-
+					
 					endpoint.protocol.client(stream)
 				end
 			end
