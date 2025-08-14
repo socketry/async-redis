@@ -5,12 +5,18 @@
 # Copyright, 2025, by Travis Bell.
 
 require_relative "client"
+require_relative "cluster_subscription"
+require_relative "range_map"
 require "io/stream"
+
+require "protocol/redis/cluster/methods"
 
 module Async
 	module Redis
 		# A Redis cluster client that manages multiple Redis instances and handles cluster operations.
 		class ClusterClient
+			include ::Protocol::Redis::Cluster::Methods
+			
 			# Raised when cluster configuration cannot be reloaded.
 			class ReloadError < StandardError
 			end
@@ -20,54 +26,6 @@ module Async
 			end
 			
 			Node = Struct.new(:id, :endpoint, :role, :health, :client)
-			
-			# A map that stores ranges and their associated values for efficient lookup.
-			class RangeMap
-				# Initialize a new RangeMap.
-				def initialize
-					@ranges = []
-				end
-				
-				# Add a range-value pair to the map.
-				# @parameter range [Range] The range to map.
-				# @parameter value [Object] The value to associate with the range.
-				# @returns [Object] The added value.
-				def add(range, value)
-					@ranges << [range, value]
-					
-					return value
-				end
-				
-				# Find the value associated with a key within any range.
-				# @parameter key [Object] The key to find.
-				# @yields {...} Block called if no range contains the key.
-				# @returns [Object] The value if found, result of block if given, or nil.
-				def find(key)
-					@ranges.each do |range, value|
-						return value if range.include?(key)
-					end
-					
-					if block_given?
-						return yield
-					end
-					
-					return nil
-				end
-				
-				# Iterate over all values in the map.
-				# @yields {|value| ...} Block called for each value.
-				# 	@parameter value [Object] The value from the range-value pair.
-				def each
-					@ranges.each do |range, value|
-						yield value
-					end
-				end
-				
-				# Clear all ranges from the map.
-				def clear
-					@ranges.clear
-				end
-			end
 			
 			# Create a new instance of the cluster client.
 			#
@@ -127,13 +85,35 @@ module Async
 				end
 			end
 			
+			# Get any available client from the cluster.
+			# This is useful for operations that don't require slot-specific routing, such as global pub/sub operations, INFO commands, or other cluster-wide operations.
+			# @parameter role [Symbol] The role of node to get (:master or :slave).
+			# @returns [Client] A Redis client for any available node.
+			def any_client(role = :master)
+				unless @shards
+					reload_cluster!
+				end
+				
+				# Sample a random shard to get better load distribution
+				if nodes = @shards.sample
+					nodes = nodes.select{|node| node.role == role}
+					
+					if node = nodes.sample
+						return (node.client ||= Client.new(node.endpoint, **@options))
+					end
+				end
+				
+				# Fallback to slot 0 if sampling fails
+				client_for(0, role)
+			end
+			
 			protected
 			
 			def reload_cluster!(endpoints = @endpoints)
 				@endpoints.each do |endpoint|
 					client = Client.new(endpoint, **@options)
 					
-					shards = RangeMap.new
+					shards = Async::Redis::RangeMap.new
 					endpoints = []
 					
 					client.call("CLUSTER", "SHARDS").each do |shard|
@@ -242,6 +222,32 @@ module Async
 				end
 				
 				return slots
+			end
+			
+			# Subscribe to one or more sharded channels for pub/sub messaging in cluster environment.
+			# The subscription will be created on the appropriate nodes responsible for each channel's hash slot.
+			#
+			# @parameter channels [Array(String)] The sharded channels to subscribe to.
+			# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
+			# 	@parameter context [ClusterSubscription] The cluster subscription context.
+			# @returns [Object] The result of the block if block given.
+			# @returns [ClusterSubscription] The cluster subscription context if no block given.
+			def subscribe(*channels)
+				context = ClusterSubscription.new(self)
+				
+				if channels.any?
+					context.subscribe(channels)
+				end
+				
+				if block_given?
+					begin
+						yield context
+					ensure
+						context.close
+					end
+				else
+					return context
+				end
 			end
 		end
 	end

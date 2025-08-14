@@ -60,7 +60,7 @@ jobs:
           - ubuntu
         
         ruby:
-          - ruby
+          - "3.4"
     
     steps:
     - uses: actions/checkout@v4
@@ -93,7 +93,7 @@ jobs:
           - ubuntu
         
         ruby:
-          - ruby
+          - "3.4"
     
     steps:
     - uses: actions/checkout@v4

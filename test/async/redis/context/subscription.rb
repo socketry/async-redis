@@ -7,7 +7,7 @@ require "async/redis/client"
 require "sus/fixtures/async"
 require "securerandom"
 
-describe Async::Redis::Context::Subscribe do
+describe Async::Redis::Context::Subscription do
 	include Sus::Fixtures::Async::ReactorContext
 	
 	let(:endpoint) {Async::Redis.local_endpoint}
@@ -88,6 +88,26 @@ describe Async::Redis::Context::Subscribe do
 			listener.wait
 		ensure
 			subscription.close
+		end
+	end
+	
+	with "#close" do
+		it "causes #listen to exit" do
+			skip_unless_minimum_ruby_version("3.5")
+			
+			subscription = client.subscribe(news_channel)
+			error = nil
+			
+			listener = reactor.async do
+				subscription.listen
+			rescue => error
+				# Ignore.
+			end
+			
+			subscription.close
+			listener.wait
+			
+			expect(error).to be_a(IOError)
 		end
 	end
 end

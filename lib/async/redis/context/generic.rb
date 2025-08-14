@@ -22,10 +22,15 @@ module Async
 				
 				# Close the context and release the connection back to the pool.
 				def close
-					if @connection
-						@pool.release(@connection)
+					if connection = @connection
 						@connection = nil
+						@pool.release(connection)
 					end
+				end
+				
+				# @returns [Boolean] Whether the context is closed.
+				def closed?
+					@connection.nil?
 				end
 				
 				# Write a Redis command request to the connection.

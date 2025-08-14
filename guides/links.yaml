@@ -1,2 +1,5 @@
 getting-started:
   order: 1
+
+subscriptions:
+  order: 2

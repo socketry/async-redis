@@ -27,6 +27,9 @@ Async do
 	
 	client = Async::Redis::Client.new(endpoint)
 	puts client.info
+	
+	client.set("mykey", "myvalue")
+	puts client.get("mykey")
 end
 ```
 
@@ -86,34 +89,6 @@ ensure
 end
 ```
 
-### Subscriptions
+## Next Steps
 
-``` ruby
-require 'async'
-require 'async/redis'
-
-endpoint = Async::Redis.local_endpoint
-client = Async::Redis::Client.new(endpoint)
-
-Async do |task|
-	condition = Async::Condition.new
-	
-	publisher = task.async do
-		condition.wait
-		
-		client.publish 'status.frontend', 'good'
-	end
-	
-	subscriber = task.async do
-		client.subscribe 'status.frontend' do |context|
-			condition.signal # We are waiting for messages.
-			
-			type, name, message = context.listen
-			
-			pp type, name, message
-		end
-	end
-ensure
-	client.close
-end
-```
+- [Subscriptions](../subscriptions/) - Learn how to use Redis pub/sub functionality for real-time messaging.

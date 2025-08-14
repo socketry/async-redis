@@ -9,7 +9,7 @@
 
 require_relative "context/pipeline"
 require_relative "context/transaction"
-require_relative "context/subscribe"
+require_relative "context/subscription"
 require_relative "endpoint"
 
 require "io/endpoint/host_endpoint"
@@ -32,11 +32,49 @@ module Async
 				# Subscribe to one or more channels for pub/sub messaging.
 				# @parameter channels [Array(String)] The channels to subscribe to.
 				# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
-				# 	@parameter context [Context::Subscribe] The subscription context.
+				# 	@parameter context [Context::Subscription] The subscription context.
 				# @returns [Object] The result of the block if block given.
-				# @returns [Context::Subscribe] The subscription context if no block given.
+				# @returns [Context::Subscription] The subscription context if no block given.
 				def subscribe(*channels)
-					context = Context::Subscribe.new(@pool, channels)
+					context = Context::Subscription.new(@pool, channels)
+					
+					return context unless block_given?
+					
+					begin
+						yield context
+					ensure
+						context.close
+					end
+				end
+				
+				# Subscribe to one or more channel patterns for pub/sub messaging.
+				# @parameter patterns [Array(String)] The channel patterns to subscribe to.
+				# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
+				# 	@parameter context [Context::Subscription] The subscription context.
+				# @returns [Object] The result of the block if block given.
+				# @returns [Context::Subscription] The subscription context if no block given.
+				def psubscribe(*patterns)
+					context = Context::Subscription.new(@pool, [])
+					context.psubscribe(patterns)
+					
+					return context unless block_given?
+					
+					begin
+						yield context
+					ensure
+						context.close
+					end
+				end
+				
+				# Subscribe to one or more sharded channels for pub/sub messaging (Redis 7.0+).
+				# @parameter channels [Array(String)] The sharded channels to subscribe to.
+				# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
+				# 	@parameter context [Context::Subscription] The subscription context.
+				# @returns [Object] The result of the block if block given.
+				# @returns [Context::Subscription] The subscription context if no block given.
+				def ssubscribe(*channels)
+					context = Context::Subscription.new(@pool, [])
+					context.ssubscribe(channels)
 					
 					return context unless block_given?
 					

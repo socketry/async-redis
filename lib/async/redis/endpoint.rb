@@ -210,6 +210,8 @@ module Async
 				end
 			end
 			
+			# Get the credentials for authentication.
+			# @returns [Array(String) | Nil] The username and password credentials or nil if not specified.
 			def credentials
 				@options[:credentials] || extract_userinfo(@url.userinfo)
 			end
@@ -224,6 +226,8 @@ module Async
 				end
 			end
 			
+			# Check if the endpoint is connecting to localhost.
+			# @returns [Boolean] True if connecting to localhost.
 			def localhost?
 				@url.hostname =~ /^(.*?\.)?localhost\.?$/
 			end
@@ -237,6 +241,8 @@ module Async
 				end
 			end
 			
+			# Get the SSL context for secure connections.
+			# @returns [OpenSSL::SSL::SSLContext] The SSL context configured for this endpoint.
 			def ssl_context
 				@options[:ssl_context] || OpenSSL::SSL::SSLContext.new.tap do |context|
 					context.set_params(
@@ -245,6 +251,9 @@ module Async
 				end
 			end
 			
+			# Build the underlying endpoint with optional SSL wrapping.
+			# @parameter endpoint [IO::Endpoint] Optional base endpoint to wrap.
+			# @returns [IO::Endpoint] The built endpoint, potentially wrapped with SSL.
 			def build_endpoint(endpoint = nil)
 				endpoint ||= tcp_endpoint
 				
@@ -260,22 +269,33 @@ module Async
 				return endpoint
 			end
 			
+			# Get the underlying endpoint, building it if necessary.
+			# @returns [IO::Endpoint] The underlying endpoint for connections.
 			def endpoint
 				@endpoint ||= build_endpoint
 			end
 			
+			# Set the underlying endpoint.
+			# @parameter endpoint [IO::Endpoint] The endpoint to wrap and use.
 			def endpoint=(endpoint)
 				@endpoint = build_endpoint(endpoint)
 			end
 			
+			# Bind to the endpoint and yield the server socket.
+			# @parameter arguments [Array] Arguments to pass to the underlying endpoint bind method.
+			# @yields [IO] The bound server socket.
 			def bind(*arguments, &block)
 				endpoint.bind(*arguments, &block)
 			end
 			
+			# Connect to the endpoint and yield the client socket.
+			# @yields [IO] The connected client socket.
 			def connect(&block)
 				endpoint.connect(&block)
 			end
 			
+			# Iterate over each possible endpoint variation.
+			# @yields [Endpoint] Each endpoint variant.
 			def each
 				return to_enum unless block_given?
 				
@@ -284,14 +304,21 @@ module Async
 				end
 			end
 			
+			# Get the key for hashing and equality comparison.
+			# @returns [Array] The key components for this endpoint.
 			def key
 				[@url, @options]
 			end
 			
+			# Check if this endpoint is equal to another.
+			# @parameter other [Endpoint] The other endpoint to compare with.
+			# @returns [Boolean] True if the endpoints are equal.
 			def eql? other
 				self.key.eql? other.key
 			end
 			
+			# Get the hash code for this endpoint.
+			# @returns [Integer] The hash code based on the endpoint's key.
 			def hash
 				self.key.hash
 			end
