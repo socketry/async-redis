@@ -58,11 +58,19 @@ module Async
 			end
 			
 			# Construct an endpoint with a specified scheme, hostname, optional path, and options.
+			# If no scheme is provided, it will be auto-detected based on SSL context.
 			#
-			# @parameter scheme [String] The scheme to use, e.g. "redis" or "rediss".
+			# @parameter scheme [String, nil] The scheme to use, e.g. "redis" or "rediss". If nil, will auto-detect.
 			# @parameter hostname [String] The hostname to connect to (or bind to).
 			# @parameter options [Hash] Additional options, passed to {#initialize}.
 			def self.for(scheme, host, credentials: nil, port: nil, database: nil, **options)
+				# Auto-detect scheme if not provided:
+				if default_scheme = options.delete(:scheme)
+					scheme ||= default_scheme
+				end
+				
+				scheme ||= options.key?(:ssl_context) ? "rediss" : "redis"
+				
 				uri_klass = SCHEMES.fetch(scheme.downcase) do
 					raise ArgumentError, "Unsupported scheme: #{scheme.inspect}"
 				end

@@ -111,28 +111,6 @@ describe Async::Redis::SentinelClient do
 			expect(slave_client_fallback.get(key)).to be == value
 		end
 		
-		it "handles secure connections with ssl_context in master_options" do
-			# Note: This test verifies the scheme detection logic without requiring actual SSL setup
-			# The scheme_for_options method should return "rediss" when ssl_context is present
-			
-			ssl_context = OpenSSL::SSL::SSLContext.new
-			master_options = {ssl_context: ssl_context}
-			
-			client_with_ssl = subject.new(sentinels, master_options: master_options)
-			
-			# Verify the scheme detection works
-			expect(client_with_ssl.send(:scheme_for_options, master_options)).to be == "rediss"
-		end
-		
-		it "handles non-secure connections without ssl_context" do
-			master_options = {database: 0}
-			
-			client_without_ssl = subject.new(sentinels, master_options: master_options)
-			
-			# Verify the scheme detection works
-			expect(client_without_ssl.send(:scheme_for_options, master_options)).to be == "redis"
-		end
-		
 		it "provides correct endpoint options for master role" do
 			master_options = {database: 1, timeout: 5}
 			slave_options = {database: 2, timeout: 10}

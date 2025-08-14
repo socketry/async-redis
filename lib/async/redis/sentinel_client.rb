@@ -99,8 +99,6 @@ module Async
 			# Resolve the master endpoint address.
 			# @returns [Endpoint | Nil] The master endpoint or nil if not found.
 			def resolve_master(options = @master_options)
-				scheme = scheme_for_options(options)
-				
 				sentinels do |client|
 					begin
 						address = client.call("SENTINEL", "GET-MASTER-ADDR-BY-NAME", @master_name)
@@ -108,7 +106,7 @@ module Async
 						next
 					end
 					
-					return Endpoint.for(scheme, address[0], port: address[1], **options) if address
+					return Endpoint.for(nil, address[0], port: address[1], **options) if address
 				end
 				
 				return nil
@@ -117,8 +115,6 @@ module Async
 			# Resolve a slave endpoint address.
 			# @returns [Endpoint | Nil] A slave endpoint or nil if not found.
 			def resolve_slave(options = @slave_options)
-				scheme = scheme_for_options(options)
-				
 				sentinels do |client|
 					begin
 						reply = client.call("SENTINEL", "SLAVES", @master_name)
@@ -130,7 +126,7 @@ module Async
 					next if slaves.empty?
 					
 					slave = select_slave(slaves)
-					return Endpoint.for(scheme, slave["ip"], port: slave["port"], **options)
+					return Endpoint.for(nil, slave["ip"], port: slave["port"], **options)
 				end
 				
 				return nil
@@ -138,14 +134,8 @@ module Async
 			
 			protected
 			
-			# Determine the scheme (redis or rediss) based on the endpoint options.
-			# @parameter options [Hash] The endpoint options.
-			# @returns [String] The scheme to use.
-			def scheme_for_options(options)
-				options.key?(:ssl_context) ? "rediss" : "redis"
-			end
-			
 			def assign_default_tags(tags)
+				tags[:role] ||= @role
 			end
 			
 			# Override the parent method. The only difference is that this one needs to resolve the master/slave address.

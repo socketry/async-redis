@@ -52,25 +52,6 @@ describe Async::Redis::SentinelClient do
 		end
 	end
 	
-	with "scheme detection" do
-		let(:client) {subject.new(sentinels)}
-		
-		it "detects redis scheme for options without ssl_context" do
-			options = {database: 1, timeout: 5}
-			expect(client.send(:scheme_for_options, options)).to be == "redis"
-		end
-		
-		it "detects rediss scheme for options with ssl_context" do
-			ssl_context = OpenSSL::SSL::SSLContext.new
-			options = {ssl_context: ssl_context}
-			expect(client.send(:scheme_for_options, options)).to be == "rediss"
-		end
-		
-		it "detects redis scheme for empty options" do
-			expect(client.send(:scheme_for_options, {})).to be == "redis"
-		end
-	end
-	
 	with "endpoint options by role" do
 		let(:master_options) {{database: 1, timeout: 5}}
 		let(:slave_options) {{database: 2, timeout: 10}}
@@ -86,23 +67,24 @@ describe Async::Redis::SentinelClient do
 	end
 	
 	with "role-specific scheme handling" do
-		it "uses correct scheme for master with SSL" do
+		it "creates correct endpoint scheme for master with SSL" do
 			ssl_context = OpenSSL::SSL::SSLContext.new
 			master_options = {ssl_context: ssl_context}
-			client = subject.new(sentinels, master_options: master_options)
 			
-			expect(client.send(:scheme_for_options, master_options)).to be == "rediss"
+			endpoint = Async::Redis::Endpoint.for(nil, "localhost", **master_options)
+			expect(endpoint.scheme).to be == "rediss"
 		end
 		
-		it "uses different schemes for master vs slave when options differ" do
+		it "creates different schemes for master vs slave when options differ" do
 			ssl_context = OpenSSL::SSL::SSLContext.new
 			master_options = {ssl_context: ssl_context}  # SSL enabled
 			slave_options = {database: 1}  # No SSL
 			
-			client = subject.new(sentinels, master_options: master_options, slave_options: slave_options)
+			master_endpoint = Async::Redis::Endpoint.for(nil, "localhost", **master_options)
+			slave_endpoint = Async::Redis::Endpoint.for(nil, "localhost", **slave_options)
 			
-			expect(client.send(:scheme_for_options, master_options)).to be == "rediss"
-			expect(client.send(:scheme_for_options, slave_options)).to be == "redis"
+			expect(master_endpoint.scheme).to be == "rediss"
+			expect(slave_endpoint.scheme).to be == "redis"
 		end
 	end
 end
