@@ -21,16 +21,15 @@ module Async
 			#
 			# @property endpoints [Array(Endpoint)] The list of sentinel endpoints.
 			# @property master_name [String] The name of the master instance, defaults to 'mymaster'.
-			# @property master_options [Hash] Connection options for master.
+			# @property master_options [Hash] Connection options for master instances.
+			# @property slave_options [Hash] Connection options for slave instances (defaults to master_options if not specified).
 			# @property role [Symbol] The role of the instance that you want to connect to, either `:master` or `:slave`.
-			def initialize(endpoints, master_name: DEFAULT_MASTER_NAME, master_options: nil, role: :master, **options)
+			def initialize(endpoints, master_name: DEFAULT_MASTER_NAME, master_options: nil, slave_options: nil, role: :master, **options)
 				@endpoints = endpoints
 				@master_name = master_name
 				@master_options = master_options || {}
+				@slave_options = slave_options || @master_options
 				@role = role
-
-				@ssl = !!@master_options.key?(:ssl_context)
-				@scheme = "redis#{@ssl ? 's' : ''}"
 				
 				# A cache of sentinel connections.
 				@sentinels = {}
@@ -99,7 +98,9 @@ module Async
 			
 			# Resolve the master endpoint address.
 			# @returns [Endpoint | Nil] The master endpoint or nil if not found.
-			def resolve_master
+			def resolve_master(options = @master_options)
+				scheme = scheme_for_options(options)
+				
 				sentinels do |client|
 					begin
 						address = client.call("SENTINEL", "GET-MASTER-ADDR-BY-NAME", @master_name)
@@ -107,7 +108,7 @@ module Async
 						next
 					end
 
-					return Endpoint.for(@scheme, address[0], port: address[1], **@master_options) if address
+					return Endpoint.for(scheme, address[0], port: address[1], **options) if address
 				end
 				
 				return nil
@@ -115,7 +116,9 @@ module Async
 			
 			# Resolve a slave endpoint address.
 			# @returns [Endpoint | Nil] A slave endpoint or nil if not found.
-			def resolve_slave
+			def resolve_slave(options = @slave_options)
+				scheme = scheme_for_options(options)
+				
 				sentinels do |client|
 					begin
 						reply = client.call("SENTINEL", "SLAVES", @master_name)
@@ -127,13 +130,20 @@ module Async
 					next if slaves.empty?
 					
 					slave = select_slave(slaves)
-					return Endpoint.for(@scheme, slave["ip"], port: slave["port"], **@master_options)
+					return Endpoint.for(scheme, slave["ip"], port: slave["port"], **options)
 				end
 				
 				return nil
 			end
 			
 			protected
+			
+			# Determine the scheme (redis or rediss) based on the endpoint options.
+			# @parameter options [Hash] The endpoint options.
+			# @returns [String] The scheme to use.
+			def scheme_for_options(options)
+				options.key?(:ssl_context) ? "rediss" : "redis"
+			end
 			
 			def assign_default_tags(tags)
 			end
