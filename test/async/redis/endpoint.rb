@@ -143,4 +143,26 @@ describe Async::Redis::Endpoint do
 			expect(endpoint.database).to be == 3
 		end
 	end
+	
+	with "scheme auto-detection" do
+		it "auto-detects redis scheme when no ssl_context provided" do
+			endpoint = Async::Redis::Endpoint.for(nil, "localhost", port: 6379)
+			expect(endpoint.scheme).to be == "redis"
+			expect(endpoint).not.to be(:secure?)
+		end
+		
+		it "auto-detects rediss scheme when ssl_context provided" do
+			ssl_context = OpenSSL::SSL::SSLContext.new
+			endpoint = Async::Redis::Endpoint.for(nil, "localhost", ssl_context: ssl_context)
+			expect(endpoint.scheme).to be == "rediss"
+			expect(endpoint).to be(:secure?)
+		end
+		
+		it "respects explicit scheme even when ssl_context provided" do
+			ssl_context = OpenSSL::SSL::SSLContext.new
+			endpoint = Async::Redis::Endpoint.for("redis", "localhost", ssl_context: ssl_context)
+			expect(endpoint.scheme).to be == "redis"
+			expect(endpoint).not.to be(:secure?)  # scheme takes precedence
+		end
+	end
 end

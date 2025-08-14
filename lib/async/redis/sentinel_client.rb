@@ -21,13 +21,15 @@ module Async
 			#
 			# @property endpoints [Array(Endpoint)] The list of sentinel endpoints.
 			# @property master_name [String] The name of the master instance, defaults to 'mymaster'.
+			# @property master_options [Hash] Connection options for master instances.
+			# @property slave_options [Hash] Connection options for slave instances (defaults to master_options if not specified).
 			# @property role [Symbol] The role of the instance that you want to connect to, either `:master` or `:slave`.
-			# @property protocol [Protocol] The protocol to use when connecting to the actual Redis server, defaults to {Protocol::RESP2}.
-			def initialize(endpoints, master_name: DEFAULT_MASTER_NAME, role: :master, protocol: Protocol::RESP2, **options)
+			def initialize(endpoints, master_name: DEFAULT_MASTER_NAME, master_options: nil, slave_options: nil, role: :master, **options)
 				@endpoints = endpoints
 				@master_name = master_name
+				@master_options = master_options || {}
+				@slave_options = slave_options || @master_options
 				@role = role
-				@protocol = protocol
 				
 				# A cache of sentinel connections.
 				@sentinels = {}
@@ -94,9 +96,11 @@ module Async
 				end
 			end
 			
+			private
+			
 			# Resolve the master endpoint address.
 			# @returns [Endpoint | Nil] The master endpoint or nil if not found.
-			def resolve_master
+			def resolve_master(options = @master_options)
 				sentinels do |client|
 					begin
 						address = client.call("SENTINEL", "GET-MASTER-ADDR-BY-NAME", @master_name)
@@ -104,7 +108,7 @@ module Async
 						next
 					end
 					
-					return Endpoint.remote(address[0], address[1]) if address
+					return Endpoint.for(nil, address[0], port: address[1], **options) if address
 				end
 				
 				return nil
@@ -112,7 +116,7 @@ module Async
 			
 			# Resolve a slave endpoint address.
 			# @returns [Endpoint | Nil] A slave endpoint or nil if not found.
-			def resolve_slave
+			def resolve_slave(options = @slave_options)
 				sentinels do |client|
 					begin
 						reply = client.call("SENTINEL", "SLAVES", @master_name)
@@ -124,16 +128,14 @@ module Async
 					next if slaves.empty?
 					
 					slave = select_slave(slaves)
-					return Endpoint.remote(slave["ip"], slave["port"])
+					return Endpoint.for(nil, slave["ip"], port: slave["port"], **options)
 				end
 				
 				return nil
 			end
 			
-			protected
-			
 			def assign_default_tags(tags)
-				tags[:protocol] = @protocol.to_s
+				tags[:role] ||= @role
 			end
 			
 			# Override the parent method. The only difference is that this one needs to resolve the master/slave address.
@@ -145,7 +147,7 @@ module Async
 					peer = endpoint.connect
 					stream = ::IO::Stream(peer)
 					
-					@protocol.client(stream)
+					endpoint.protocol.client(stream)
 				end
 			end
 			
