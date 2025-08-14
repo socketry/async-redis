@@ -5,6 +5,7 @@
   - Add agent context.
   - Add support for pattern pub/sub.
   - Add support for sharded pub/sub.
+  - Add support for `master_options` and `slave_options` (and removed `protocol`) from `SentinelClient`.
 
 ## v0.11.2
 
