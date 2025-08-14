@@ -12,6 +12,10 @@ module Async
 		# This class handles the complexity of subscribing to channels that may be distributed
 		# across different shards in a Redis cluster.
 		class ClusterSubscription
+			# Represents a failure in the subscription process, e.g. network issues, shard failures.
+			class SubscriptionError < StandardError
+			end
+			
 			# Initialize a new shard subscription context.
 			# @parameter cluster_client [ClusterClient] The cluster client to use.
 			def initialize(cluster_client, queue: Async::LimitedQueue.new)
@@ -35,10 +39,12 @@ module Async
 			end
 			
 			# Listen for the next message from any subscribed shard.
-			# This uses a simple round-robin approach to check each shard.
-			# @returns [Array] The next message response, or nil if all connections closed.
+			# @returns [Array] The next message response.
+			# @raises [SubscriptionError] If the subscription has failed for any reason.
 			def listen
 				@queue.pop
+			rescue => error
+				raise SubscriptionError, "Failed to read message!"
 			end
 			
 			# Iterate over all messages from all subscribed shards.
@@ -67,8 +73,14 @@ module Async
 						subscription = @subscriptions[slot] = client.ssubscribe(*channels_for_slot)
 						
 						@barrier.async do
-							while true
+							# This is optimistic, in other words, subscription.listen will also fail on close.
+							until subscription.closed?
 								@queue << subscription.listen
+							end
+						ensure
+							# If we are exiting here for any reason OTHER than the subscription was closed, we need to re-create the subscription state:
+							unless subscription.closed?
+								@queue.close
 							end
 						end
 					end
@@ -94,8 +106,8 @@ module Async
 						
 						# If no channels left for this shard, close and remove it
 						if remaining_channels_for_slot.empty?
-							subscription.close
 							@subscriptions.delete(slot)
+							subscription.close
 						end
 					end
 				end

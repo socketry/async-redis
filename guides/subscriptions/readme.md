@@ -52,6 +52,31 @@ Listening for messages on 'status.frontend'...
 Received: good
 ```
 
+### Error Handling
+
+Subscriptions are at-most-once delivery. In addition, subscriptions are stateful, meaning that they maintain their own internal state and can be affected by network issues or server restarts. In order to improve resilience, it's important to implement error handling and reconnection logic.
+
+```ruby
+require 'async'
+require 'async/redis'
+
+client = Async::Redis::Client.new
+
+Async do
+	client.subscribe 'status.frontend' do |context|
+		puts "Listening for messages on 'status.frontend'..."
+		
+		context.each do |type, name, message|
+			puts "Received: #{message}"
+		end
+	end
+rescue => error
+	Console.warn(self, "Subscription failed", error)
+	sleep 1
+	retry
+end
+```
+
 ## Pattern Subscribe
 
 The `PSUBSCRIBE` command is used to subscribe to channels that match a given pattern. This allows clients to receive messages from multiple channels without subscribing to each one individually.
@@ -115,3 +140,22 @@ Async do
 	puts "Message sent!"
 end
 ```
+
+### Clustered Subscriptions
+
+While general `PUBLISH` and `SUBSCRIBE` will work on a cluster, they are less efficient as they require inter-shard communication. By default, the {ruby Async::Redis::ClusterClient} subscription mechanism defaults to `SSUBSCRIBE` and `SPUBLISH`, which are optimized for sharded environments. However, if using multiple subscriptions, internally, several connections will be made to the relevant shards, which increases the complexity.
+
+#### Cluster Topology Changes and Subscription Invalidation
+
+If the cluster is re-configured (e.g. adding or removing nodes, resharding), the subscription state may need to be re-established to account for the new topology. During this process, messages may be lost. This is expected as subscriptions are stateless.
+
+**Important**: When any individual shard subscription fails (due to resharding, node failures, or network issues), the entire cluster subscription is invalidated and will stop delivering messages. This design ensures consistency and prevents partial subscription states that could lead to missed messages on some shards.
+
+Common scenarios that trigger subscription invalidation:
+
+- **Resharding operations**: When slots are migrated between nodes (`MOVED` errors)
+- **Node failures**: When Redis nodes become unavailable
+- **Network partitions**: When connections to specific shards are lost
+- **Cluster reconfiguration**: When the cluster topology changes
+
+Applications should be prepared to handle subscription failures and implement appropriate retry strategies.

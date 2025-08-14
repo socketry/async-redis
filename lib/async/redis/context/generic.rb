@@ -28,6 +28,11 @@ module Async
 					end
 				end
 				
+				# @returns [Boolean] Whether the context is closed.
+				def closed?
+					@connection.nil?
+				end
+				
 				# Write a Redis command request to the connection.
 				# @parameter command [String] The Redis command.
 				# @parameter arguments [Array] The command arguments.

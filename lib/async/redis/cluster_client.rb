@@ -226,11 +226,12 @@ module Async
 			
 			# Subscribe to one or more sharded channels for pub/sub messaging in cluster environment.
 			# The subscription will be created on the appropriate nodes responsible for each channel's hash slot.
+			#
 			# @parameter channels [Array(String)] The sharded channels to subscribe to.
 			# @yields {|context| ...} If a block is given, it will be executed within the subscription context.
-			# 	@parameter context [Context::ShardSubscribe] The shard subscription context.
+			# 	@parameter context [ClusterSubscription] The cluster subscription context.
 			# @returns [Object] The result of the block if block given.
-			# @returns [Context::ShardSubscribe] The shard subscription context if no block given.
+			# @returns [ClusterSubscription] The cluster subscription context if no block given.
 			def subscribe(*channels)
 				context = ClusterSubscription.new(self)
 				
