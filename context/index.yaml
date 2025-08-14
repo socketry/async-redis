@@ -1,0 +1,16 @@
+# Automatically generated context index for Utopia::Project guides.
+# Do not edit then files in this directory directly, instead edit the guides and then run `bake utopia:project:agent:context:update`.
+---
+description: A Redis client library.
+metadata:
+  documentation_uri: https://socketry.github.io/async-redis/
+  source_code_uri: https://github.com/socketry/async-redis.git
+files:
+- path: getting-started.md
+  title: Getting Started
+  description: This guide explains how to use the `async-redis` gem to connect to
+    a Redis server and perform basic operations.
+- path: subscriptions.md
+  title: Subscriptions
+  description: This guide explains how to use Redis pub/sub functionality with `async-redis`
+    to publish and subscribe to messages.
