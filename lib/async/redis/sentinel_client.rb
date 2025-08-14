@@ -96,6 +96,8 @@ module Async
 				end
 			end
 			
+			private
+			
 			# Resolve the master endpoint address.
 			# @returns [Endpoint | Nil] The master endpoint or nil if not found.
 			def resolve_master(options = @master_options)
@@ -131,8 +133,6 @@ module Async
 				
 				return nil
 			end
-			
-			protected
 			
 			def assign_default_tags(tags)
 				tags[:role] ||= @role
