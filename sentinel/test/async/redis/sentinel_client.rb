@@ -37,9 +37,11 @@ describe Async::Redis::SentinelClient do
 		client.set(key, value)
 		
 		# It takes a while to replicate:
-		while true
+		timeout_count = 0
+		while timeout_count < 100 # Maximum 1 second wait
 			break if slave_client.get(key) == value
 			sleep 0.01
+			timeout_count += 1
 		end
 		
 		expect(slave_client.get(key)).to be == value
@@ -67,17 +69,20 @@ describe Async::Redis::SentinelClient do
 			slave_options = {database: 2}
 			slave_client_with_options = subject.new(sentinels, slave_options: slave_options, role: :slave)
 			
-			# Set data via master first
-			client.set(key, value)
+			# Set data via master that also uses the same database
+			master_client_with_options = subject.new(sentinels, master_options: slave_options, role: :master)
+			master_client_with_options.set(key, value)
 			
 			# Wait for replication and verify slave can read (basic connectivity)
-			while true
+			timeout_count = 0
+			while timeout_count < 100 # Maximum 1 second wait
 				begin
 					break if slave_client_with_options.get(key) == value
 				rescue
 					# May fail initially due to replication lag or connection setup
 				end
 				sleep 0.01
+				timeout_count += 1
 			end
 			
 			expect(slave_client_with_options.get(key)).to be == value
@@ -92,13 +97,15 @@ describe Async::Redis::SentinelClient do
 			client_with_master_options.set(key, value)
 			
 			# Wait for replication and verify slave can read using master options
-			while true
+			timeout_count = 0
+			while timeout_count < 100 # Maximum 1 second wait
 				begin
 					break if slave_client_fallback.get(key) == value
 				rescue
 					# May fail initially due to replication lag or connection setup
 				end
 				sleep 0.01
+				timeout_count += 1
 			end
 			
 			expect(slave_client_fallback.get(key)).to be == value
