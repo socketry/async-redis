@@ -14,9 +14,18 @@ Please see the [project documentation](https://socketry.github.io/async-redis/) 
 
   - [Getting Started](https://socketry.github.io/async-redis/guides/getting-started/index) - This guide explains how to use the `async-redis` gem to connect to a Redis server and perform basic operations.
 
+  - [Subscriptions](https://socketry.github.io/async-redis/guides/subscriptions/index) - This guide explains how to use Redis pub/sub functionality with `async-redis` to publish and subscribe to messages.
+
 ## Releases
 
 Please see the [project releases](https://socketry.github.io/async-redis/releases/index) for all releases.
+
+### v0.12.0
+
+  - Add agent context.
+  - Add support for pattern pub/sub.
+  - Add support for sharded pub/sub.
+  - Add support for `master_options` and `slave_options` (and removed `protocol`) from `SentinelClient`.
 
 ### v0.11.2
 

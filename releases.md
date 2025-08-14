@@ -1,6 +1,6 @@
 # Releases
 
-## Unreleased
+## v0.12.0
 
   - Add agent context.
   - Add support for pattern pub/sub.
