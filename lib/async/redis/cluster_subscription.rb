@@ -3,6 +3,9 @@
 # Released under the MIT License.
 # Copyright, 2025, by Samuel Williams.
 
+require "async/limited_queue"
+require "async/barrier"
+
 module Async
 	module Redis
 		# Context for managing sharded subscriptions across multiple Redis cluster nodes.
@@ -11,14 +14,22 @@ module Async
 		class ClusterSubscription
 			# Initialize a new shard subscription context.
 			# @parameter cluster_client [ClusterClient] The cluster client to use.
-			def initialize(cluster_client)
+			def initialize(cluster_client, queue: Async::LimitedQueue.new)
 				@cluster_client = cluster_client
 				@subscriptions = {}
 				@channels = []
+				
+				@barrier = Async::Barrier.new
+				@queue = queue
 			end
 			
 			# Close all shard subscriptions.
 			def close
+				if barrier = @barrier
+					@barrier = nil
+					barrier.stop
+				end
+				
 				@subscriptions.each_value(&:close)
 				@subscriptions.clear
 			end
@@ -27,25 +38,7 @@ module Async
 			# This uses a simple round-robin approach to check each shard.
 			# @returns [Array] The next message response, or nil if all connections closed.
 			def listen
-				return nil if @subscriptions.empty?
-				
-				# Simple round-robin checking of subscriptions
-				@subscriptions.each_value do |subscription|
-					# Non-blocking check for messages
-					begin
-						if response = subscription.listen
-							return response
-						end
-					rescue => error
-						# Handle connection errors gracefully
-						Console.warn(self, "Error reading from shard subscription: #{error}")
-					end
-				end
-				
-				# If no immediate messages, do a blocking wait on the first subscription
-				if first_subscription = @subscriptions.values.first
-					first_subscription.listen
-				end
+				@queue.pop
 			end
 			
 			# Iterate over all messages from all subscribed shards.
@@ -71,7 +64,13 @@ module Async
 					else
 						# Create new subscription for this shard
 						client = @cluster_client.client_for(slot)
-						@subscriptions[slot] = client.ssubscribe(*channels_for_slot)
+						subscription = @subscriptions[slot] = client.ssubscribe(*channels_for_slot)
+						
+						@barrier.async do
+							while true
+								@queue << subscription.listen
+							end
+						end
 					end
 				end
 				

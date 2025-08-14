@@ -26,7 +26,7 @@ module Async
 				
 				# Close the subscription context.
 				def close
-					# There is no way to reset subscription state. On Redis v6+ you can use RESET, but this is not supported in <= v6.
+					# This causes anyone calling `#listen` to exit, as `read_response` will fail. If we decided to use `RESET` instead, we'd need to take that into account.
 					@connection&.close
 					
 					super
@@ -36,7 +36,11 @@ module Async
 				# @returns [Array] The next message response, or nil if connection closed.
 				def listen
 					while response = @connection.read_response
-						return response if response.first == MESSAGE || response.first == PMESSAGE || response.first == SMESSAGE
+						type = response.first
+						
+						if type == MESSAGE || type == PMESSAGE || type == SMESSAGE
+							return response
+						end
 					end
 				end
 				

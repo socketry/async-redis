@@ -16,8 +16,7 @@ First, let's create a simple listener that subscribes to messages on a channel:
 require 'async'
 require 'async/redis'
 
-endpoint = Async::Redis.local_endpoint
-client = Async::Redis::Client.new(endpoint)
+client = Async::Redis::Client.new
 
 Async do
 	client.subscribe 'status.frontend' do |context|
@@ -36,12 +35,11 @@ Now, let's create a publisher that sends messages to the same channel:
 require 'async'
 require 'async/redis'
 
-endpoint = Async::Redis.local_endpoint
-client = Async::Redis::Client.new(endpoint)
+client = Async::Redis::Client.new
 
 Async do
 	puts "Publishing message..."
-	cluster_client.publish 'status.frontend', 'good'
+	client.publish 'status.frontend', 'good'
 	puts "Message sent!"
 end
 ```
@@ -82,9 +80,9 @@ Note that an extra field, `pattern` is returned when using `PSUBSCRIBE`. This fi
 
 ## Shard Subscribe
 
-If you are working with a clustered environment, you can improve performance by limiting the scope of your subscriptions to specific shards. This can help reduce the amount of data that needs to be sent over the network and improve overall throughput.
+If you are working with a clustered environment, you can improve performance by limiting the scope of your subscriptions to specific shards. This can help reduce the amount of data that needs to be sent between shards and improve overall throughput.
 
-To use sharded subscriptions, you can use the `SSUBSCRIBE` command, which allows you to subscribe to a specific shard:
+To use sharded subscriptions, use a cluster client which supports sharded pub/sub:
 
 ``` ruby
 require 'async'
@@ -116,18 +114,4 @@ Async do
 	cluster_client.publish('status.frontend', 'good')
 	puts "Message sent!"
 end
-```
-
-To see pub/sub in action, you can run the listener in one terminal and the publisher in another. The listener will receive any messages sent by the publisher to the `status.frontend` channel:
-
-```bash
-$ ruby listener.rb
-Listening for messages on 'status.frontend'...
-Received: good
-```
-
-```bash
-$ ruby publisher.rb
-Publishing message...
-Message sent!
 ```

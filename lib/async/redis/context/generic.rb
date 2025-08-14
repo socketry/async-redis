@@ -22,9 +22,9 @@ module Async
 				
 				# Close the context and release the connection back to the pool.
 				def close
-					if @connection
-						@pool.release(@connection)
+					if connection = @connection
 						@connection = nil
+						@pool.release(connection)
 					end
 				end
 				
