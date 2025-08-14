@@ -22,6 +22,4 @@ tests-1  | 🏁 Finished in 4.1s; 0.74 assertions per second.
 tests-1  | 🐢 Slow tests:
 tests-1  | 	4.1s: describe Async::Redis::SentinelClient it should resolve slave address sentinel/test/async/redis/sentinel_client.rb:35
 tests-1 exited with code 0
-
 ```
-
