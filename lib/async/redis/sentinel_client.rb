@@ -21,13 +21,16 @@ module Async
 			#
 			# @property endpoints [Array(Endpoint)] The list of sentinel endpoints.
 			# @property master_name [String] The name of the master instance, defaults to 'mymaster'.
+			# @property master_options [Hash] Connection options for master.
 			# @property role [Symbol] The role of the instance that you want to connect to, either `:master` or `:slave`.
-			# @property protocol [Protocol] The protocol to use when connecting to the actual Redis server, defaults to {Protocol::RESP2}.
-			def initialize(endpoints, master_name: DEFAULT_MASTER_NAME, role: :master, protocol: Protocol::RESP2, **options)
+			def initialize(endpoints, master_name: DEFAULT_MASTER_NAME, master_options: nil, role: :master, **options)
 				@endpoints = endpoints
 				@master_name = master_name
+				@master_options = master_options || {}
 				@role = role
-				@protocol = protocol
+
+				@ssl = !!@master_options.key?(:ssl_context)
+				@scheme = "redis#{@ssl ? 's' : ''}"
 				
 				# A cache of sentinel connections.
 				@sentinels = {}
@@ -103,8 +106,8 @@ module Async
 					rescue Errno::ECONNREFUSED
 						next
 					end
-					
-					return Endpoint.remote(address[0], address[1]) if address
+
+					return Endpoint.for(@scheme, address[0], port: address[1], **@master_options) if address
 				end
 				
 				return nil
@@ -124,7 +127,7 @@ module Async
 					next if slaves.empty?
 					
 					slave = select_slave(slaves)
-					return Endpoint.remote(slave["ip"], slave["port"])
+					return Endpoint.for(@scheme, slave["ip"], port: slave["port"], **@master_options)
 				end
 				
 				return nil
@@ -133,7 +136,6 @@ module Async
 			protected
 			
 			def assign_default_tags(tags)
-				tags[:protocol] = @protocol.to_s
 			end
 			
 			# Override the parent method. The only difference is that this one needs to resolve the master/slave address.
@@ -144,8 +146,8 @@ module Async
 					endpoint = resolve_address
 					peer = endpoint.connect
 					stream = ::IO::Stream(peer)
-					
-					@protocol.client(stream)
+
+					endpoint.protocol.client(stream)
 				end
 			end
 			
