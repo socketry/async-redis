@@ -6,6 +6,7 @@
 require "io/endpoint"
 require "io/endpoint/host_endpoint"
 require "io/endpoint/ssl_endpoint"
+require "io/endpoint/unix_endpoint"
 
 require_relative "protocol/resp2"
 require_relative "protocol/authenticated"
@@ -39,6 +40,11 @@ module Async
 			def self.remote(host, port = 6379, **options)
 				# URI::Generic.build automatically handles IPv6 addresses correctly:
 				self.new(URI::Generic.build(scheme: "redis", host: host, port: port), **options)
+			end
+
+			def self.unix(path, **options)
+				unix_endpoint = ::IO::Endpoint.unix(path, Socket::PF_UNIX)
+				self.new(URI::Generic.build(scheme: "unix", path:), unix_endpoint, **options)
 			end
 			
 			SCHEMES = {
