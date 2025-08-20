@@ -1,5 +1,9 @@
 # Releases
 
+## Unreleased
+
+  - Fix password with special characters when using sentinels.
+
 ## v0.12.0
 
   - Add agent context.

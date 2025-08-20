@@ -69,7 +69,7 @@ module Async
 			# @parameter scheme [String, nil] The scheme to use, e.g. "redis" or "rediss". If nil, will auto-detect.
 			# @parameter hostname [String] The hostname to connect to (or bind to).
 			# @parameter options [Hash] Additional options, passed to {#initialize}.
-			def self.for(scheme, host, credentials: nil, port: nil, database: nil, **options)
+			def self.for(scheme, host, port: nil, database: nil, **options)
 				# Auto-detect scheme if not provided:
 				if default_scheme = options.delete(:scheme)
 					scheme ||= default_scheme
@@ -88,7 +88,6 @@ module Async
 				self.new(
 					uri_klass.build(
 						scheme: scheme,
-						userinfo: credentials&.join(":"),
 						host: host,
 						port: port,
 						path: path,

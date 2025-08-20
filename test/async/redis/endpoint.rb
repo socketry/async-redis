@@ -106,8 +106,7 @@ describe Async::Redis::Endpoint do
 		
 		it "handles credentials correctly" do
 			endpoint = Async::Redis::Endpoint.for("redis", "localhost", credentials: ["user", "pass"], port: 6380)
-			expect(endpoint.url.to_s).to be == "redis://user:pass@localhost:6380"
-			expect(endpoint.url.userinfo).to be == "user:pass"
+			expect(endpoint.url.to_s).to be == "redis://localhost:6380"
 			expect(endpoint.credentials).to be == ["user", "pass"]
 		end
 		
@@ -131,11 +130,10 @@ describe Async::Redis::Endpoint do
 				port: 6380, 
 				database: 3
 			)
-			expect(endpoint.url.to_s).to be == "rediss://user:pass@[#{ipv6}]:6380/3"
+			expect(endpoint.url.to_s).to be == "rediss://[#{ipv6}]:6380/3"
 			expect(endpoint.url.scheme).to be == "rediss"
 			expect(endpoint.url.host).to be == "[#{ipv6}]"
 			expect(endpoint.url.hostname).to be == ipv6
-			expect(endpoint.url.userinfo).to be == "user:pass"
 			expect(endpoint.url.port).to be == 6380
 			expect(endpoint.url.path).to be == "/3"
 			expect(endpoint).to be(:secure?)
