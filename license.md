@@ -12,7 +12,7 @@ Copyright, 2021, by Olle Jonsson.
 Copyright, 2021, by Troex Nevelin.  
 Copyright, 2022, by Tim Willard.  
 Copyright, 2022, by Gleb Sinyavskiy.  
-Copyright, 2024, by Joan Lledó.  
+Copyright, 2024-2025, by Joan Lledó.  
 Copyright, 2025, by Travis Bell.  
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

@@ -2,6 +2,7 @@
 
 # Released under the MIT License.
 # Copyright, 2024-2025, by Samuel Williams.
+# Copyright, 2025, by Joan Lledó.
 
 require "async/redis/client"
 require "async/redis/protocol/authenticated"

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Released under the MIT License.
+# Copyright, 2025, by Samuel Williams.
+
 module Async
 	module Redis
 		# A map that stores ranges and their associated values for efficient lookup.

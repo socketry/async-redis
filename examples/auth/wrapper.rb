@@ -2,7 +2,7 @@
 
 # Released under the MIT License.
 # Copyright, 2021, by Troex Nevelin.
-# Copyright, 2023-2024, by Samuel Williams.
+# Copyright, 2023-2025, by Samuel Williams.
 
 require_relative "../../lib/async/redis"
 
