@@ -33,10 +33,6 @@ Async do
 end
 ```
 
-You can also encode this information in a URL:
-
-
-
 ### Connecting to Redis SSL Endpoint
 
 This example demonstrates parsing an environment variable with a `redis://` or SSL `rediss://` scheme, and demonstrates how you can specify SSL parameters on the SSLContext object.
