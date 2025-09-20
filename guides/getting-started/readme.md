@@ -88,7 +88,3 @@ ensure
 	client.close
 end
 ```
-
-## Next Steps
-
-- [Subscriptions](../subscriptions/) - Learn how to use Redis pub/sub functionality for real-time messaging.
