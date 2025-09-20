@@ -42,7 +42,11 @@ module Async
 				# URI::Generic.build automatically handles IPv6 addresses correctly:
 				self.new(URI::Generic.build(scheme: "redis", host: host, port: port), **options)
 			end
-
+			
+			# Create a local Redis endpoint from a UNIX socket path.
+			# @parameter path [String] The path to the UNIX socket.
+			# @parameter options [Hash] Additional options for the endpoint.
+			# @returns [Endpoint] A local Redis endpoint.
 			def self.unix(path, **options)
 				endpoint = ::IO::Endpoint.unix(path)
 				self.new(URI::Generic.build(scheme: "redis", path:), endpoint, **options)
