@@ -163,4 +163,40 @@ describe Async::Redis::Endpoint do
 			expect(endpoint).not.to be(:secure?)  # scheme takes precedence
 		end
 	end
+	
+	with ".unix" do
+		it "can create unix socket endpoint" do
+			unix_endpoint = Async::Redis::Endpoint.unix("/tmp/redis.sock")
+			
+			expect(unix_endpoint).to be_a(Async::Redis::Endpoint)
+			expect(unix_endpoint.url.scheme).to be == "redis"
+			expect(unix_endpoint.url.path).to be == "/tmp/redis.sock"
+			expect(unix_endpoint.url.host).to be_nil
+		end
+		
+		it "can create unix socket endpoint with options" do
+			unix_endpoint = Async::Redis::Endpoint.unix("/var/run/redis.sock", database: 1)
+			
+			expect(unix_endpoint.url.scheme).to be == "redis"
+			expect(unix_endpoint.url.path).to be == "/var/run/redis.sock"
+			expect(unix_endpoint.options[:database]).to be == 1
+		end
+		
+		it "can parse unix socket URLs with redis scheme" do
+			parsed_endpoint = Async::Redis::Endpoint.parse("redis:/tmp/redis.sock")
+			
+			expect(parsed_endpoint).to be_a(Async::Redis::Endpoint)
+			expect(parsed_endpoint.url.scheme).to be == "redis"
+			expect(parsed_endpoint.url.path).to be == "/tmp/redis.sock"
+			expect(parsed_endpoint.url.host).to be_nil
+		end
+		
+		it "can distinguish unix socket from tcp by URL structure" do
+			tcp_endpoint = Async::Redis::Endpoint.parse("redis://localhost:6379")
+			unix_endpoint = Async::Redis::Endpoint.parse("redis:/tmp/redis.sock")
+			
+			expect(tcp_endpoint.url.host).to be == "localhost"
+			expect(unix_endpoint.url.host).to be_nil
+		end
+	end
 end

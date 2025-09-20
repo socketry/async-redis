@@ -102,4 +102,13 @@ describe Async::Redis::Client do
 		
 		client.close
 	end
+	
+	it "can create unix socket endpoint" do
+		# Test that the unix socket endpoint creation works (without connecting)
+		unix_endpoint = Async::Redis::Endpoint.unix("/tmp/redis.sock")
+		
+		expect(unix_endpoint).to be_a(Async::Redis::Endpoint)
+		expect(unix_endpoint.url.scheme).to be == "redis"
+		expect(unix_endpoint.url.path).to be == "/tmp/redis.sock"
+	end
 end

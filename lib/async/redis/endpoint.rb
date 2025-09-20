@@ -43,8 +43,8 @@ module Async
 			end
 
 			def self.unix(path, **options)
-				unix_endpoint = ::IO::Endpoint.unix(path, Socket::PF_UNIX)
-				self.new(URI::Generic.build(scheme: "unix", path:), unix_endpoint, **options)
+				endpoint = ::IO::Endpoint.unix(path)
+				self.new(URI::Generic.build(scheme: "redis", path:), endpoint, **options)
 			end
 			
 			SCHEMES = {
@@ -268,7 +268,7 @@ module Async
 			# @parameter endpoint [IO::Endpoint] Optional base endpoint to wrap.
 			# @returns [IO::Endpoint] The built endpoint, potentially wrapped with SSL.
 			def build_endpoint(endpoint = nil)
-				endpoint ||= tcp_endpoint
+				endpoint ||= make_endpoint
 				
 				if secure?
 					# Wrap it in SSL:
@@ -350,8 +350,20 @@ module Async
 				return options
 			end
 			
+			def unix_endpoint
+				::IO::Endpoint.unix(@url.path)
+			end
+			
 			def tcp_endpoint
 				::IO::Endpoint.tcp(self.hostname, port, **tcp_options)
+			end
+			
+			def make_endpoint
+				if @url.host
+					tcp_endpoint
+				else
+					unix_endpoint
+				end
 			end
 		end
 	end
