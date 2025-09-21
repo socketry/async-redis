@@ -13,13 +13,13 @@ The `SUBSCRIBE` command is used to subscribe to one or more channels. When a mes
 First, let's create a simple listener that subscribes to messages on a channel:
 
 ``` ruby
-require 'async'
-require 'async/redis'
+require "async"
+require "async/redis"
 
 client = Async::Redis::Client.new
 
 Async do
-	client.subscribe 'status.frontend' do |context|
+	client.subscribe "status.frontend" do |context|
 		puts "Listening for messages on 'status.frontend'..."
 		
 		type, name, message = context.listen
@@ -32,14 +32,14 @@ end
 Now, let's create a publisher that sends messages to the same channel:
 
 ``` ruby
-require 'async'
-require 'async/redis'
+require "async"
+require "async/redis"
 
 client = Async::Redis::Client.new
 
 Async do
 	puts "Publishing message..."
-	client.publish 'status.frontend', 'good'
+	client.publish "status.frontend", "good"
 	puts "Message sent!"
 end
 ```
@@ -57,13 +57,13 @@ Received: good
 Subscriptions are at-most-once delivery. In addition, subscriptions are stateful, meaning that they maintain their own internal state and can be affected by network issues or server restarts. In order to improve resilience, it's important to implement error handling and reconnection logic.
 
 ```ruby
-require 'async'
-require 'async/redis'
+require "async"
+require "async/redis"
 
 client = Async::Redis::Client.new
 
 Async do
-	client.subscribe 'status.frontend' do |context|
+	client.subscribe "status.frontend" do |context|
 		puts "Listening for messages on 'status.frontend'..."
 		
 		context.each do |type, name, message|
@@ -84,14 +84,14 @@ The `PSUBSCRIBE` command is used to subscribe to channels that match a given pat
 Let's replace the receiver in the above example:
 
 ``` ruby
-require 'async'
-require 'async/redis'
+require "async"
+require "async/redis"
 
 endpoint = Async::Redis.local_endpoint
 client = Async::Redis::Client.new(endpoint)
 
 Async do
-	client.psubscribe 'status.*' do |context|
+	client.psubscribe "status.*" do |context|
 		puts "Listening for messages on 'status.*'..."
 		
 		type, pattern, name, message = context.listen
@@ -110,14 +110,14 @@ If you are working with a clustered environment, you can improve performance by 
 To use sharded subscriptions, use a cluster client which supports sharded pub/sub:
 
 ``` ruby
-require 'async'
-require 'async/redis'
+require "async"
+require "async/redis"
 
 # endpoints = ...
 cluster_client = Async::Redis::ClusterClient.new(endpoints)
 
 Async do
-	cluster_client.subscribe 'status.frontend' do |context|
+	cluster_client.subscribe "status.frontend" do |context|
 		puts "Listening for messages on 'status.frontend'..."
 		
 		type, name, message = context.listen
@@ -128,15 +128,15 @@ end
 ```
 
 ``` ruby
-require 'async'
-require 'async/redis'
+require "async"
+require "async/redis"
 
 # endpoints = ...
 cluster_client = Async::Redis::ClusterClient.new(endpoints)
 
 Async do
 	puts "Publishing message..."
-	cluster_client.publish('status.frontend', 'good')
+	cluster_client.publish("status.frontend", "good")
 	puts "Message sent!"
 end
 ```

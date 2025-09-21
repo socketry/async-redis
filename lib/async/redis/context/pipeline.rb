@@ -44,7 +44,7 @@ module Async
 				end
 				
 				# Flush responses.
-				# @param count [Integer] leave this many responses.
+				# @parameter count [Integer] leave this many responses.
 				def flush(count = 0)
 					while @count > count
 						read_response

@@ -1,5 +1,20 @@
 getting-started:
   order: 1
 
-subscriptions:
+transactions-and-pipelines:
   order: 2
+
+subscriptions:
+  order: 3
+
+data-structures:
+  order: 4
+
+streams:
+  order: 5
+
+scripting:
+  order: 6
+
+client-architecture:
+  order: 7

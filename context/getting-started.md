@@ -15,7 +15,7 @@ $ bundle add async-redis
 ### Basic Local Connection
 
 ``` ruby
-require 'async/redis'
+require "async/redis"
 
 Async do
 	endpoint = Async::Redis.local_endpoint(
@@ -42,7 +42,7 @@ You can also encode this information in a URL:
 This example demonstrates parsing an environment variable with a `redis://` or SSL `rediss://` scheme, and demonstrates how you can specify SSL parameters on the SSLContext object.
 
 ``` ruby
-require 'async/redis'
+require "async/redis"
 
 ssl_context = OpenSSL::SSL::SSLContext.new.tap do |context|
 	# Load the certificate store:
@@ -75,15 +75,15 @@ end
 ### Variables
 
 ``` ruby
-require 'async'
-require 'async/redis'
+require "async"
+require "async/redis"
 
 endpoint = Async::Redis.local_endpoint
 client = Async::Redis::Client.new(endpoint)
 
 Async do
-	client.set('X', 10)
-	puts client.get('X')
+	client.set("X", 10)
+	puts client.get("X")
 ensure
 	client.close
 end
