@@ -1,6 +1,6 @@
 # Releases
 
-## Unreleased
+## v0.13.0
 
   - Fix password with special characters when using sentinels.
   - Fix support for UNIX domain socket endpoints. You can now create Unix socket endpoints using `Async::Redis::Endpoint.unix("/path/to/socket.sock")` or parse them from URLs like `redis:/path/to/socket.sock`.

@@ -14,11 +14,26 @@ Please see the [project documentation](https://socketry.github.io/async-redis/) 
 
   - [Getting Started](https://socketry.github.io/async-redis/guides/getting-started/index) - This guide explains how to use the `async-redis` gem to connect to a Redis server and perform basic operations.
 
+  - [Transactions and Pipelines](https://socketry.github.io/async-redis/guides/transactions-and-pipelines/index) - This guide explains how to use Redis transactions and pipelines with `async-redis` for atomic operations and improved performance.
+
   - [Subscriptions](https://socketry.github.io/async-redis/guides/subscriptions/index) - This guide explains how to use Redis pub/sub functionality with `async-redis` to publish and subscribe to messages.
+
+  - [Data Structures and Operations](https://socketry.github.io/async-redis/guides/data-structures/index) - This guide explains how to work with Redis data types and operations using `async-redis`.
+
+  - [Streams](https://socketry.github.io/async-redis/guides/streams/index) - This guide explains how to use Redis streams with `async-redis` for reliable message processing and event sourcing.
+
+  - [Scripting](https://socketry.github.io/async-redis/guides/scripting/index) - This guide explains how to use Redis Lua scripting with `async-redis` for atomic operations and advanced data processing.
+
+  - [Client Architecture](https://socketry.github.io/async-redis/guides/client-architecture/index) - This guide explains the different client types available in `async-redis` and when to use each one.
 
 ## Releases
 
 Please see the [project releases](https://socketry.github.io/async-redis/releases/index) for all releases.
+
+### v0.13.0
+
+  - Fix password with special characters when using sentinels.
+  - Fix support for UNIX domain socket endpoints. You can now create Unix socket endpoints using `Async::Redis::Endpoint.unix("/path/to/socket.sock")` or parse them from URLs like `redis:/path/to/socket.sock`.
 
 ### v0.12.0
 

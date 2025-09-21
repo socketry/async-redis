@@ -2,15 +2,26 @@
 
 This guide explains how to use Redis pub/sub functionality with `async-redis` to publish and subscribe to messages.
 
+Redis pub/sub enables real-time communication between different parts of your application or between different applications. It's perfect for broadcasting notifications, coordinating distributed systems, or building real-time features, provided you don't need reliable messaging.
+
+Common use cases:
+- **Real-time notifications**: Alert users about new messages, updates, or events.
+- **System coordination**: Notify services about configuration changes or cache invalidation.
+- **Live updates**: Push data changes to web interfaces or mobile apps.
+- **Event-driven architecture**: Decouple services through asynchronous messaging.
+
 ## Overview
 
-Redis actually has 3 mechanisms to support pub/sub - a general `SUBSCRIBE` command, a pattern-based `PSUBSCRIBE` command, and a sharded `SSUBSCRIBE` command for cluster environments. They mostly work the same way, but have different use cases.
+Redis provides 3 pub/sub mechanisms:
+- **SUBSCRIBE**: Subscribe to specific channels by name.
+- **PSUBSCRIBE**: Subscribe to channels matching patterns (e.g., `user.*`).
+- **SSUBSCRIBE**: Sharded subscriptions for cluster environments (better performance).
 
 ## Subscribe
 
-The `SUBSCRIBE` command is used to subscribe to one or more channels. When a message is published to a subscribed channel, the client receives the message in real-time.
+The `SUBSCRIBE` command lets you listen for messages on specific channels. This creates a persistent connection that receives messages as they're published.
 
-First, let's create a simple listener that subscribes to messages on a channel:
+Here's a simple notification system - first, create a listener:
 
 ``` ruby
 require "async"
@@ -29,7 +40,7 @@ Async do
 end
 ```
 
-Now, let's create a publisher that sends messages to the same channel:
+In another part of your application, publish notifications:
 
 ``` ruby
 require "async"
@@ -79,9 +90,9 @@ end
 
 ## Pattern Subscribe
 
-The `PSUBSCRIBE` command is used to subscribe to channels that match a given pattern. This allows clients to receive messages from multiple channels without subscribing to each one individually.
+When you need to listen to multiple related channels, patterns save you from subscribing to each channel individually. This is perfect for monitoring all user activities or all events from a specific service.
 
-Let's replace the receiver in the above example:
+For example, to monitor all user-related events (`user.login`, `user.logout`, `user.signup`):
 
 ``` ruby
 require "async"

@@ -10,7 +10,27 @@ files:
   title: Getting Started
   description: This guide explains how to use the `async-redis` gem to connect to
     a Redis server and perform basic operations.
+- path: transactions-and-pipelines.md
+  title: Transactions and Pipelines
+  description: This guide explains how to use Redis transactions and pipelines with
+    `async-redis` for atomic operations and improved performance.
 - path: subscriptions.md
   title: Subscriptions
   description: This guide explains how to use Redis pub/sub functionality with `async-redis`
     to publish and subscribe to messages.
+- path: data-structures.md
+  title: Data Structures and Operations
+  description: This guide explains how to work with Redis data types and operations
+    using `async-redis`.
+- path: streams.md
+  title: Streams
+  description: This guide explains how to use Redis streams with `async-redis` for
+    reliable message processing and event sourcing.
+- path: scripting.md
+  title: Scripting
+  description: This guide explains how to use Redis Lua scripting with `async-redis`
+    for atomic operations and advanced data processing.
+- path: client-architecture.md
+  title: Client Architecture
+  description: This guide explains the different client types available in `async-redis`
+    and when to use each one.
