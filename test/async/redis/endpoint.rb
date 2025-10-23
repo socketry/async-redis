@@ -163,6 +163,13 @@ describe Async::Redis::Endpoint do
 			expect(endpoint.scheme).to be == "redis"
 			expect(endpoint).not.to be(:secure?)  # scheme takes precedence
 		end
+		
+		it "does not treat ssl_context: nil as requesting SSL" do
+			ssl_context = nil
+			endpoint = Async::Redis::Endpoint.for(nil, "localhost", port: 6379, ssl_context: ssl_context)
+			expect(endpoint.scheme).to be == "redis"
+			expect(endpoint).not.to be(:secure?)
+		end
 	end
 	
 	with ".unix" do

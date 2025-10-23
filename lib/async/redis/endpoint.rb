@@ -80,7 +80,7 @@ module Async
 					scheme ||= default_scheme
 				end
 				
-				scheme ||= options.key?(:ssl_context) ? "rediss" : "redis"
+				scheme ||= options[:ssl_context] ? "rediss" : "redis"
 				
 				uri_klass = SCHEMES.fetch(scheme.downcase) do
 					raise ArgumentError, "Unsupported scheme: #{scheme.inspect}"
