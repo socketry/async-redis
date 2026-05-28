@@ -6,7 +6,7 @@ To test sentinels, you need to set up master, slave and sentinel instances.
 
 ``` bash
 $ cd sentinel
-$ docker-compose up tests
+$ docker compose up tests
 [+] Running 4/0
  ✔ Container sentinel-redis-master-1    Created
  ✔ Container sentinel-redis-slave-1     Created

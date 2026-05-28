@@ -65,16 +65,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install Docker Compose
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y docker-compose
-    
     - name: Run tests
       timeout-minutes: 10
       env:
         RUBY_VERSION: ${{matrix.ruby}}
-      run: docker-compose -f sentinel/docker-compose.yaml up --exit-code-from tests
+      run: docker compose -f sentinel/docker-compose.yaml up --exit-code-from tests
     
     - uses: actions/upload-artifact@v4
       with:
@@ -98,16 +93,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install Docker Compose
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y docker-compose
-    
     - name: Run tests
       timeout-minutes: 10
       env:
         RUBY_VERSION: ${{matrix.ruby}}
-      run: docker-compose -f cluster/docker-compose.yaml up --exit-code-from tests
+      run: docker compose -f cluster/docker-compose.yaml up --exit-code-from tests
     
     - uses: actions/upload-artifact@v4
       with:

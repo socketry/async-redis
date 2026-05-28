@@ -6,7 +6,7 @@ To test clusters, you need to set up three redis instances (shards) and bind the
 
 ``` bash
 $ cd cluster
-$ docker-compose up tests
+$ docker compose up tests
 [+] Running 5/0
  ✔ Container cluster-redis-b-1     Running
  ✔ Container cluster-redis-c-1     Running
