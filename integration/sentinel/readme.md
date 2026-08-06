@@ -5,8 +5,7 @@ To test sentinels, you need to set up master, slave and sentinel instances.
 ## Setup
 
 ``` bash
-$ cd integration/sentinel
-$ docker compose up tests
+$ bundle exec bake test:integration name=sentinel build=false
 [+] Running 4/0
  ✔ Container sentinel-redis-master-1    Created
  ✔ Container sentinel-redis-slave-1     Created
