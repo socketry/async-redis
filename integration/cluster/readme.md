@@ -5,7 +5,7 @@ To test clusters, you need to set up three redis instances (shards) and bind the
 ## Running Tests
 
 ``` bash
-$ cd cluster
+$ cd integration/cluster
 $ docker compose up tests
 [+] Running 5/0
  ✔ Container cluster-redis-b-1     Running

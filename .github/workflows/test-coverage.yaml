@@ -67,9 +67,10 @@ jobs:
     
     - name: Run tests
       timeout-minutes: 10
+      working-directory: integration/sentinel
       env:
         RUBY_VERSION: ${{matrix.ruby}}
-      run: docker compose -f sentinel/docker-compose.yaml up --exit-code-from tests
+      run: docker compose up --exit-code-from tests
     
     - uses: actions/upload-artifact@v7
       with:
@@ -95,9 +96,10 @@ jobs:
     
     - name: Run tests
       timeout-minutes: 10
+      working-directory: integration/cluster
       env:
         RUBY_VERSION: ${{matrix.ruby}}
-      run: docker compose -f cluster/docker-compose.yaml up --exit-code-from tests
+      run: docker compose up --exit-code-from tests
     
     - uses: actions/upload-artifact@v7
       with:

@@ -17,8 +17,8 @@ services:
   tests:
     image: ruby:${RUBY_VERSION:-latest}
     volumes:
-      - ../:/code
-    command: bash -c "cd /code && bundle install && bundle exec sus sentinel/test"
+      - ../../:/code
+    command: bash -c "cd /code && bundle install && bundle exec sus integration/sentinel/test"
     environment:
       - COVERAGE=${COVERAGE}
     depends_on:
