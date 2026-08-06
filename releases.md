@@ -1,9 +1,5 @@
 # Releases
 
-## Unreleased
-
-  - Require Ruby 3.3 or newer.
-
 ## v0.13.0
 
   - Fix password with special characters when using sentinels.
