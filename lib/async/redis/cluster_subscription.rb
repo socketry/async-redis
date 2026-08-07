@@ -102,7 +102,7 @@ module Async
 						@channels -= channels_for_slot
 						
 						# Check if this shard still has channels
-						remaining_channels_for_slot = @channels.select {|ch| @cluster_client.slot_for(ch) == slot}
+						remaining_channels_for_slot = @channels.select{|ch| @cluster_client.slot_for(ch) == slot}
 						
 						# If no channels left for this shard, close and remove it
 						if remaining_channels_for_slot.empty?

@@ -78,7 +78,7 @@ describe Async::Redis::Client do
 		size = 1000
 		
 		client.call("DEL", list_key)
-		size.times {|i| client.call("RPUSH", list_key, i)}
+		size.times{|i| client.call("RPUSH", list_key, i)}
 		
 		response = client.call("LRANGE", list_key, 0, size - 1)
 		

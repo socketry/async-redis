@@ -20,7 +20,6 @@ jobs:
           - ubuntu
         
         ruby:
-          - "3.2"
           - "3.3"
           - "3.4"
         
@@ -28,9 +27,13 @@ jobs:
     
     steps:
     - uses: actions/checkout@v6
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "4.0"
+        bundler-cache: true
     
     - name: Run tests
       timeout-minutes: 10
       env:
         RUBY_VERSION: ${{matrix.ruby}}
-      run: docker compose -f sentinel/docker-compose.yaml up --exit-code-from tests
+      run: bundle exec bake test:integration name=sentinel build=false

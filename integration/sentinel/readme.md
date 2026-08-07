@@ -5,8 +5,7 @@ To test sentinels, you need to set up master, slave and sentinel instances.
 ## Setup
 
 ``` bash
-$ cd sentinel
-$ docker compose up tests
+$ bundle exec bake test:integration name=sentinel build=false
 [+] Running 4/0
  ✔ Container sentinel-redis-master-1    Created
  ✔ Container sentinel-redis-slave-1     Created
@@ -20,6 +19,6 @@ tests-1  |   Run `bundle fund` for details
 tests-1  | 3 passed out of 3 total (3 assertions)
 tests-1  | 🏁 Finished in 4.1s; 0.74 assertions per second.
 tests-1  | 🐢 Slow tests:
-tests-1  | 	4.1s: describe Async::Redis::SentinelClient it should resolve slave address sentinel/test/async/redis/sentinel_client.rb:35
+tests-1  | 	4.1s: describe Async::Redis::SentinelClient it should resolve slave address integration/sentinel/test/async/redis/sentinel_client.rb:35
 tests-1 exited with code 0
 ```

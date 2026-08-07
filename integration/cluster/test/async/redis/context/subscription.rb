@@ -69,7 +69,7 @@ describe Async::Redis::Context::Subscription do
 				]
 				
 				# Find channels that map to different slots/nodes
-				channel_slots = channels.map {|channel| [channel, cluster.slot_for(channel)]}
+				channel_slots = channels.map{|channel| [channel, cluster.slot_for(channel)]}
 				unique_slots = channel_slots.map(&:last).uniq
 				
 				# We should have channels distributed across different slots
@@ -115,7 +115,7 @@ describe Async::Redis::Context::Subscription do
 				expect(received_messages.size).to be == channels.size
 				
 				# Verify messages were distributed to different slots
-				received_slots = received_messages.map {|msg| msg[:slot]}.uniq
+				received_slots = received_messages.map{|msg| msg[:slot]}.uniq
 				expect(received_slots.size).to be > 1
 			end
 			
@@ -175,7 +175,7 @@ describe Async::Redis::Context::Subscription do
 				expect(received_messages.size).to be == 2
 				
 				# Verify message types
-				message_types = received_messages.map {|msg| msg[:type]}
+				message_types = received_messages.map{|msg| msg[:type]}
 				expect(message_types).to be(:include?, "message")  # Regular pub/sub
 				expect(message_types).to be(:include?, "smessage") # Sharded pub/sub
 			end
