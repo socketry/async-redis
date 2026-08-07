@@ -34,5 +34,4 @@ group :test do
 	gem "sus-fixtures-async"
 	
 	gem "redis"
-	gem "hiredis"
 end
