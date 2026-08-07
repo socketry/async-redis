@@ -2,7 +2,7 @@
 
 # Released under the MIT License.
 # Copyright, 2019, by Pierre Montelle.
-# Copyright, 2019-2024, by Samuel Williams.
+# Copyright, 2019-2026, by Samuel Williams.
 # Copyright, 2019, by David Ortiz.
 
 require "async/redis"
