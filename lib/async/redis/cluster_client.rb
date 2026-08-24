@@ -110,40 +110,56 @@ module Async
 			protected
 			
 			def reload_cluster!(endpoints = @endpoints)
-				@endpoints.each do |endpoint|
-					client = Client.new(endpoint, **@options)
+				@endpoints.each do |cluster_endpoint|
+					client = Client.new(cluster_endpoint, **@options)
 					
-					shards = Async::Redis::RangeMap.new
-					endpoints = []
-					
-					client.call("CLUSTER", "SHARDS").each do |shard|
-						shard = shard.each_slice(2).to_h
+					begin
+						shards = Async::Redis::RangeMap.new
 						
-						slots = shard["slots"]
-						range = Range.new(*slots)
-						
-						nodes = shard["nodes"].map do |node|
-							node = node.each_slice(2).to_h
-							endpoint = Endpoint.for(endpoint.scheme, node["endpoint"], port: node["port"])
+						client.call("CLUSTER", "SHARDS").each do |shard|
+							shard = shard.each_slice(2).to_h
 							
-							# Collect all endpoints:
-							endpoints << endpoint
+							nodes = shard["nodes"].map do |node|
+								node = node.each_slice(2).to_h
+								node_endpoint = Endpoint.for(cluster_endpoint.scheme, node["endpoint"], port: node["port"])
+								
+								Node.new(node["id"], node_endpoint, node["role"].to_sym, node["health"].to_sym)
+							end
 							
-							Node.new(node["id"], endpoint, node["role"].to_sym, node["health"].to_sym)
+							slot_ranges_for(shard["slots"]).each do |range|
+								shards.add(range, nodes)
+							end
 						end
 						
-						shards.add(range, nodes)
+						@shards = shards
+						
+						return true
+					rescue Errno::ECONNREFUSED
+						next
+					ensure
+						client.close
 					end
-					
-					@shards = shards
-					# @endpoints = @endpoints | endpoints
-					
-					return true
-				rescue Errno::ECONNREFUSED
-					next
 				end
 				
 				raise ReloadError, "Failed to reload cluster configuration."
+			end
+			
+			# Parse the raw slots array from CLUSTER SHARDS into Range objects.
+			#
+			# CLUSTER SHARDS returns slot assignments as a flat array of start/end pairs.
+			# A shard owning a single range returns [0, 5460], but a shard owning
+			# multiple ranges returns [0, 5460, 10923, 16383]. The previous code
+			# assumed a single pair and built one Range via `Range.new(*slots)`.
+			#
+			# @parameter raw_slots [Array] Flat array of integers, grouped as start/end pairs.
+			# @returns [Array(Range)] One Range per pair.
+			def slot_ranges_for(raw_slots)
+				slots = Array(raw_slots).flat_map{|entry| entry.is_a?(Array) ? entry : [entry]}
+				
+				slots.each_slice(2).filter_map do |start_slot, end_slot|
+					next if end_slot.nil?
+					Range.new(start_slot.to_i, end_slot.to_i)
+				end
 			end
 			
 			XMODEM_CRC16_LOOKUP = [
