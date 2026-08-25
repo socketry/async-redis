@@ -129,8 +129,8 @@ module Async
 							end
 							shard_nodes << nodes
 							
-							slot_ranges_for(shard["slots"]).each do |range|
-								shards.add(range, nodes)
+							shard["slots"].each_slice(2) do |first_slot, last_slot|
+								shards.add(first_slot..last_slot, nodes)
 							end
 						end
 						
@@ -146,24 +146,6 @@ module Async
 				end
 				
 				raise ReloadError, "Failed to reload cluster configuration."
-			end
-			
-			# Parse the raw slots array from CLUSTER SHARDS into Range objects.
-			#
-			# CLUSTER SHARDS returns slot assignments as a flat array of start/end pairs.
-			# A shard owning a single range returns [0, 5460], but a shard owning
-			# multiple ranges returns [0, 5460, 10923, 16383]. The previous code
-			# assumed a single pair and built one Range via `Range.new(*slots)`.
-			#
-			# @parameter raw_slots [Array] Flat array of integers, grouped as start/end pairs.
-			# @returns [Array(Range)] One Range per pair.
-			def slot_ranges_for(raw_slots)
-				slots = Array(raw_slots).flat_map{|entry| entry.is_a?(Array) ? entry : [entry]}
-				
-				slots.each_slice(2).filter_map do |start_slot, end_slot|
-					next if end_slot.nil?
-					Range.new(start_slot.to_i, end_slot.to_i)
-				end
 			end
 			
 			XMODEM_CRC16_LOOKUP = [

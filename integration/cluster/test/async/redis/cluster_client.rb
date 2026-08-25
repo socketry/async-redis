@@ -21,15 +21,6 @@ describe Async::Redis::ClusterClient do
 	]}
 	
 	let(:cluster) {subject.new(endpoints)}
-	let(:shards) do
-		client = Async::Redis::Client.new(endpoints.first)
-		
-		begin
-			client.call("CLUSTER", "SHARDS")
-		ensure
-			client.close
-		end
-	end
 	
 	let(:key) {"cluster-test:fixed"}
 	let(:value) {"cluster-test-value"}
@@ -62,20 +53,13 @@ describe Async::Redis::ClusterClient do
 		expect(clients).not.to have_value(be_nil)
 	end
 	
-	it "can map multiple slot ranges for one shard" do
-		slots = shards.filter_map do |shard|
-			shard = shard.each_slice(2).to_h
-			shard["slots"] if shard["slots"].size > 2
-		end.first
+	it "can map a shard with non-contiguous slot ranges" do
+		source_client = cluster.client_for(5999)
+		target_client = cluster.client_for(10923)
 		
-		expect(slots).not.to be_nil
-		
-		clients = slots.each_slice(2).flat_map do |first_slot, last_slot|
-			[cluster.client_for(first_slot), cluster.client_for(last_slot)]
-		end.uniq
-		
-		expect(clients.size).to be == 1
-		expect(cluster.instance_variable_get(:@shard_nodes).size).to be == shards.size
-		expect(cluster.any_client).not.to be_nil
+		# The cluster fixture moves slot 6000 from the source shard to the target shard.
+		expect(cluster.client_for(6000)).to be == target_client
+		expect(cluster.client_for(6001)).to be == source_client
+		expect(target_client).not.to be == source_client
 	end
 end
