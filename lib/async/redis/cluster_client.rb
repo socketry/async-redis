@@ -34,7 +34,6 @@ module Async
 				@endpoints = endpoints
 				@options = options
 				@shards = nil
-				@shard_nodes = nil
 			end
 			
 			# Execute a block with clients for the given keys, grouped by cluster slot.
@@ -96,7 +95,7 @@ module Async
 				end
 				
 				# Sample a random shard to get better load distribution
-				if nodes = @shard_nodes.sample
+				if nodes = @shards.sample
 					nodes = nodes.select{|node| node.role == role}
 					
 					if node = nodes.sample
@@ -116,7 +115,6 @@ module Async
 					
 					begin
 						shards = Async::Redis::RangeMap.new
-						shard_nodes = []
 						
 						client.call("CLUSTER", "SHARDS").each do |shard|
 							shard = shard.each_slice(2).to_h
@@ -127,14 +125,13 @@ module Async
 								
 								Node.new(node["id"], node_endpoint, node["role"].to_sym, node["health"].to_sym)
 							end
-							shard_nodes << nodes
-							
-							shard["slots"].each_slice(2) do |first_slot, last_slot|
-								shards.add(first_slot..last_slot, nodes)
+							ranges = shard["slots"].each_slice(2).map do |first_slot, last_slot|
+								first_slot..last_slot
 							end
+							
+							shards.add(ranges, nodes)
 						end
 						
-						@shard_nodes = shard_nodes
 						@shards = shards
 						
 						return true
