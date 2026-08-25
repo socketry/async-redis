@@ -24,7 +24,7 @@ describe Async::Redis::RangeMap do
 		
 		it "can provide a fallback for missing keys" do
 			expect(map.find(5)).to be_nil
-			expect(map.find(5) {:missing}).to be == :missing
+			expect(map.find(5){:missing}).to be == :missing
 		end
 	end
 	
