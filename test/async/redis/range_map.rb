@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
+# Copyright, 2026, by Travis Bell.
 # Copyright, 2026, by Samuel Williams.
 
 require "async/redis/range_map"

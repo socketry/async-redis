@@ -13,7 +13,7 @@ Copyright, 2021, by Troex Nevelin.
 Copyright, 2022, by Tim Willard.  
 Copyright, 2022, by Gleb Sinyavskiy.  
 Copyright, 2024-2025, by Joan Lledó.  
-Copyright, 2025, by Travis Bell.  
+Copyright, 2025-2026, by Travis Bell.  
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -2,7 +2,7 @@
 
 # Released under the MIT License.
 # Copyright, 2024-2025, by Samuel Williams.
-# Copyright, 2025, by Travis Bell.
+# Copyright, 2025-2026, by Travis Bell.
 
 require_relative "client"
 require_relative "cluster_subscription"
