@@ -3,6 +3,8 @@
 ---
 description: A Redis client library.
 metadata:
+  bug_tracker_uri: https://github.com/socketry/async-redis/issues
+  changelog_uri: https://github.com/socketry/async-redis/blob/main/releases.md
   documentation_uri: https://socketry.github.io/async-redis/
   source_code_uri: https://github.com/socketry/async-redis.git
 files:
