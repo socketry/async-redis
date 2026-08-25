@@ -110,37 +110,36 @@ module Async
 			protected
 			
 			def reload_cluster!(endpoints = @endpoints)
-				@endpoints.each do |endpoint|
-					client = Client.new(endpoint, **@options)
+				@endpoints.each do |cluster_endpoint|
+					client = Client.new(cluster_endpoint, **@options)
 					
-					shards = Async::Redis::RangeMap.new
-					endpoints = []
-					
-					client.call("CLUSTER", "SHARDS").each do |shard|
-						shard = shard.each_slice(2).to_h
+					begin
+						shards = Async::Redis::RangeMap.new
 						
-						slots = shard["slots"]
-						range = Range.new(*slots)
-						
-						nodes = shard["nodes"].map do |node|
-							node = node.each_slice(2).to_h
-							endpoint = Endpoint.for(endpoint.scheme, node["endpoint"], port: node["port"])
+						client.call("CLUSTER", "SHARDS").each do |shard|
+							shard = shard.each_slice(2).to_h
 							
-							# Collect all endpoints:
-							endpoints << endpoint
+							nodes = shard["nodes"].map do |node|
+								node = node.each_slice(2).to_h
+								node_endpoint = Endpoint.for(cluster_endpoint.scheme, node["endpoint"], port: node["port"])
+								
+								Node.new(node["id"], node_endpoint, node["role"].to_sym, node["health"].to_sym)
+							end
+							ranges = shard["slots"].each_slice(2).map do |first_slot, last_slot|
+								first_slot..last_slot
+							end
 							
-							Node.new(node["id"], endpoint, node["role"].to_sym, node["health"].to_sym)
+							shards.add(ranges, nodes)
 						end
 						
-						shards.add(range, nodes)
+						@shards = shards
+						
+						return true
+					rescue Errno::ECONNREFUSED
+						next
+					ensure
+						client.close
 					end
-					
-					@shards = shards
-					# @endpoints = @endpoints | endpoints
-					
-					return true
-				rescue Errno::ECONNREFUSED
-					next
 				end
 				
 				raise ReloadError, "Failed to reload cluster configuration."

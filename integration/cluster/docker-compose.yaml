@@ -18,13 +18,21 @@ services:
     image: redis
     command: >
       bash -c "
-      redis-cli --cluster create --cluster-yes --cluster-replicas 0 redis-a:6379 redis-b:6379 redis-c:6379;
+      redis-cli --cluster create --cluster-yes --cluster-replicas 0 redis-a:6379 redis-b:6379 redis-c:6379 &&
+      source_id=$$(redis-cli -h redis-b cluster myid) &&
+      target_id=$$(redis-cli -h redis-c cluster myid) &&
+      redis-cli -h redis-c cluster setslot 6000 importing $$source_id &&
+      redis-cli -h redis-b cluster setslot 6000 migrating $$target_id &&
+      redis-cli -h redis-c cluster setslot 6000 node $$target_id &&
+      redis-cli -h redis-b cluster setslot 6000 node $$target_id &&
+      redis-cli -h redis-a cluster setslot 6000 node $$target_id &&
+      touch /tmp/cluster-ready;
       while true; do
         redis-cli -h redis-a cluster info | grep cluster_state:fail;
         sleep 1;
       done"
     healthcheck:
-      test: "redis-cli -h redis-a cluster info | grep cluster_state:ok"
+      test: "test -f /tmp/cluster-ready && redis-cli -h redis-a cluster info | grep cluster_state:ok"
       interval: 1s
       timeout: 3s
       retries: 30
@@ -40,4 +48,5 @@ services:
     environment:
       - COVERAGE=${COVERAGE}
     depends_on:
-      - controller
+      controller:
+        condition: service_healthy

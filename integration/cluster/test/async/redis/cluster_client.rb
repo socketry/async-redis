@@ -52,4 +52,14 @@ describe Async::Redis::ClusterClient do
 		expect(clients.size).to be == 3
 		expect(clients).not.to have_value(be_nil)
 	end
+	
+	it "can map a shard with non-contiguous slot ranges" do
+		source_client = cluster.client_for(5999)
+		target_client = cluster.client_for(10923)
+		
+		# The cluster fixture moves slot 6000 from the source shard to the target shard.
+		expect(cluster.client_for(6000)).to be == target_client
+		expect(cluster.client_for(6001)).to be == source_client
+		expect(target_client).not.to be == source_client
+	end
 end
