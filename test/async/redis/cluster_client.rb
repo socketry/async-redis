@@ -17,6 +17,22 @@ describe Async::Redis::ClusterClient do
 		end
 	end
 	
+	with "#any_client" do
+		it "samples shard nodes rather than slot ranges" do
+			shard_node = Async::Redis::ClusterClient::Node.new("shard", nil, :master, :online, :shard_client)
+			range_node = Async::Redis::ClusterClient::Node.new("range", nil, :master, :online, :range_client)
+			
+			shards = Async::Redis::RangeMap.new
+			shards.add(0..8191, [range_node])
+			shards.add(8192..16_383, [range_node])
+			
+			client.instance_variable_set(:@shards, shards)
+			client.instance_variable_set(:@shard_nodes, [[shard_node]])
+			
+			expect(client.any_client).to be == :shard_client
+		end
+	end
+	
 	with "#slot_ranges_for" do
 		it "parses a single slot range" do
 			ranges = client.send(:slot_ranges_for, [0, 5460])

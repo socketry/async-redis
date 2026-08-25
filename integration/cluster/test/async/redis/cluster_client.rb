@@ -75,5 +75,7 @@ describe Async::Redis::ClusterClient do
 		end.uniq
 		
 		expect(clients.size).to be == 1
+		expect(cluster.instance_variable_get(:@shard_nodes).size).to be == shards.size
+		expect(cluster.any_client).not.to be_nil
 	end
 end
