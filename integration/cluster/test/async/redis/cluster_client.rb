@@ -21,6 +21,15 @@ describe Async::Redis::ClusterClient do
 	]}
 	
 	let(:cluster) {subject.new(endpoints)}
+	let(:shards) do
+		client = Async::Redis::Client.new(endpoints.first)
+		
+		begin
+			client.call("CLUSTER", "SHARDS")
+		ensure
+			client.close
+		end
+	end
 	
 	let(:key) {"cluster-test:fixed"}
 	let(:value) {"cluster-test-value"}
@@ -51,5 +60,20 @@ describe Async::Redis::ClusterClient do
 		
 		expect(clients.size).to be == 3
 		expect(clients).not.to have_value(be_nil)
+	end
+	
+	it "can map multiple slot ranges for one shard" do
+		slots = shards.filter_map do |shard|
+			shard = shard.each_slice(2).to_h
+			shard["slots"] if shard["slots"].size > 2
+		end.first
+		
+		expect(slots).not.to be_nil
+		
+		clients = slots.each_slice(2).flat_map do |first_slot, last_slot|
+			[cluster.client_for(first_slot), cluster.client_for(last_slot)]
+		end.uniq
+		
+		expect(clients.size).to be == 1
 	end
 end
